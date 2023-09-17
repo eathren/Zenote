@@ -1,7 +1,7 @@
 import "./App.css"
 import { NoteBlock } from "./components/NoteBlock"
-
 import { BrowserRouter, Routes, Route } from "react-router-dom"
+
 function App() {
   return (
     <>
