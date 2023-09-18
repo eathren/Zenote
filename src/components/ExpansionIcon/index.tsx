@@ -8,7 +8,7 @@ type Props = {
 }
 
 const ExpansionIcon: React.FC<Props> = ({ expanded, setExpanded }) => {
-  const onClick = (e: React.MouseEvent) => {
+  const onClick = () => {
     setExpanded(!expanded)
   }
 

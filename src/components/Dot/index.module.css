@@ -11,11 +11,11 @@
 
 .dot:hover,
 .dot:focus {
-  background-color: #f1f1f1; /* Gentler shade of grey */
-  border-radius: 50%; /* Make it a perfect circle */
+  background-color: #f1f1f1;
+  border-radius: 50%;
 }
 
 .dot__active {
-  background-color: #f1f1f1; /* Gentler shade of grey */
-  border-radius: 50%; /* Make it a perfect circle */
+  background-color: #f1f1f1;
+  border-radius: 50%;
 }

@@ -1,0 +1,10 @@
+.input__body {
+  display: inline-block;
+  border: none;
+}
+.input__body input {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  background: transparent !important;
+}

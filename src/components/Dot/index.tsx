@@ -20,7 +20,6 @@ const getDotActive = (
 }
 
 const index: React.FC<Props> = ({ id, expanded, hasChildren }) => {
-  console.log(expanded)
   return (
     <Link to={id}>
       <div className={clsx(styles.dot, getDotActive(expanded, hasChildren))}>

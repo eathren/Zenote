@@ -1,9 +1,9 @@
-import { NoteBlock } from "../components/NoteBlock"
+import { BlockList } from "../components/Note/BlockList"
 
-export const index = () => {
+export const HomePage = () => {
   return (
     <div>
-      <NoteBlock />
+      <BlockList />
     </div>
   )
 }

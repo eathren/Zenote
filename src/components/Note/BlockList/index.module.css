@@ -1,0 +1,12 @@
+.icon__add:hover {
+  border-radius: 50%;
+  background-color: rgb(200, 200, 200);
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  cursor: pointer;
+  text-align: center;
+  cursor: pointer;
+  background-color: #f1f1f1;
+  border-radius: 50%;
+}
