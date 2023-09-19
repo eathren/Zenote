@@ -1,16 +1,23 @@
 import "./App.css"
 // import { NoteBlock } from "./components/NoteBlock"
-import { BrowserRouter, Routes, Route } from "react-router-dom"
-import { SignUpPage } from "./pages/signup.tsx"
-import { LoginPage } from "./pages/login.tsx"
-import { HomePage } from "./pages/index.tsx"
-
+import { BrowserRouter, Routes, Route, Router } from "react-router-dom"
+import { SignUpPage } from "src/pages/signup.tsx"
+import { LoginPage } from "src/pages/login.tsx"
+import { HomePage } from "src/pages/index.tsx"
+import { BasicLayout } from "src/layout/layout.tsx"
 function App() {
   return (
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route
+            path="/"
+            element={
+              <BasicLayout>
+                <HomePage />
+              </BasicLayout>
+            }
+          />
           {/* <Route path="/:id" element={<NoteBlock />} /> */}
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/login" element={<LoginPage />} />
