@@ -1,6 +1,6 @@
 import "./App.css"
 // import { NoteBlock } from "./components/NoteBlock"
-import { BrowserRouter, Routes, Route, Router } from "react-router-dom"
+import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { SignUpPage } from "src/pages/signup.tsx"
 import { LoginPage } from "src/pages/login.tsx"
 import { HomePage } from "src/pages/index.tsx"
@@ -19,8 +19,22 @@ function App() {
             }
           />
           {/* <Route path="/:id" element={<NoteBlock />} /> */}
-          <Route path="/signup" element={<SignUpPage />} />
-          <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/signup"
+            element={
+              <BasicLayout>
+                <SignUpPage />
+              </BasicLayout>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <BasicLayout>
+                <LoginPage />
+              </BasicLayout>
+            }
+          />
         </Routes>
       </BrowserRouter>
     </>
