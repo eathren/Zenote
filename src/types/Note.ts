@@ -1,7 +1,7 @@
 export type Note = {
   id: string
   timestamp?: number
-  note: string
+  content: string
   parent?: string
   expanded?: false
 }

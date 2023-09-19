@@ -20,6 +20,7 @@ export const fetchAllDocuments = async (): Promise<Note[]> => {
       id: doc.id,
       ...doc.data(),
     } as Note)
+    console.log(allNotes)
   })
 
   return allNotes

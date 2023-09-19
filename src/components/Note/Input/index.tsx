@@ -1,59 +1,63 @@
-import React, { useCallback, useEffect, useState } from "react"
+import React, { useCallback, useState } from "react"
 import { Input } from "antd"
-import { v4 as uuidv4 } from "uuid"
-import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore"
+import { useNoteStore } from "../../../stores/noteStore" // Update the path accordingly
 import styles from "./index.module.css"
 
-export const NoteInput: React.FC = () => {
-  // Initialize local state for the input value
-  const [value, setValue] = useState<string>("")
-  const [timeoutId, setTimeoutId] = useState<number | null>(null) // State to keep track of the timer
+interface NoteInputProps {
+  noteId: string
+  content: string
+}
 
-  const db = getFirestore()
+export const NoteInput: React.FC<NoteInputProps> = ({ noteId, content }) => {
+  console.log("note", content)
+  const [value, setValue] = useState<string>(content)
+  const [timeoutId, setTimeoutId] = useState<number | null>(null)
+  const { updateNoteContent, addNoteBlock } = useNoteStore()
 
-  const docId = localStorage.getItem("docId") || uuidv4()
-  localStorage.setItem("docId", docId)
+  const updateNote = useCallback(() => {
+    if (value.trim().length > 0) {
+      updateNoteContent(noteId, value)
+    }
+  }, [noteId, value, updateNoteContent])
 
-  const noteRef = doc(db, "notes", docId)
+  const createNewNote = useCallback(() => {
+    if (value.trim().length > 0) {
+      addNoteBlock({
+        id: noteId,
+        content: "",
+        expanded: false,
+        parent: "",
+        timestamp: Date.now(),
+      })
+    }
+  }, [noteId, value, addNoteBlock])
 
-  // Function to update the Firestore document
-  const updateNote = async () => {
-    await setDoc(noteRef, { content: value })
-    console.log("updating")
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault()
+      createNewNote()
+    }
   }
 
-  const fetchNote = useCallback(async () => {
-    const docSnapshot = await getDoc(noteRef)
-    if (docSnapshot.exists()) {
-      setValue(docSnapshot.data().content)
-    }
-  }, [noteRef])
-
-  // Handler for the onChange event of the Input element
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value)
-
-    // Clear the existing timer, if any
     if (timeoutId) {
       clearTimeout(timeoutId)
     }
-
-    // Start a new timer
     const newTimeoutId = setTimeout(() => {
       updateNote()
-    }, 1000) // 1000 ms delay
-
-    // Save the new timer ID
+    }, 3000)
     setTimeoutId(newTimeoutId)
   }
 
-  useEffect(() => {
-    fetchNote()
-  }, [fetchNote])
-
   return (
     <span className={styles.input__body}>
-      <Input allowClear={false} value={value} onChange={onChange} />
+      <Input
+        allowClear={false}
+        value={value}
+        onChange={onChange}
+        onPressEnter={handleKeyPress}
+      />
     </span>
   )
 }
