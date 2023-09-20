@@ -1,4 +1,10 @@
-import { getFirestore, collection, getDocs } from "firebase/firestore"
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  doc,
+  updateDoc,
+} from "firebase/firestore"
 import { Note } from "src/types/Note"
 
 export const fetchAllDocuments = async (): Promise<Note[]> => {
@@ -23,4 +29,19 @@ export const fetchAllDocuments = async (): Promise<Note[]> => {
   })
 
   return allNotes
+}
+
+export const updateDocumentInDB = async (
+  noteId: string,
+  updatedFields: Partial<Note>
+): Promise<void> => {
+  // Initialize Firestore
+  const db = getFirestore()
+
+  // Reference to Firestore collection and specific document
+  const notesCollection = collection(db, "notes")
+  const noteDoc = doc(notesCollection, noteId)
+
+  // Update document with new fields
+  await updateDoc(noteDoc, updatedFields)
 }

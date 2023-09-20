@@ -1,6 +1,5 @@
 import { TreeNode } from "src/types/TreeNode"
 import Block from "src/components/Note/Block"
-import { useNoteStore } from "src/stores/noteStore"
 import { Button } from "antd"
 import { PlusOutlined } from "@ant-design/icons"
 // Recursive component to render TreeNode and its children

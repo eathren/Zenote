@@ -1,27 +1,41 @@
-import { useState } from "react"
+import { useState, ChangeEvent, FormEvent } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
-import { createUserWithEmailAndPassword } from "firebase/auth"
+import { createUserWithEmailAndPassword, UserCredential } from "firebase/auth"
+import { AuthError } from "firebase/auth"
 import { auth } from "../firebase"
 
 export const SignUpPage = () => {
   const navigate = useNavigate()
 
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  // State with explicit types
+  const [email, setEmail] = useState<string>("")
+  const [password, setPassword] = useState<string>("")
 
-  const onSubmit = async (e: { preventDefault: () => void }) => {
+  // Explicitly type the event parameter
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
 
-    await createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed in
-        const user = userCredential.user(user)
+    try {
+      // Type for userCredential is UserCredential
+      const userCredential: UserCredential =
+        await createUserWithEmailAndPassword(auth, email, password)
+
+      // Signed in
+      const user = userCredential.user
+
+      // Redirect to login page
+      if (user) {
         navigate("/login")
-      })
-      .catch((error) => {
-        const errorCode = error.code
-        const errorMessage = error.message(errorCode, errorMessage)
-      })
+      }
+    } catch (error) {
+      // Type for error is AuthError
+      const authError: AuthError | any = error
+      const errorCode = authError.code
+      // const errorMessage = authError.message;
+
+      // Handle error (e.g., show error message)
+      console.error("Error during sign-up:", errorCode)
+    }
   }
 
   return (
@@ -29,14 +43,16 @@ export const SignUpPage = () => {
       <section>
         <div>
           <div>
-            <h1> FocusApp </h1>
-            <form>
+            <h1>FocusApp</h1>
+            <form onSubmit={onSubmit}>
               <div>
                 <label htmlFor="email-address">Email address</label>
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setEmail(e.target.value)
+                  }
                   required
                   placeholder="Email address"
                 />
@@ -47,15 +63,15 @@ export const SignUpPage = () => {
                 <input
                   type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setPassword(e.target.value)
+                  }
                   required
                   placeholder="Password"
                 />
               </div>
 
-              <button type="submit" onClick={onSubmit}>
-                Sign up
-              </button>
+              <button type="submit">Sign up</button>
             </form>
 
             <p>
