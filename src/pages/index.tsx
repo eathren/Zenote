@@ -1,9 +1,12 @@
-import { BlockList } from "../components/Note/BlockList"
+import { useNoteStore } from "src/stores/noteStore"
+import { TreeView } from "src/components/Tree"
 
 export const HomePage = () => {
+  const { notes } = useNoteStore()
+  console.log("n", notes)
   return (
     <div>
-      <BlockList />
+      <TreeView notes={notes} />
     </div>
   )
 }

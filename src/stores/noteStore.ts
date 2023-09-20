@@ -1,68 +1,87 @@
 import { create } from "zustand"
-import { Note } from "src/types/Note"
 import { getFirestore, doc, setDoc } from "firebase/firestore"
 import { fetchAllDocuments } from "src/handles/fetchNotes"
-import { v4 as uuid } from "uuid"
+import { nanoid } from "nanoid"
+import { createTree } from "src/utils"
+import { TreeNode } from "src/types/TreeNode"
 type NoteState = {
-  notes: Note[]
+  notes: TreeNode[]
   fetchNotes: () => void
-  addNoteBlock: (note: Note) => void
-  addEmptyNoteBlock: (index: number) => void
-  updateNoteContent: (noteId: string, content: string) => void
-  setParent: (noteId: string, parentId: string) => void
-  removeParent: (noteId: string) => void
+  addNote: (index: number, parentId?: string) => void
+  updateNote: (noteId: string, content: string, parent: string) => void
+  deleteNote: (noteId: string) => void
 }
 
-const db = getFirestore()
+const initializeStore = async (set: any, get: any) => {
+  const fetchedNotes = await fetchAllDocuments()
+  const tree = createTree(fetchedNotes)
+  set({ notes: tree })
+}
 
-export const useNoteStore = create<NoteState>((set) => ({
-  notes: [],
-  fetchNotes: async () => {
-    const fetchedNotes = await fetchAllDocuments()
-    set({ notes: fetchedNotes })
-  },
-  addNoteBlock: (note) => {
-    set((state) => ({ notes: [...state.notes, note] }))
-  },
-  addEmptyNoteBlock: (index: number) => {
-    const notes = get().notes
-    const newNote = {
-      id: uuid(), // Generate a new ID
-      content: "",
-      // other properties
-    }
+export const useNoteStore = create<NoteState>(async (set, get) => {
+  // Initialize store with fetched notes
+  await initializeStore(set, get)
 
-    const updatedNotes = [
-      ...notes.slice(0, index + 1),
-      newNote,
-      ...notes.slice(index + 1),
-    ]
+  return {
+    notes: [],
+    fetchNotes: async () => {
+      const fetchedNotes = await fetchAllDocuments()
+      const tree = createTree(fetchedNotes)
+      console.log("1", fetchedNotes, tree)
+      set({ notes: tree })
+    },
+    addNote: (index: number, parent?: string) => {
+      const notes = get().notes
+      const newNote = {
+        id: nanoid(),
+        content: "",
+        parent,
+        index: index + 1, // New note takes index one higher than the position it's inserted
+      }
 
-    set({ notes: updatedNotes })
-  },
-  updateNoteContent: async (noteId, content) => {
-    await setDoc(doc(db, "notes", noteId), { content })
-    set((state) => {
-      const updatedNotes = state.notes.map((note) =>
-        note.id === noteId ? { ...note, note: content } : note
+      const updatedNotes = [
+        ...notes.slice(0, index + 1),
+        newNote,
+        ...notes
+          .slice(index + 1)
+          .map((note) => ({ ...note, index: note.index! + 1 })),
+      ]
+
+      set({ notes: updatedNotes })
+    },
+    updateNote: (noteId: string, content: string, parent: string) => {
+      const notes = get().notes
+
+      // Update content and parent only, keep existing index
+      const updatedNotes = notes.map((note) =>
+        note.id === noteId ? { ...note, content, parent } : note
       )
-      return { notes: updatedNotes }
-    })
-  },
-  setParent: (noteId, parentId) => {
-    set((state) => {
-      const updatedNotes = state.notes.map((note) =>
-        note.id === noteId ? { ...note, parent: parentId } : note
-      )
-      return { notes: updatedNotes }
-    })
-  },
-  removeParent: (noteId) => {
-    set((state) => {
-      const updatedNotes = state.notes.map((note) =>
-        note.id === noteId ? { ...note, parent: undefined } : note
-      )
-      return { notes: updatedNotes }
-    })
-  },
-}))
+
+      set({ notes: updatedNotes })
+    },
+    deleteNote: (noteId: string) => {
+      let notes = get().notes
+
+      // Identify and remove the note and all its child nodes
+      const removeNoteAndChildren = (id: string) => {
+        notes = notes.filter((note) => note.id !== id)
+        notes.forEach((note) => {
+          if (note.parent === id) {
+            removeNoteAndChildren(note.id)
+          }
+        })
+      }
+
+      removeNoteAndChildren(noteId)
+
+      // Re-index remaining notes. This could be made more efficient if needed.
+      let indexCounter = 0
+      notes = notes.map((note) => {
+        note.index = indexCounter++
+        return note
+      })
+
+      set({ notes })
+    },
+  }
+})

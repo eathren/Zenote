@@ -5,6 +5,7 @@ import { SignUpPage } from "src/pages/signup.tsx"
 import { LoginPage } from "src/pages/login.tsx"
 import { HomePage } from "src/pages/index.tsx"
 import { BasicLayout } from "src/layout/layout.tsx"
+import { SubPage } from "src/pages/subpage"
 function App() {
   return (
     <>
@@ -18,7 +19,14 @@ function App() {
               </BasicLayout>
             }
           />
-          {/* <Route path="/:id" element={<NoteBlock />} /> */}
+          <Route
+            path="/:id"
+            element={
+              <BasicLayout>
+                <SubPage />
+              </BasicLayout>
+            }
+          />
           <Route
             path="/signup"
             element={
