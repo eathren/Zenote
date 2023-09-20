@@ -1,5 +1,4 @@
 import { create } from "zustand"
-import { getFirestore, doc, setDoc } from "firebase/firestore"
 import { fetchAllDocuments } from "src/handles/fetchNotes"
 import { nanoid } from "nanoid"
 import { createTree } from "src/utils"
@@ -8,11 +7,11 @@ type NoteState = {
   notes: TreeNode[]
   fetchNotes: () => void
   addNote: (index: number, parentId?: string) => void
-  updateNote: (noteId: string, content: string, parent: string) => void
+  updateNote: (noteId: string, updatedFields: Partial<TreeNode>) => void
   deleteNote: (noteId: string) => void
 }
 
-const initializeStore = async (set: any, get: any) => {
+const initializeStore = async (set: any) => {
   const fetchedNotes = await fetchAllDocuments()
   const tree = createTree(fetchedNotes)
   set({ notes: tree })
@@ -20,14 +19,13 @@ const initializeStore = async (set: any, get: any) => {
 
 export const useNoteStore = create<NoteState>(async (set, get) => {
   // Initialize store with fetched notes
-  await initializeStore(set, get)
+  await initializeStore(set)
 
   return {
     notes: [],
     fetchNotes: async () => {
       const fetchedNotes = await fetchAllDocuments()
       const tree = createTree(fetchedNotes)
-      console.log("1", fetchedNotes, tree)
       set({ notes: tree })
     },
     addNote: (index: number, parent?: string) => {
@@ -49,12 +47,12 @@ export const useNoteStore = create<NoteState>(async (set, get) => {
 
       set({ notes: updatedNotes })
     },
-    updateNote: (noteId: string, content: string, parent: string) => {
+    updateNote: (noteId: string, updatedFields: Partial<TreeNode>) => {
       const notes = get().notes
 
-      // Update content and parent only, keep existing index
+      // Update only the fields that are passed in
       const updatedNotes = notes.map((note) =>
-        note.id === noteId ? { ...note, content, parent } : note
+        note.id === noteId ? { ...note, ...updatedFields } : note
       )
 
       set({ notes: updatedNotes })

@@ -9,16 +9,9 @@ interface NoteInputProps {
 }
 
 export const NoteInput: React.FC<NoteInputProps> = ({ noteId, content }) => {
-  console.log("note", content)
   const [value, setValue] = useState<string>(content)
   const [timeoutId, setTimeoutId] = useState<number | null>(null)
-  const { updateNoteContent, addNoteBlock } = useNoteStore()
-
-  const updateNote = useCallback(() => {
-    if (value.trim().length > 0) {
-      updateNoteContent(noteId, value)
-    }
-  }, [noteId, value, updateNoteContent])
+  const { updateNote, addNoteBlock } = useNoteStore()
 
   const createNewNote = useCallback(() => {
     if (value.trim().length > 0) {

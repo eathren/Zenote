@@ -1,33 +1,28 @@
-import React, { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { Row } from "antd"
-import { Note } from "src/types/Note"
 import ExpansionIcon from "../../ExpansionIcon"
 import Dot from "../../Dot"
 import { NoteInput } from "../Input"
+import { TreeNode } from "src/types/TreeNode"
+import { useNoteStore } from "src/stores/noteStore"
 
-export const Block = (props: Note & { onAddBlock: () => void }) => {
+export const Block = (props: TreeNode) => {
   const [expanded, setExpanded] = useState(false)
+  const { updateNote } = useNoteStore()
 
-  const handleKeyPress = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === "Enter") {
-        props.onAddBlock()
-      }
-    },
-    [props]
-  )
-
-  // Add event listener for Enter key press
   useEffect(() => {
-    window.addEventListener("keydown", handleKeyPress)
-    return () => {
-      window.removeEventListener("keydown", handleKeyPress)
-    }
-  }, [handleKeyPress])
+    if (props.expanded) setExpanded(props.expanded)
+    else setExpanded(false)
+  }, [props.expanded])
+
+  const toggleExpansion = () => {
+    setExpanded(!expanded)
+    updateNote(props.id, { expanded: !expanded })
+  }
 
   return (
     <Row justify="start" align="middle">
-      <ExpansionIcon expanded={expanded} setExpanded={setExpanded} />
+      <ExpansionIcon expanded={expanded} setExpanded={toggleExpansion} />
       <Dot id={props.id} expanded={expanded} hasChildren={true} />
       <NoteInput noteId={props.id} content={props.content} />
     </Row>
