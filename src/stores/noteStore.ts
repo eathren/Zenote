@@ -7,7 +7,7 @@ type NoteState = {
   notes: Note[]
   fetchNotes: () => void
   addNoteBlock: (note: Note) => void
-  addEmptyNoteBlock: () => void
+  addEmptyNoteBlock: (index: number) => void
   updateNoteContent: (noteId: string, content: string) => void
   setParent: (noteId: string, parentId: string) => void
   removeParent: (noteId: string) => void
@@ -24,13 +24,21 @@ export const useNoteStore = create<NoteState>((set) => ({
   addNoteBlock: (note) => {
     set((state) => ({ notes: [...state.notes, note] }))
   },
-  addEmptyNoteBlock: () => {
-    set((state) => ({
-      notes: [
-        ...state.notes,
-        { id: uuid(), content: "", timestamp: Date.now() },
-      ],
-    }))
+  addEmptyNoteBlock: (index: number) => {
+    const notes = get().notes
+    const newNote = {
+      id: uuid(), // Generate a new ID
+      content: "",
+      // other properties
+    }
+
+    const updatedNotes = [
+      ...notes.slice(0, index + 1),
+      newNote,
+      ...notes.slice(index + 1),
+    ]
+
+    set({ notes: updatedNotes })
   },
   updateNoteContent: async (noteId, content) => {
     await setDoc(doc(db, "notes", noteId), { content })

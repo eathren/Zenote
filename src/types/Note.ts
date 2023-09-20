@@ -4,4 +4,5 @@ export type Note = {
   content: string
   parent?: string
   expanded?: false
+  completed?: false
 }
