@@ -1,4 +1,3 @@
-import React from "react"
 import styles from "./index.module.css"
 import { Link } from "react-router-dom"
 import clsx from "clsx"
@@ -19,7 +18,7 @@ const getDotActive = (
   return null
 }
 
-const index: React.FC<Props> = ({ id, expanded, hasChildren }) => {
+const Dot = ({ id, expanded, hasChildren }: Props) => {
   return (
     <Link to={id}>
       <div className={clsx(styles.dot, getDotActive(expanded, hasChildren))}>
@@ -29,4 +28,4 @@ const index: React.FC<Props> = ({ id, expanded, hasChildren }) => {
   )
 }
 
-export default index
+export default Dot
