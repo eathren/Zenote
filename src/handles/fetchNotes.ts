@@ -4,7 +4,6 @@ import {
   getDocs,
   setDoc,
   doc,
-  updateDoc,
 } from "firebase/firestore"
 import { Note } from "src/types/Note"
 import { TreeNode } from "src/types/TreeNode"
