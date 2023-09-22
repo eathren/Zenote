@@ -23,7 +23,7 @@ export const Block = (props: TreeNode) => {
   return (
     <Row justify="start" align="middle">
       <ExpansionIcon expanded={expanded} setExpanded={toggleExpansion} />
-      <Dot id={props.id} expanded={expanded} hasChildren={true} />
+      <Dot itemId={props.id} expanded={expanded} hasChildren={true} />
       <NoteInput noteId={props.id} content={props.content} />
     </Row>
   )

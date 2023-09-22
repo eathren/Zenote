@@ -1,5 +1,5 @@
 import "./App.css"
-// import { NoteBlock } from "./components/NoteBlock"
+
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { SignUpPage } from "src/pages/signup.tsx"
 import { LoginPage } from "src/pages/login.tsx"

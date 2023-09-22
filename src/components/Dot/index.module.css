@@ -9,6 +9,10 @@
   color: black;
 }
 
+.dot__hidden {
+  display: none;
+}
+
 .dot:hover,
 .dot:focus {
   background-color: #f1f1f1;

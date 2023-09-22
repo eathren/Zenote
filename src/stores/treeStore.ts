@@ -15,18 +15,35 @@ export const useTreeStore = create<TreeState>((set) => ({
   selectedTreeNodes: [], // Initialize the selectedTreeNodes to an empty array
 }))
 
+// Utility function to find a TreeNode by id
+export const findTreeNodeById = (
+  id: string,
+  nodes: TreeNode[]
+): TreeNode | null => {
+  for (const node of nodes) {
+    if (node.id === id) return node
+
+    if (node.children) {
+      const foundNode = findTreeNodeById(id, node.children)
+      if (foundNode) return foundNode
+    }
+  }
+
+  return null
+}
+
 // Function to update the selectedTreeNodes based on selectedParentId
 export const updateSelectedTreeNodes = () => {
   const { selectedParentId } = useTreeStore.getState()
   const { notes } = useNoteStore.getState() // Get notes from noteStore
 
   // Find the TreeNode with the correct ID
-  const selectedTreeNode = notes.filter((note) => note.id === selectedParentId)
-
+  const selectedTreeNode = findTreeNodeById(selectedParentId || "", notes)
+  console.log("here", selectedParentId, selectedTreeNode)
   // Update the selectedTreeNodes in the useTreeStore
   if (selectedTreeNode) {
-    useTreeStore.setState({ selectedTreeNodes: selectedTreeNode }) // Wrap it in an array
+    useTreeStore.setState({ selectedTreeNodes: [selectedTreeNode] })
   } else {
-    useTreeStore.setState({ selectedTreeNodes: [] }) // If not found, set to empty array
+    useTreeStore.setState({ selectedTreeNodes: [] })
   }
 }

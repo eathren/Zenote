@@ -1,9 +1,9 @@
 import styles from "./index.module.css"
-import { Link } from "react-router-dom"
+import { Link, useParams } from "react-router-dom"
 import clsx from "clsx"
 
 type Props = {
-  id: string
+  itemId: string
   expanded: boolean
   hasChildren: boolean
 }
@@ -18,10 +18,25 @@ const getDotActive = (
   return null
 }
 
-const Dot = ({ id, expanded, hasChildren }: Props) => {
+const getDotHidden = (id: string | undefined, itemId: string) => {
+  if (id === itemId) {
+    return styles.dot__hidden
+  }
+  return null
+}
+
+const Dot = ({ itemId, expanded, hasChildren }: Props) => {
+  const { id } = useParams()
+
   return (
-    <Link to={id}>
-      <div className={clsx(styles.dot, getDotActive(expanded, hasChildren))}>
+    <Link to={itemId}>
+      <div
+        className={clsx(
+          styles.dot,
+          getDotHidden(id, itemId),
+          getDotActive(expanded, hasChildren)
+        )}
+      >
         &#8226;
       </div>
     </Link>
