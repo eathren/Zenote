@@ -2,11 +2,20 @@ import { TreeNode } from "src/types/TreeNode"
 import Block from "src/components/Note/Block"
 import { Button } from "antd"
 import { PlusOutlined } from "@ant-design/icons"
+import { useNoteStore } from "src/stores/noteStore"
+
 // Recursive component to render TreeNode and its children
 const TreeNodeComponent = ({ node }: { node: TreeNode }) => {
-  node
+  const { addNote } = useNoteStore()
+
+  const handleEnter = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter") {
+      event.stopPropagation()
+      addNote(node.id)
+    }
+  }
   return (
-    <div style={{ marginLeft: "20px" }}>
+    <div style={{ marginLeft: "20px" }} onKeyDown={handleEnter}>
       <Block {...node} />
       {node.expanded &&
         node.children?.map((child) => (

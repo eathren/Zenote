@@ -3,11 +3,11 @@ import { fetchAllDocuments, updateDocumentInDB } from "src/handles/fetchNotes"
 import { nanoid } from "nanoid"
 import { createTree } from "src/utils"
 import { TreeNode } from "src/types/TreeNode"
-
+import { findTreeNodeById } from "./treeStore"
 type NoteState = {
   notes: TreeNode[]
   fetchNotes: () => Promise<void>
-  addNote: (index: number, parentId?: string) => void
+  addNote: (currentNodeId: string) => void
   updateNote: (noteId: string, updatedFields: Partial<TreeNode>) => void
   deleteNote: (noteId: string) => void
 }
@@ -34,22 +34,42 @@ export const useNoteStore = create<NoteState>((set, get) => {
       const tree = createTree(fetchedNotes)
       set({ notes: tree })
     },
-    addNote: (index: number, parent?: string) => {
+    addNote: (currentNodeId: string) => {
       const notes = get().notes
-      const newNote: TreeNode = {
+      const currentNode = findTreeNodeById(currentNodeId, notes)
+
+      if (!currentNode) {
+        console.error("Node with the given ID not found.")
+        return
+      }
+      const parent = currentNode.parent
+      let newBlockIndex = currentNode.index + 1 // Default behavior
+
+      // If the current node has children and is expanded
+      if (currentNode.expanded && currentNode.children?.length) {
+        newBlockIndex = 1 // The index for the new block becomes 1
+      }
+
+      // Increment indices for all sibling notes that have an index greater than the new index
+      const updatedNotes = notes.map((note) => {
+        if (note.parent === parent && note.index >= newBlockIndex) {
+          return { ...note, index: note.index + 1 }
+        }
+        return note
+      })
+
+      const newBlock: TreeNode = {
         id: nanoid(),
         content: "",
-        parent,
-        index: index + 1,
+        parent: parent ? parent : undefined,
+        index: newBlockIndex,
       }
-      const updatedNotes = [
-        ...notes.slice(0, index + 1),
-        newNote,
-        ...notes
-          .slice(index + 1)
-          .map((note) => ({ ...note, index: note.index! + 1 })),
-      ]
-      set({ notes: updatedNotes })
+
+      console.log(newBlock)
+
+      set({
+        notes: [...updatedNotes, newBlock].sort((a, b) => a.index - b.index),
+      })
     },
     updateNote: async (noteId: string, updatedFields: Partial<TreeNode>) => {
       const notes = get().notes

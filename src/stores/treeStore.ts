@@ -39,7 +39,6 @@ export const updateSelectedTreeNodes = () => {
 
   // Find the TreeNode with the correct ID
   const selectedTreeNode = findTreeNodeById(selectedParentId || "", notes)
-  console.log("here", selectedParentId, selectedTreeNode)
   // Update the selectedTreeNodes in the useTreeStore
   if (selectedTreeNode) {
     useTreeStore.setState({ selectedTreeNodes: [selectedTreeNode] })

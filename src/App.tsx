@@ -6,6 +6,7 @@ import { LoginPage } from "src/pages/login.tsx"
 import { HomePage } from "src/pages/index.tsx"
 import { BasicLayout } from "src/layout/layout.tsx"
 import { SubPage } from "src/pages/subpage"
+
 function App() {
   return (
     <>
