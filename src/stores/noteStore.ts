@@ -1,9 +1,10 @@
 import { create } from "zustand"
 import { fetchAllDocuments, updateDocumentInDB } from "src/handles/fetchNotes"
-import { nanoid } from "nanoid"
 import { createTree } from "src/utils"
 import { TreeNode } from "src/types/TreeNode"
 import { findTreeNodeById } from "./treeStore"
+import { v4 as uuidv4 } from "uuid"
+
 type NoteState = {
   notes: TreeNode[]
   fetchNotes: () => Promise<void>
@@ -34,41 +35,56 @@ export const useNoteStore = create<NoteState>((set, get) => {
       const tree = createTree(fetchedNotes)
       set({ notes: tree })
     },
+
     addNote: (currentNodeId: string) => {
-      const notes = get().notes
-      const currentNode = findTreeNodeById(currentNodeId, notes)
-
-      if (!currentNode) {
-        console.error("Node with the given ID not found.")
-        return
-      }
-      const parent = currentNode.parent
-      let newBlockIndex = currentNode.index + 1 // Default behavior
-
-      // If the current node has children and is expanded
-      if (currentNode.expanded && currentNode.children?.length) {
-        newBlockIndex = 1 // The index for the new block becomes 1
-      }
-
-      // Increment indices for all sibling notes that have an index greater than the new index
-      const updatedNotes = notes.map((note) => {
-        if (note.parent === parent && note.index >= newBlockIndex) {
-          return { ...note, index: note.index + 1 }
-        }
-        return note
-      })
+      let notes = get().notes
 
       const newBlock: TreeNode = {
-        id: nanoid(),
+        id: uuidv4(),
         content: "",
-        parent: parent ? parent : undefined,
-        index: newBlockIndex,
+        index: 0,
       }
 
-      console.log(newBlock)
+      const updater = (node: TreeNode) => {
+        if (node.expanded && node.children?.length) {
+          // Node is expanded and has children, insert at the top of children list
+          newBlock.parent = node.id
+          node.children = [newBlock, ...node.children]
+        } else {
+          // Find the parent node to insert the new node as its sibling
+          const parentNode: TreeNode | null = node.parent
+            ? findTreeNodeById(node.parent, notes)
+            : null
 
+          if (parentNode) {
+            // It's a child node; we insert it as the last child of its parent
+            newBlock.parent = parentNode.id
+            newBlock.index = (parentNode.children?.length || 0) + 1
+            parentNode.children = [...(parentNode.children || []), newBlock]
+          } else {
+            // It's a root node
+            newBlock.index = node.index + 1
+            newBlock.parent = node.parent
+
+            // Update indices for existing nodes
+            notes = notes.map((note) => {
+              if (note.parent === node.parent && note.index >= newBlock.index) {
+                return { ...note, index: note.index + 1 }
+              }
+              return note
+            })
+
+            notes.push(newBlock)
+          }
+        }
+      }
+
+      updateNodeById(currentNodeId, notes, updater)
+
+      console.log(newBlock, notes)
+      // Sort the notes by index for easier rendering later
       set({
-        notes: [...updatedNotes, newBlock].sort((a, b) => a.index - b.index),
+        notes: notes.sort((a, b) => a.index - b.index),
       })
     },
     updateNote: async (noteId: string, updatedFields: Partial<TreeNode>) => {
@@ -101,3 +117,20 @@ export const useNoteStore = create<NoteState>((set, get) => {
     },
   }
 })
+
+const updateNodeById = (
+  id: string,
+  nodes: TreeNode[],
+  updater: (node: TreeNode) => void
+): TreeNode[] => {
+  return nodes.map((node) => {
+    if (node.id === id) {
+      updater(node)
+      return node
+    }
+    if (node.children) {
+      node.children = updateNodeById(id, node.children, updater)
+    }
+    return node
+  })
+}

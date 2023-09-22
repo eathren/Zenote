@@ -20,7 +20,7 @@ export const NoteInput: React.FC<NoteInputProps> = ({ noteId, content }) => {
     }
     const newTimeoutId = setTimeout(() => {
       updateNote(noteId, { content: e.target.value })
-    }, 3000)
+    }, 300)
     setTimeoutId(newTimeoutId)
   }
 

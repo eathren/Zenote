@@ -2,6 +2,7 @@ import {
   getFirestore,
   collection,
   getDocs,
+  setDoc,
   doc,
   updateDoc,
 } from "firebase/firestore"
@@ -36,12 +37,8 @@ export const updateDocumentInDB = async (
   updatedFields: Partial<Note>
 ): Promise<void> => {
   // Initialize Firestore
+
   const db = getFirestore()
-
-  // Reference to Firestore collection and specific document
-  const notesCollection = collection(db, "notes")
-  const noteDoc = doc(notesCollection, noteId)
-
-  // Update document with new fields
-  await updateDoc(noteDoc, updatedFields)
+  const docRef = doc(db, "notes", noteId)
+  await setDoc(docRef, updatedFields, { merge: true })
 }
