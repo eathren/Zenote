@@ -7,6 +7,7 @@ import {
   updateDoc,
 } from "firebase/firestore"
 import { Note } from "src/types/Note"
+import { TreeNode } from "src/types/TreeNode"
 
 export const fetchAllDocuments = async (): Promise<Note[]> => {
   // Initialize Firestore
@@ -34,11 +35,12 @@ export const fetchAllDocuments = async (): Promise<Note[]> => {
 
 export const updateDocumentInDB = async (
   noteId: string,
-  updatedFields: Partial<Note>
+  updatedFields: Partial<TreeNode>
 ): Promise<void> => {
   // Initialize Firestore
 
   const db = getFirestore()
   const docRef = doc(db, "notes", noteId)
+  if (updatedFields.expanded) delete updatedFields.expanded
   await setDoc(docRef, updatedFields, { merge: true })
 }
