@@ -5,55 +5,70 @@ import {
   setDoc,
   doc,
 } from "firebase/firestore"
-import { GraphNode, InitialGraphNode } from "src/types/GraphNode"
+import {
+  GraphNode,
+  GraphEdge,
+  GraphEdgeObj,
+  GraphNodeObj,
+} from "src/types/Graph"
 
-/**
- * Fetch all documents from the Firestore "nodes" collection and return them as an array of InitialGraphNode.
- * @returns {Promise<InitialGraphNode[]>} A promise that resolves to an array of InitialGraphNodes.
- */
-export const fetchAllDocuments = async (): Promise<InitialGraphNode[]> => {
-  // Initialize Firestore instance
+export const fetchNodes = async (): Promise<GraphNodeObj> => {
   const db = getFirestore()
-
-  // Reference to the Firestore collection "nodes"
   const nodesCollection = collection(db, "nodes")
-
-  // Perform query to fetch all documents from the "nodes" collection
   const querySnapshot = await getDocs(nodesCollection)
+  const nodes: GraphNodeObj = {}
 
-  // Initialize an empty array to store fetched nodes
-  const allNodes: InitialGraphNode[] = []
-
-  // Populate allNodes array with data from Firestore
   querySnapshot.forEach((docSnapshot) => {
-    allNodes.push({
+    const data = docSnapshot.data()
+    nodes[docSnapshot.id] = {
       id: docSnapshot.id,
-      ...docSnapshot.data(),
-    } as InitialGraphNode)
+      ...data,
+    } as GraphNode
   })
 
-  return allNodes
+  return nodes
+}
+
+export const fetchEdges = async (): Promise<GraphEdgeObj> => {
+  const db = getFirestore()
+  const edgesCollection = collection(db, "edges")
+  const querySnapshot = await getDocs(edgesCollection)
+  const edges: GraphEdgeObj = {}
+
+  querySnapshot.forEach((docSnapshot) => {
+    const data = docSnapshot.data()
+    edges[docSnapshot.id] = data as GraphEdge
+  })
+
+  return edges
 }
 
 /**
- * Update a specific document in the Firestore "nodes" collection with the provided fields.
- * @param {string} nodeId - The ID of the node to update.
+ * Update a specific node in the Firestore "nodes" collection.
+ * @param {string} nodeId - The ID of the GraphNode to update.
  * @param {Partial<GraphNode>} updatedFields - An object containing the fields to update.
- * @returns {Promise<void>} A promise that resolves when the document has been updated.
+ * @returns {Promise<void>} A promise that resolves when the node has been updated.
  */
-export const updateDocumentInDB = async (
+export const updateNodeInDB = async (
   nodeId: string,
   updatedFields: Partial<GraphNode>
 ): Promise<void> => {
-  // Initialize Firestore instance
   const db = getFirestore()
-
-  // Reference to the specific document in the "nodes" collection
   const docRef = doc(db, "nodes", nodeId)
+  await setDoc(docRef, updatedFields, { merge: true })
+}
 
-  // Remove the 'children' field if present, as it should not be updated this way
-  if (updatedFields.children) delete updatedFields.children
-
-  // Perform the update
+/**
+ * Update a specific edge in the Firestore "nodes" collection.
+ * @param {string} edgeId - The ID of the GraphEdge to update.
+ * @param {Partial<GraphEdge>} updatedFields - An object containing the fields to update.
+ * @returns {Promise<void>} A promise that resolves when the edge has been updated.
+ */
+export const updateEdgeInDB = async (
+  edgeId: string,
+  updatedFields: Partial<GraphEdge>
+): Promise<void> => {
+  const db = getFirestore()
+  const docRef = doc(db, "edges", edgeId)
   await setDoc(docRef, updatedFields, { merge: true })
 }

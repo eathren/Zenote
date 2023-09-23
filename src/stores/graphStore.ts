@@ -1,21 +1,92 @@
-import { fetchAllDocuments } from "src/handles/fetchNotes"
-import { TreeNode } from "src/types/TreeNode"
-import { createTree } from "src/utils"
+import { fetchEdges, fetchNodes } from "src/handles/index"
 import { create } from "zustand"
+import { v4 as uuidv4 } from "uuid"
+import {
+  GraphEdge,
+  GraphNode,
+  GraphEdgeObj,
+  GraphNodeObj,
+} from "src/types/Graph"
+import { findNodeById, findEdgeById } from "src/utils"
 
 type GraphState = {
-  nodes: TreeNode[]
-  fetchNodes: () => Promise<void>
+  nodes: GraphNodeObj
+  edges: GraphEdgeObj
+  fetchGraph: () => Promise<void>
   addNode: () => void
-  updateNode: (nodeId: string, updatedFields: Partial<TreeNode>) => void
+  updateNode: (nodeId: string, updatedFields: Partial<GraphNode>) => void
   deleteNode: (nodeId: string) => void
+  addEdge: (src: string, dest: string) => void
+  updateEdge: (edgeId: string, updatedFields: Partial<GraphEdge>) => void
+  deleteEdge: (edgeId: string) => void
 }
 
-// UTIL FUNCTIONS NEEDED
-// Update node with new information
+// Initialize the store with fetched data
 const initializeStore = async (set: (partial: Partial<GraphState>) => void) => {
-  // Fetch all documents and create the initial tree structure
-  const fetchedNotes = await fetchAllDocuments()
-  const tree = createTree(fetchedNotes)
-  set({ nodes: tree })
+  const fetchedNodes = await fetchNodes()
+  const fetchedEdges = await fetchEdges()
+  set({ nodes: fetchedNodes, edges: fetchedEdges })
 }
+
+export const useGraphStore = create<GraphState>((set, get) => {
+  initializeStore(set).catch((error) => {
+    // Handle initialization error here
+    console.error("Failed to initialize store:", error)
+  })
+
+  return {
+    nodes: {},
+    edges: {},
+    fetchGraph: async () => {
+      const fetchedNodes = await fetchNodes()
+      const fetchedEdges = await fetchEdges()
+      set({ nodes: fetchedNodes, edges: fetchedEdges })
+    },
+    addNode: () => {
+      const newNode: GraphNode = {
+        id: uuidv4(),
+        content: "",
+        date_created: Date.now(),
+      }
+      set((state) => ({ nodes: { ...state.nodes, [newNode.id]: newNode } }))
+    },
+    updateNode: (nodeId: string, updatedFields: Partial<GraphNode>) => {
+      const node = findNodeById(get().nodes, nodeId)
+      if (node) {
+        set((state) => ({
+          nodes: {
+            ...state.nodes,
+            [nodeId]: { ...node, ...updatedFields },
+          },
+        }))
+      }
+    },
+    deleteNode: (nodeId: string) => {
+      const { [nodeId]: _, ...restNodes } = get().nodes
+      set({ nodes: restNodes })
+    },
+    addEdge: (src: string, dest: string) => {
+      const newEdge: GraphEdge = {
+        id: uuidv4(),
+        src,
+        dest,
+      }
+      set((state) => ({ edges: { ...state.edges, [newEdge.id]: newEdge } }))
+    },
+    updateEdge: (edgeId: string, updatedFields: Partial<GraphEdge>) => {
+      const edge = findEdgeById(get().edges, edgeId)
+      if (edge) {
+        set((state) => ({
+          edges: {
+            ...state.edges,
+            [edgeId]: { ...edge, ...updatedFields },
+          },
+        }))
+      }
+    },
+    deleteEdge: (edgeId: string) => {
+      const { [edgeId]: _, ...restEdges } = get().edges
+      set({ edges: restEdges })
+    },
+  }
+})
