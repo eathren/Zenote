@@ -1,48 +1,44 @@
-import React from "react"
-import Block from "src/components/Note/Block"
-import { Button } from "antd"
-import { PlusOutlined } from "@ant-design/icons"
-import { useGraphStore } from "src/stores/graphStore"
-import { GraphEdgeObj, GraphNodeObj } from "src/types/Graph"
+import { GraphNodeObj, GraphEdgeObj, GraphNode } from "src/types/Graph"
 import { TreeNodeInput } from "src/components/Tree/Input"
 
-// Recursive component to render GraphNode and its children
-// const TreeNodeComponent = ({
-//   node,
-//   edges,
-// }: {
-//   node: GraphNodeObj
-//   edges: GraphEdgeObj
-// }) => {
-//   const { addNode } = useGraphStore()
+// Function to find node by id
+const findNodeById = (nodes: GraphNodeObj, id: string): GraphNode | undefined =>
+  nodes[id]
 
-//   const handleEnter = (event: React.KeyboardEvent) => {
-//     if (event.key === "Enter") {
-//       event.stopPropagation()
-//       addNode()
-//     }
-//   }
+// Recursive component to render a node and its children
+const TreeNodeComponent = ({
+  node,
+  edges,
+  nodes,
+  depth,
+}: {
+  node: GraphNode
+  edges: GraphEdgeObj
+  nodes: GraphNodeObj
+  depth: number
+}) => {
+  const childrenEdges = Object.values(edges).filter(
+    (edge) => edge.src === node.id
+  )
 
-//   const childNodes = Object.values(edges)
-//     .filter((edge) => edge.src === node.id)
-//     .map((edge) => edge.dest)
-
-//   return (
-//     <div style={{ marginLeft: "20px" }} onKeyDown={handleEnter}>
-//       <Block {...node} />
-//       {node.expanded &&
-//         childNodes.map((childId) => (
-//           <TreeNodeComponent
-//             key={childId}
-//             node={edges[childId]}
-//             edges={edges}
-//           />
-//         ))}
-//     </div>
-//   )
-// }
-
-export const TreeNodeComponent = () => {}
+  return (
+    <div style={{ marginLeft: `${depth * 20}px` }}>
+      <TreeNodeInput node={node} />
+      {childrenEdges.map((childEdge) => {
+        const childNode = findNodeById(nodes, childEdge.dest)
+        return childNode ? (
+          <TreeNodeComponent
+            key={childNode.id}
+            node={childNode}
+            edges={edges}
+            nodes={nodes}
+            depth={depth + 1}
+          />
+        ) : null
+      })}
+    </div>
+  )
+}
 
 export const TreeView = ({
   nodes,
@@ -51,17 +47,26 @@ export const TreeView = ({
   nodes: GraphNodeObj
   edges: GraphEdgeObj
 }) => {
-  const rootNodeIds = Object.keys(nodes) // Assume these are your root nodes
+  // Identify root nodes (nodes that are not dest of any other nodes)
+  const destNodeIds = new Set(Object.values(edges).map((edge) => edge.dest))
+  const rootNodeIds = Object.keys(nodes).filter(
+    (nodeId) => !destNodeIds.has(nodeId)
+  )
 
   return (
     <div>
-      {Object.values(nodes).map((node) => (
-        <TreeNodeInput key={node.id} node={node} />
-      ))}
-      {/* {rootNodeIds.map((nodeId) => (
-
-        // <TreeNodeComponent key={nodeId} node={nodes[nodeId]} edges={edges} />
-      ))} */}
+      {rootNodeIds.map((rootNodeId) => {
+        const rootNode = findNodeById(nodes, rootNodeId)
+        return rootNode ? (
+          <TreeNodeComponent
+            key={rootNode.id}
+            node={rootNode}
+            edges={edges}
+            nodes={nodes}
+            depth={0}
+          />
+        ) : null
+      })}
     </div>
   )
 }

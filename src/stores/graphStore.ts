@@ -78,8 +78,10 @@ export const useGraphStore = create<GraphState>((set, get) => {
       debouncedDeleteNode(nodeId)
     },
     addEdge: (src: string, dest: string) => {
+      console.log("adding edge")
+      const id = uuidv4()
       const newEdge: GraphEdge = {
-        id: uuidv4(),
+        id: id,
         src,
         dest,
       }

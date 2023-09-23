@@ -1,10 +1,8 @@
 // SubPage.tsx
 import React, { useEffect } from "react"
-import { useParams } from "react-router-dom"
 import { useGraphStore } from "src/stores/graphStore"
 
 export const SubPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>()
   const { nodes, edges, fetchGraph } = useGraphStore()
 
   useEffect(() => {
