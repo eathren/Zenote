@@ -4,6 +4,7 @@ import { Button } from "antd"
 import { PlusOutlined } from "@ant-design/icons"
 import { useGraphStore } from "src/stores/graphStore"
 import { GraphEdgeObj, GraphNodeObj } from "src/types/Graph"
+import { TreeNodeInput } from "src/components/Tree/Input"
 
 // Recursive component to render GraphNode and its children
 // const TreeNodeComponent = ({
@@ -41,6 +42,8 @@ import { GraphEdgeObj, GraphNodeObj } from "src/types/Graph"
 //   )
 // }
 
+export const TreeNodeComponent = () => {}
+
 export const TreeView = ({
   nodes,
   edges,
@@ -53,7 +56,7 @@ export const TreeView = ({
   return (
     <div>
       {Object.values(nodes).map((node) => (
-        <div key={node.id}>{node.content}</div>
+        <TreeNodeInput key={node.id} node={node} />
       ))}
       {/* {rootNodeIds.map((nodeId) => (
 

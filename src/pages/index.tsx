@@ -14,8 +14,6 @@ export const HomePage = () => {
     }
   }, [edges, fetchGraph, nodes])
 
-  console.log(nodes)
-
   return (
     <>
       <TreeView nodes={nodes} edges={edges} />
