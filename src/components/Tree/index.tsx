@@ -1,40 +1,72 @@
-import { TreeNode } from "src/types/TreeNode"
-import Block from "src/components/Note/Block"
-import { Button } from "antd"
-import { PlusOutlined } from "@ant-design/icons"
-import { useNoteStore } from "src/stores/noteStore"
+import { GraphNodeObj, GraphEdgeObj, GraphNode } from "src/types/Graph"
+import { TreeNodeInput } from "src/components/Tree/Input"
 
-// Recursive component to render TreeNode and its children
-const TreeNodeComponent = ({ node }: { node: TreeNode }) => {
-  const { addNote } = useNoteStore()
+// Function to find node by id
+const findNodeById = (nodes: GraphNodeObj, id: string): GraphNode | undefined =>
+  nodes[id]
 
-  const handleEnter = (event: React.KeyboardEvent) => {
-    if (event.key === "Enter") {
-      event.stopPropagation()
-      addNote(node.id)
-    }
-  }
+// Recursive component to render a node and its children
+const TreeNodeComponent = ({
+  node,
+  edges,
+  nodes,
+  depth,
+}: {
+  node: GraphNode
+  edges: GraphEdgeObj
+  nodes: GraphNodeObj
+  depth: number
+}) => {
+  const childrenEdges = Object.values(edges).filter(
+    (edge) => edge.src === node.id
+  )
+
   return (
-    <div style={{ marginLeft: "20px" }} onKeyDown={handleEnter}>
-      <Block {...node} />
-      {node.expanded &&
-        node.children?.map((child) => (
-          <TreeNodeComponent key={child.id} node={child} />
-        ))}
+    <div style={{ marginLeft: `${depth * 20}px` }}>
+      <TreeNodeInput node={node} />
+      {childrenEdges.map((childEdge) => {
+        const childNode = findNodeById(nodes, childEdge.dest)
+        return childNode ? (
+          <TreeNodeComponent
+            key={childNode.id}
+            node={childNode}
+            edges={edges}
+            nodes={nodes}
+            depth={depth + 1}
+          />
+        ) : null
+      })}
     </div>
   )
 }
 
-// Your main component
-const TreeView = ({ notes }: { notes: TreeNode[] }) => {
-  // Assume "notes" contains only root nodes and each root node has its children properly nested
+export const TreeView = ({
+  nodes,
+  edges,
+}: {
+  nodes: GraphNodeObj
+  edges: GraphEdgeObj
+}) => {
+  // Identify root nodes (nodes that are not dest of any other nodes)
+  const destNodeIds = new Set(Object.values(edges).map((edge) => edge.dest))
+  const rootNodeIds = Object.keys(nodes).filter(
+    (nodeId) => !destNodeIds.has(nodeId)
+  )
+
   return (
     <div>
-      {notes &&
-        notes.map((node) => <TreeNodeComponent key={node.id} node={node} />)}
-      <Button shape="circle" icon={<PlusOutlined />} />
+      {rootNodeIds.map((rootNodeId) => {
+        const rootNode = findNodeById(nodes, rootNodeId)
+        return rootNode ? (
+          <TreeNodeComponent
+            key={rootNode.id}
+            node={rootNode}
+            edges={edges}
+            nodes={nodes}
+            depth={0}
+          />
+        ) : null
+      })}
     </div>
   )
 }
-
-export default TreeView

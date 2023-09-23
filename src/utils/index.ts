@@ -1,36 +1,75 @@
-import { Note } from "src/types/Note"
-import { TreeNode } from "src/types/TreeNode"
+import {
+  GraphEdge,
+  GraphEdgeObj,
+  GraphNode,
+  GraphNodeObj,
+} from "src/types/Graph"
+import { debounce } from "lodash"
+import {
+  updateNodeInDB,
+  updateEdgeInDB,
+  addNodeInDB,
+  deleteNodeInDB,
+  addEdgeInDB,
+  deleteEdgeInDB,
+} from "src/handles"
 
-export const createTree = (data: Note[]): TreeNode[] => {
-  const tree: TreeNode[] = []
-  const nodeMap: { [id: string]: TreeNode } = {}
+export const findNodeById = (nodes: GraphNodeObj, id: string) => nodes[id]
+export const findEdgeById = (edges: GraphEdgeObj, id: string) => edges[id]
 
-  let rootIndex = 0
-  data.forEach((item: Note) => {
-    if (!item.parent) {
-      const newNode: TreeNode = { ...item, children: [], index: rootIndex++ }
-      tree.push(newNode)
-      nodeMap[item.id] = newNode
+// Update actions
+export const debouncedUpdateNode = debounce(
+  async (nodeId: string, updatedFields: Partial<GraphNode>) => {
+    try {
+      await updateNodeInDB(nodeId, updatedFields)
+    } catch (error) {
+      console.error("Failed to update node in DB:", error)
     }
-  })
+  },
+  300
+)
 
-  const addChildNodes = (node: TreeNode) => {
-    let localIndex = 0
-    data.forEach((item: Note) => {
-      if (item.parent === node.id) {
-        const childNode: TreeNode = {
-          ...item,
-          children: [],
-          index: localIndex++,
-        }
-        node.children?.push(childNode)
-        nodeMap[item.id] = childNode
-        addChildNodes(childNode)
-      }
-    })
+export const debouncedUpdateEdge = debounce(
+  async (edgeId: string, updatedFields: Partial<GraphEdge>) => {
+    try {
+      await updateEdgeInDB(edgeId, updatedFields)
+    } catch (error) {
+      console.error("Failed to update edge in DB:", error)
+    }
+  },
+  300
+)
+
+// Add actions
+export const debouncedAddNode = debounce(async (newNode: GraphNode) => {
+  try {
+    await addNodeInDB(newNode)
+  } catch (error) {
+    console.error("Failed to add node in DB:", error)
   }
+}, 300)
 
-  tree.forEach(addChildNodes)
+export const debouncedAddEdge = debounce(async (newEdge: GraphEdge) => {
+  try {
+    await addEdgeInDB(newEdge)
+  } catch (error) {
+    console.error("Failed to add edge in DB:", error)
+  }
+}, 300)
 
-  return tree
-}
+// Delete actions
+export const debouncedDeleteNode = debounce(async (nodeId: string) => {
+  try {
+    await deleteNodeInDB(nodeId)
+  } catch (error) {
+    console.error("Failed to delete node in DB:", error)
+  }
+}, 300)
+
+export const debouncedDeleteEdge = debounce(async (edgeId: string) => {
+  try {
+    await deleteEdgeInDB(edgeId)
+  } catch (error) {
+    console.error("Failed to delete edge in DB:", error)
+  }
+}, 300)
