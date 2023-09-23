@@ -7,7 +7,16 @@ import {
   GraphEdgeObj,
   GraphNodeObj,
 } from "src/types/Graph"
-import { findNodeById, findEdgeById } from "src/utils"
+import {
+  findNodeById,
+  findEdgeById,
+  debouncedAddEdge,
+  debouncedAddNode,
+  debouncedDeleteEdge,
+  debouncedDeleteNode,
+  debouncedUpdateEdge,
+  debouncedUpdateNode,
+} from "src/utils"
 
 type GraphState = {
   nodes: GraphNodeObj
@@ -45,10 +54,11 @@ export const useGraphStore = create<GraphState>((set, get) => {
     addNode: () => {
       const newNode: GraphNode = {
         id: uuidv4(),
-        content: "",
+        content: "Test",
         date_created: Date.now(),
       }
       set((state) => ({ nodes: { ...state.nodes, [newNode.id]: newNode } }))
+      debouncedAddNode(newNode)
     },
     updateNode: (nodeId: string, updatedFields: Partial<GraphNode>) => {
       const node = findNodeById(get().nodes, nodeId)
@@ -59,11 +69,13 @@ export const useGraphStore = create<GraphState>((set, get) => {
             [nodeId]: { ...node, ...updatedFields },
           },
         }))
+        debouncedUpdateNode(nodeId, updatedFields)
       }
     },
     deleteNode: (nodeId: string) => {
       const { [nodeId]: _, ...restNodes } = get().nodes
       set({ nodes: restNodes })
+      debouncedDeleteNode(nodeId)
     },
     addEdge: (src: string, dest: string) => {
       const newEdge: GraphEdge = {
@@ -72,6 +84,7 @@ export const useGraphStore = create<GraphState>((set, get) => {
         dest,
       }
       set((state) => ({ edges: { ...state.edges, [newEdge.id]: newEdge } }))
+      debouncedAddEdge(newEdge)
     },
     updateEdge: (edgeId: string, updatedFields: Partial<GraphEdge>) => {
       const edge = findEdgeById(get().edges, edgeId)
@@ -82,11 +95,13 @@ export const useGraphStore = create<GraphState>((set, get) => {
             [edgeId]: { ...edge, ...updatedFields },
           },
         }))
+        debouncedUpdateEdge(edgeId, updatedFields)
       }
     },
     deleteEdge: (edgeId: string) => {
       const { [edgeId]: _, ...restEdges } = get().edges
       set({ edges: restEdges })
+      debouncedDeleteEdge(edgeId)
     },
   }
 })
