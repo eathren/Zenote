@@ -6,7 +6,7 @@ import { TreeNode } from "src/types/TreeNode"
 type TreeState = {
   selectedParentId: string | null
   setSelectedParentId: (id: string) => void
-  selectedTreeNodes: TreeNode[] // Now an array
+  selectedTreeNodes: TreeNode[]
 }
 
 export const useTreeStore = create<TreeState>((set) => ({
