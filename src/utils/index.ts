@@ -49,6 +49,12 @@ export const createTree = (nodes: GraphNodeObj, edges: GraphEdgeObj) => {
         })
       }
     })
+
+    // Sort children by date_created before returning
+    children.sort(
+      (a, b) =>
+        new Date(a.date_created).getTime() - new Date(b.date_created).getTime()
+    )
     return children
   }
 
@@ -62,6 +68,12 @@ export const createTree = (nodes: GraphNodeObj, edges: GraphEdgeObj) => {
       children,
     })
   })
+
+  // Sort the root level nodes as well
+  tree.sort(
+    (a, b) =>
+      new Date(a.date_created).getTime() - new Date(b.date_created).getTime()
+  )
 
   return tree
 }
