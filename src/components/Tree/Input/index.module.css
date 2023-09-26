@@ -1,5 +1,5 @@
 .input__body {
-  display: inline-block;
+  display: block;
   border: none;
 }
 .input__body input {
