@@ -1,15 +1,9 @@
 // SubPage.tsx
-import React, { useEffect } from "react"
+import React from "react"
 import { useGraphStore } from "src/stores/graphStore"
 
 export const SubPage: React.FC = () => {
-  const { nodes, edges, fetchGraph } = useGraphStore()
-
-  useEffect(() => {
-    if (!nodes || !edges) {
-      fetchGraph()
-    }
-  }, [edges, fetchGraph, nodes])
+  const { nodes } = useGraphStore()
 
   return (
     <div>
