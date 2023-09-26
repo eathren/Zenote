@@ -1,109 +1,154 @@
-import { fetchEdges, fetchNodes } from "src/handles/index"
-import { create } from "zustand"
-import { v4 as uuidv4 } from "uuid"
+import { useEffect, useState } from "react"
 import {
-  GraphEdge,
+  doc,
+  collection,
+  onSnapshot,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore"
+import { db } from "src/firebase" // Import your Firestore configuration
+
+import {
   GraphNode,
-  GraphEdgeObj,
+  GraphEdge,
   GraphNodeObj,
+  GraphEdgeObj,
 } from "src/types/Graph"
-import {
-  findNodeById,
-  findEdgeById,
-  debouncedAddEdge,
-  debouncedAddNode,
-  debouncedDeleteEdge,
-  debouncedDeleteNode,
-  debouncedUpdateEdge,
-  debouncedUpdateNode,
-} from "src/utils"
 
-type GraphState = {
-  nodes: GraphNodeObj
-  edges: GraphEdgeObj
-  fetchGraph: () => Promise<void>
-  addNode: () => void
-  updateNode: (nodeId: string, updatedFields: Partial<GraphNode>) => void
-  deleteNode: (nodeId: string) => void
-  addEdge: (src: string, dest: string) => void
-  updateEdge: (edgeId: string, updatedFields: Partial<GraphEdge>) => void
-  deleteEdge: (edgeId: string) => void
-}
+export function useGraphStore() {
+  const [nodes, setNodes] = useState<GraphNodeObj>({})
+  const [edges, setEdges] = useState<GraphEdgeObj>({})
 
-// Initialize the store with fetched data
-const initializeStore = async (set: (partial: Partial<GraphState>) => void) => {
-  const fetchedNodes = await fetchNodes()
-  const fetchedEdges = await fetchEdges()
-  set({ nodes: fetchedNodes, edges: fetchedEdges })
-}
+  useEffect(() => {
+    // Listen for real-time updates for nodes
+    const nodesUnsubscribe = onSnapshot(collection(db, "nodes"), (snapshot) => {
+      const newNodes: GraphNodeObj = {}
+      snapshot.forEach((doc) => {
+        newNodes[doc.id] = doc.data() as GraphNode
+        newNodes[doc.id].id = doc.id
+      })
+      setNodes(newNodes)
+    })
 
-export const useGraphStore = create<GraphState>((set, get) => {
-  initializeStore(set).catch((error) => {
-    // Handle initialization error here
-    console.error("Failed to initialize store:", error)
-  })
+    // Listen for real-time updates for edges
+    const edgesUnsubscribe = onSnapshot(collection(db, "edges"), (snapshot) => {
+      const newEdges: GraphEdgeObj = {}
+      snapshot.forEach((doc) => {
+        newEdges[doc.id] = doc.data() as GraphEdge
+        newEdges[doc.id].id = doc.id
+      })
+      setEdges(newEdges)
+    })
+
+    return () => {
+      nodesUnsubscribe()
+      edgesUnsubscribe()
+    }
+  }, [])
+
+  // Add a new node
+  const addNode = async () => {
+    const newNode: GraphNode = {
+      content: "",
+      date_created: Date.now(),
+    }
+    await addDoc(collection(db, "nodes"), newNode)
+  }
+
+  // Update an existing node
+  const updateNode = async (
+    nodeId: string,
+    updatedFields: Partial<GraphNode>
+  ) => {
+    try {
+      const nodeRef = doc(db, "nodes", nodeId)
+      await updateDoc(nodeRef, updatedFields)
+    } catch (error) {
+      console.error("Failed to update node:", error)
+    }
+  }
+
+  let updateNodeTimer: number | undefined
+
+  function debouncedUpdateNode(
+    nodeId: string | undefined,
+    updatedFields: Partial<GraphNode>
+  ) {
+    clearTimeout(updateNodeTimer)
+
+    if (!nodeId) return
+    updateNodeTimer = setTimeout(async () => {
+      try {
+        console.log("updating")
+        const nodeRef = doc(db, "nodes", nodeId)
+        await updateDoc(nodeRef, updatedFields)
+      } catch (error) {
+        console.error("Failed to update node:", error)
+      }
+    }, 300)
+  }
+
+  // Delete a node
+  const deleteNode = async (nodeId: string) => {
+    const nodeRef = doc(db, "nodes", nodeId)
+    await deleteDoc(nodeRef)
+  }
+
+  // Add a new edge
+  const addEdge = async (src: string, dest: string) => {
+    const newEdge: GraphEdge = {
+      src,
+      dest,
+    }
+    await addDoc(collection(db, "edges"), newEdge)
+  }
+
+  // Update an existing edge
+  const updateEdge = async (
+    edgeId: string,
+    updatedFields: Partial<GraphEdge>
+  ) => {
+    const edgeRef = doc(db, "edges", edgeId)
+    await updateDoc(edgeRef, updatedFields)
+  }
+
+  let updateEdgeTimer: number | undefined // Declare a timer variable for edge updates
+
+  // Debounced Update Edge Function
+  function debouncedUpdateEdge(
+    edgeId: string,
+    updatedFields: Partial<GraphEdge>
+  ) {
+    clearTimeout(updateEdgeTimer) // Clear the previous timer if it exists
+
+    // Set a new timer
+    updateEdgeTimer = setTimeout(async () => {
+      try {
+        const edgeRef = doc(db, "edges", edgeId)
+        await updateDoc(edgeRef, updatedFields)
+      } catch (error) {
+        console.error("Failed to update edge:", error)
+      }
+    }, 300)
+  }
+
+  // Delete an edge
+  const deleteEdge = async (edgeId: string) => {
+    const edgeRef = doc(db, "edges", edgeId)
+    await deleteDoc(edgeRef)
+  }
 
   return {
-    nodes: {},
-    edges: {},
-    fetchGraph: async () => {
-      const fetchedNodes = await fetchNodes()
-      const fetchedEdges = await fetchEdges()
-      set({ nodes: fetchedNodes, edges: fetchedEdges })
-    },
-    addNode: () => {
-      const newNode: GraphNode = {
-        id: uuidv4(),
-        content: "Test",
-        date_created: Date.now(),
-      }
-      set((state) => ({ nodes: { ...state.nodes, [newNode.id]: newNode } }))
-      debouncedAddNode(newNode)
-    },
-    updateNode: (nodeId: string, updatedFields: Partial<GraphNode>) => {
-      const node = findNodeById(get().nodes, nodeId)
-      if (node) {
-        set((state) => ({
-          nodes: {
-            ...state.nodes,
-            [nodeId]: { ...node, ...updatedFields },
-          },
-        }))
-        debouncedUpdateNode(nodeId, updatedFields)
-      }
-    },
-    deleteNode: (nodeId: string) => {
-      const { [nodeId]: _, ...restNodes } = get().nodes
-      set({ nodes: restNodes })
-      debouncedDeleteNode(nodeId)
-    },
-    addEdge: (src: string, dest: string) => {
-      console.log("adding edge")
-      const id = uuidv4()
-      const newEdge: GraphEdge = {
-        id: id,
-        src,
-        dest,
-      }
-      set((state) => ({ edges: { ...state.edges, [newEdge.id]: newEdge } }))
-      debouncedAddEdge(newEdge)
-    },
-    updateEdge: (edgeId: string, updatedFields: Partial<GraphEdge>) => {
-      const edge = findEdgeById(get().edges, edgeId)
-      if (edge) {
-        set((state) => ({
-          edges: {
-            ...state.edges,
-            [edgeId]: { ...edge, ...updatedFields },
-          },
-        }))
-        debouncedUpdateEdge(edgeId, updatedFields)
-      }
-    },
-    deleteEdge: (edgeId: string) => {
-      const { [edgeId]: _, ...restEdges } = get().edges
-      set({ edges: restEdges })
-      debouncedDeleteEdge(edgeId)
-    },
+    nodes,
+    edges,
+    addNode,
+    updateNode,
+    debouncedUpdateNode,
+    deleteNode,
+    addEdge,
+    updateEdge,
+    debouncedUpdateEdge,
+    deleteEdge,
   }
-})
+}

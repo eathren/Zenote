@@ -6,6 +6,7 @@ import configValues from "./configValues.json"
 const app = initializeApp(configValues)
 export const auth = getAuth(app)
 export const firestore = getFirestore(app)
+export const db = getFirestore(app)
 
 // const firebaseConfig = {
 //   apiKey: import.meta.env.VITE_API_KEY,
