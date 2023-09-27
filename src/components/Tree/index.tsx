@@ -1,25 +1,29 @@
 import { TreeNodeInput } from "src/components/Tree/Input"
 import { useGraphStore } from "src/stores/graphStore"
-import { createTree } from "src/utils"
 import { TreeNode } from "src/types/Tree"
-import { useState, useEffect } from "react"
+import { useEffect } from "react"
+import { useTreeStore } from "src/stores/treeStore"
+
+const renderTreeNodes = (node: TreeNode) => {
+  return (
+    <div key={node.id}>
+      <TreeNodeInput node={node} />
+      {node.children && node.children.length > 0 && (
+        <div style={{ marginLeft: "20px" }}>
+          {node.children.map((child) => renderTreeNodes(child))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export const TreeView = () => {
   const { nodes, edges } = useGraphStore()
-  const [tree, setTree] = useState<TreeNode[]>([])
+  const { tree, regenerateTree } = useTreeStore()
 
   useEffect(() => {
-    const calculatedTree = createTree(nodes, edges)
-    setTree(calculatedTree)
-  }, [nodes, edges])
+    regenerateTree(nodes, edges)
+  }, [nodes, edges, regenerateTree])
 
-  return (
-    <div>
-      <div>
-        {tree.map((node) => (
-          <TreeNodeInput key={node.id} node={node} />
-        ))}
-      </div>
-    </div>
-  )
+  return <div>{tree.map((root) => renderTreeNodes(root))}</div>
 }
