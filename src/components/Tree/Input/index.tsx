@@ -27,7 +27,7 @@ export const TreeNodeInput = (props: TreeNodeInputProps) => {
         await deleteNode(node.id)
       }
     } else if (e.key === "Enter") {
-      addNode()
+      if (node.id) addNode(node.id)
     }
   }
 

@@ -1,0 +1,23 @@
+.node__children {
+  overflow: hidden;
+  transition: height 0.5s ease, opacity 0.5s ease;
+  height: auto;
+  opacity: 1;
+  margin-left: 20px;
+}
+
+.node__icon {
+  width: 10px;
+  display: flex;
+  text-align: center;
+  align-self: center;
+}
+
+.node__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #000;
+  margin-right: 10px;
+  cursor: pointer;
+}

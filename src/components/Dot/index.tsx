@@ -1,13 +1,14 @@
 import styles from "./index.module.css"
-import { Link, useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import clsx from "clsx"
 
 type Props = {
-  itemId: string
+  itemId: string | undefined
   expanded: boolean
   hasChildren: boolean
 }
 
+// Function to get the appropriate dot class based on the expanded and hasChildren properties
 const getDotActive = (
   expanded: boolean,
   hasChildren: boolean
@@ -18,6 +19,7 @@ const getDotActive = (
   return null
 }
 
+// Function to get the appropriate dot class based on the id and itemId properties
 const getDotHidden = (id: string | undefined, itemId: string) => {
   if (id === itemId) {
     return styles.dot__hidden
@@ -25,21 +27,28 @@ const getDotHidden = (id: string | undefined, itemId: string) => {
   return null
 }
 
-const Dot = ({ itemId, expanded, hasChildren }: Props) => {
-  const { id } = useParams()
+const Dot: React.FC<Props> = ({ itemId, expanded, hasChildren }) => {
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+
+  // Function to navigate to a new ID
+  const navigateToNewId = (newId: string) => {
+    navigate(`/${newId}`)
+  }
+
+  if (!itemId) return null
 
   return (
-    <Link to={itemId}>
-      <div
-        className={clsx(
-          styles.dot,
-          getDotHidden(id, itemId),
-          getDotActive(expanded, hasChildren)
-        )}
-      >
-        &#8226;
-      </div>
-    </Link>
+    <div
+      onClick={() => navigateToNewId(itemId)}
+      className={clsx(
+        styles.dot,
+        getDotHidden(id, itemId),
+        getDotActive(expanded, hasChildren)
+      )}
+    >
+      &#8226;
+    </div>
   )
 }
 

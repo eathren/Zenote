@@ -7,7 +7,11 @@ export const AddButton = () => {
 
   return (
     <>
-      <Button shape="circle" icon={<PlusOutlined />} onClick={addNode} />
+      <Button
+        shape="circle"
+        icon={<PlusOutlined />}
+        onClick={() => addNode()}
+      />
     </>
   )
 }

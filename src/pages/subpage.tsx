@@ -1,15 +1,21 @@
 // SubPage.tsx
 import React from "react"
-import { useGraphStore } from "src/stores/graphStore"
+import { useParams } from "react-router-dom"
+import { TreeView } from "src/components/Tree"
+import { useTree } from "src/components/hooks/useTree"
+import { findSubtreeById } from "src/utils"
 
 export const SubPage: React.FC = () => {
-  const { nodes } = useGraphStore()
+  const { id } = useParams<{ id: string }>()
+  const { tree } = useTree()
 
+  if (!id) return <></>
+  const subTree = findSubtreeById(id, tree)
+
+  if (!subTree) return <></>
   return (
     <div>
-      {Object.values(nodes).map((node) => (
-        <div key={node.id}>{node.content}</div>
-      ))}
+      <TreeView tree={subTree} />
     </div>
   )
 }

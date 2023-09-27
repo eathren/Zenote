@@ -45,6 +45,7 @@ export const createTree = (nodes: GraphNodeObj, edges: GraphEdgeObj) => {
         seenNodes.add(child.id)
         children.push({
           ...child,
+          expanded: true,
           children: findChildren(child.id, nodes, edgeMap, seenNodes),
         })
       }
@@ -65,6 +66,7 @@ export const createTree = (nodes: GraphNodeObj, edges: GraphEdgeObj) => {
     const children = findChildren(nodeId, nodes, edgeMap, seenNodes)
     tree.push({
       ...node,
+      expanded: true,
       children,
     })
   })
@@ -76,6 +78,24 @@ export const createTree = (nodes: GraphNodeObj, edges: GraphEdgeObj) => {
   )
 
   return tree
+}
+
+export const findSubtreeById = (
+  id: string,
+  tree: TreeNode[]
+): TreeNode | null => {
+  for (const node of tree) {
+    if (node.id === id) {
+      return node
+    }
+
+    const childResult = findSubtreeById(id, node.children)
+    if (childResult) {
+      return childResult
+    }
+  }
+
+  return null
 }
 
 // Update actions

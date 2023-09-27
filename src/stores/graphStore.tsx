@@ -15,10 +15,12 @@ import {
   GraphNodeObj,
   GraphEdgeObj,
 } from "src/types/Graph"
+import { useParams } from "react-router-dom"
 
-export function useGraphStore() {
+export const useGraphStore = () => {
   const [nodes, setNodes] = useState<GraphNodeObj>({})
   const [edges, setEdges] = useState<GraphEdgeObj>({})
+  const { id } = useParams()
 
   useEffect(() => {
     // Listen for real-time updates for nodes
@@ -47,13 +49,30 @@ export function useGraphStore() {
     }
   }, [])
 
+  // Add a new edge
+  const addEdge = async (src: string, dest: string) => {
+    const newEdge: GraphEdge = {
+      src,
+      dest,
+    }
+    await addDoc(collection(db, "edges"), newEdge)
+  }
+
   // Add a new node
-  const addNode = async () => {
+  const addNode = async (nodeId?: string) => {
     const newNode: GraphNode = {
       content: "",
       date_created: Date.now(),
     }
-    await addDoc(collection(db, "nodes"), newNode)
+    await addDoc(collection(db, "nodes"), newNode).then((docRef) => {
+      const newNodeId = docRef.id
+      // If a pageId exists, or a nodeId exists in the URL, add an edge
+      if (nodeId) {
+        addEdge(nodeId, newNodeId)
+      } else if (id) {
+        addEdge(id, newNodeId)
+      }
+    })
   }
 
   // Update an existing node
@@ -93,15 +112,6 @@ export function useGraphStore() {
   const deleteNode = async (nodeId: string) => {
     const nodeRef = doc(db, "nodes", nodeId)
     await deleteDoc(nodeRef)
-  }
-
-  // Add a new edge
-  const addEdge = async (src: string, dest: string) => {
-    const newEdge: GraphEdge = {
-      src,
-      dest,
-    }
-    await addDoc(collection(db, "edges"), newEdge)
   }
 
   // Update an existing edge
