@@ -49,30 +49,21 @@ export const useGraphStore = () => {
     }
   }, [])
 
-  // Add a new edge
+  // Async function to add a new edge
   const addEdge = async (src: string, dest: string) => {
-    const newEdge: GraphEdge = {
-      src,
-      dest,
-    }
-    await addDoc(collection(db, "edges"), newEdge)
+    const newEdge: GraphEdge = { src, dest }
+    const docRef = await addDoc(collection(db, "edges"), newEdge)
+    return docRef.id
   }
 
-  // Add a new node
-  const addNode = async (nodeId?: string) => {
+  // Async function to add a new node
+  const addNode = async () => {
     const newNode: GraphNode = {
       content: "",
       date_created: Date.now(),
     }
-    await addDoc(collection(db, "nodes"), newNode).then((docRef) => {
-      const newNodeId = docRef.id
-      // If a pageId exists, or a nodeId exists in the URL, add an edge
-      if (nodeId) {
-        addEdge(nodeId, newNodeId)
-      } else if (id) {
-        addEdge(id, newNodeId)
-      }
-    })
+    const docRef = await addDoc(collection(db, "nodes"), newNode)
+    return docRef.id
   }
 
   // Update an existing node
@@ -108,10 +99,32 @@ export const useGraphStore = () => {
     }, 300)
   }
 
-  // Delete a node
+  // Delete an edge
+  const deleteEdge = async (edgeId: string) => {
+    const edgeRef = doc(db, "edges", edgeId)
+    await deleteDoc(edgeRef)
+  }
+
   const deleteNode = async (nodeId: string) => {
-    const nodeRef = doc(db, "nodes", nodeId)
-    await deleteDoc(nodeRef)
+    try {
+      // Delete all edges that have the deleted node as a source or destination
+      const promises: Promise<void>[] = []
+      Object.keys(edges).forEach((edgeId) => {
+        const edge = edges[edgeId]
+        if (edge.src === nodeId || edge.dest === nodeId) {
+          promises.push(deleteEdge(edgeId))
+        }
+      })
+
+      // Await for all edge deletions to complete
+      await Promise.all(promises)
+
+      // Then, delete the node itself
+      const nodeRef = doc(db, "nodes", nodeId)
+      await deleteDoc(nodeRef)
+    } catch (err) {
+      console.error("An error occurred during the deletion process", err)
+    }
   }
 
   // Update an existing edge
@@ -143,20 +156,49 @@ export const useGraphStore = () => {
     }, 300)
   }
 
-  // Delete an edge
-  const deleteEdge = async (edgeId: string) => {
-    const edgeRef = doc(db, "edges", edgeId)
-    await deleteDoc(edgeRef)
+  // Offline-first addEdge
+  const addEdgeOfflineFirst = (src: string, dest: string) => {
+    const tempEdgeId = `tempEdge-${Date.now()}`
+    const newEdge: GraphEdge = { src, dest }
+    setEdges({ ...edges, [tempEdgeId]: newEdge })
+
+    addEdge(src, dest).then((newEdgeId) => {
+      const updatedEdges = { ...edges }
+      updatedEdges[newEdgeId] = updatedEdges[tempEdgeId]
+      delete updatedEdges[tempEdgeId]
+      setEdges(updatedEdges)
+    })
+  }
+
+  // Offline-first addNode
+  const addNodeOfflineFirst = (nodeId?: string) => {
+    const tempNodeId = `tempNode-${Date.now()}`
+    const newNode: GraphNode = {
+      content: "",
+      date_created: Date.now(),
+    }
+    setNodes({ ...nodes, [tempNodeId]: newNode })
+
+    addNode().then((newNodeId) => {
+      const updatedNodes = { ...nodes }
+      updatedNodes[newNodeId] = updatedNodes[tempNodeId]
+      delete updatedNodes[tempNodeId]
+      setNodes(updatedNodes)
+
+      if (nodeId || id) {
+        addEdgeOfflineFirst(nodeId || id!, newNodeId)
+      }
+    })
   }
 
   return {
     nodes,
     edges,
-    addNode,
+    addNode: addNodeOfflineFirst,
     updateNode,
     debouncedUpdateNode,
     deleteNode,
-    addEdge,
+    addEdge: addEdgeOfflineFirst,
     updateEdge,
     debouncedUpdateEdge,
     deleteEdge,

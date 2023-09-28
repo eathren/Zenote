@@ -2,7 +2,7 @@
 import React from "react"
 import { useParams } from "react-router-dom"
 import { TreeView } from "src/components/Tree"
-import { useTree } from "src/components/hooks/useTree"
+import { useTree } from "src/hooks/useTree"
 import { findSubtreeById } from "src/utils"
 
 export const SubPage: React.FC = () => {

@@ -1,6 +1,8 @@
 .input__body {
   display: block;
   border: none;
+  width: inherit;
+  margin-left: 10px;
 }
 .input__body input {
   border: none !important;
