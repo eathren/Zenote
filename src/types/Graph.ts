@@ -5,18 +5,17 @@ export type GraphEdgeObj = Record<string, GraphEdge>
 
 export interface GraphNode {
   // Required Properties
-  id?: string
+  id: string
   content: string
   date_created: number
   date_modified?: number
   // Optional Properties
   expanded?: boolean
-  color?: string
   completed?: false
 }
 
 export type GraphEdge = {
-  id?: string
+  id: string
   src: string
   dest: string
   label?: string

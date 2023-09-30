@@ -1,16 +1,14 @@
 import { PlusOutlined } from "@ant-design/icons"
 import { Button } from "antd"
-import { useGraphStore } from "src/stores/graphStore"
+import { addEmptyNodeInDB } from "src/handles"
 
 export const AddButton = () => {
-  const { addNode } = useGraphStore()
-
   return (
     <>
       <Button
         shape="circle"
         icon={<PlusOutlined />}
-        onClick={() => addNode()}
+        onClick={() => addEmptyNodeInDB()}
       />
     </>
   )

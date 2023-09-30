@@ -1,8 +1,12 @@
 import { useState } from "react"
 import { Input } from "antd"
-import { useGraphStore } from "src/stores/graphStore"
 import styles from "./index.module.css"
 import { GraphNode } from "src/types/Graph"
+import {
+  addEmptyNodeInDB,
+  debouncedUpdateNode,
+  deleteNodeInDB,
+} from "src/handles"
 
 type TreeNodeInputProps = {
   node: GraphNode
@@ -11,7 +15,6 @@ type TreeNodeInputProps = {
 export const TreeNodeInput = (props: TreeNodeInputProps) => {
   const node = props.node
   const [content, setContent] = useState(node.content)
-  const { debouncedUpdateNode, deleteNode, addNode } = useGraphStore()
 
   const onChange = (e: { target: { value: any } }) => {
     const newContent = e.target.value
@@ -24,10 +27,10 @@ export const TreeNodeInput = (props: TreeNodeInputProps) => {
     if (e.key === "Backspace" && content === "") {
       console.log("triggered delete")
       if (node.id) {
-        await deleteNode(node.id)
+        await deleteNodeInDB(node.id)
       }
     } else if (e.key === "Enter") {
-      if (node.id) addNode(node.id)
+      addEmptyNodeInDB(node.id)
     }
   }
 

@@ -1,6 +1,6 @@
-import { TreeNode } from "src/types/Tree"
-import { GraphEdgeObj, GraphNodeObj } from "src/types/Graph"
 import { create } from "zustand"
+import { GraphNodeObj, GraphEdgeObj } from "src/types/Graph"
+import { TreeNode } from "src/types/Tree"
 import { createTree } from "src/utils"
 
 type TreeState = {
@@ -11,7 +11,7 @@ type TreeState = {
 export const useTreeStore = create<TreeState>((set) => ({
   tree: [],
 
-  regenerateTree: (nodes: GraphNodeObj, edges: GraphEdgeObj) => {
+  regenerateTree: (nodes, edges) => {
     set(() => {
       return { tree: createTree(nodes, edges) }
     })
