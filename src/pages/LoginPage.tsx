@@ -1,60 +1,57 @@
-import { useState, ChangeEvent } from "react"
-import { NavLink } from "react-router-dom"
 import { useUser } from "src/hooks/user"
+import { Button, Checkbox, Form, Input } from "antd"
+import { UserOutlined, LockOutlined } from "@ant-design/icons"
 
 const LoginPage = () => {
   // State variables with explicit types
-  const [email, setEmail] = useState<string>("")
-  const [password, setPassword] = useState<string>("")
   const { signIn } = useUser()
+
+  const onFinish = (values: any) => {
+    signIn(values.email, values.password)
+  }
 
   return (
     <>
-      <main>
-        <section>
-          <div>
-            <p>FocusApp</p>
+      <h2> Sign In</h2>
+      <Form
+        name="login-form"
+        initialValues={{ remember: true }}
+        onFinish={onFinish}
+      >
+        <Form.Item
+          name="email"
+          rules={[{ required: true, message: "Please input your Username!" }]}
+        >
+          <Input
+            prefix={<UserOutlined className="site-form-item-icon" />}
+            placeholder="Email"
+          />
+        </Form.Item>
+        <Form.Item
+          name="password"
+          rules={[{ required: true, message: "Please input your Password!" }]}
+        >
+          <Input
+            prefix={<LockOutlined className="site-form-item-icon" />}
+            type="password"
+            placeholder="Password"
+          />
+        </Form.Item>
+        <Form.Item>
+          <Form.Item name="remember" valuePropName="checked" noStyle>
+            <Checkbox>Remember me</Checkbox>
+          </Form.Item>
 
-            <form onSubmit={() => signIn(email, password)}>
-              <div>
-                <label htmlFor="email-address">Email address</label>
-                <input
-                  id="email-address"
-                  name="email"
-                  type="email"
-                  required
-                  placeholder="Email address"
-                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                    setEmail(e.target.value)
-                  }
-                />
-              </div>
+          <a href="">Forgot password</a>
+        </Form.Item>
 
-              <div>
-                <label htmlFor="password">Password</label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  placeholder="Password"
-                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                    setPassword(e.target.value)
-                  }
-                />
-              </div>
-
-              <div>
-                <button type="submit">Login</button>
-              </div>
-            </form>
-
-            <p className="text-sm text-white text-center">
-              No account yet? <NavLink to="/signup">Sign up</NavLink>
-            </p>
-          </div>
-        </section>
-      </main>
+        <Form.Item>
+          <Button type="primary" htmlType="submit">
+            Log in
+          </Button>
+          Or <a href="">register now!</a>
+        </Form.Item>
+      </Form>
     </>
   )
 }

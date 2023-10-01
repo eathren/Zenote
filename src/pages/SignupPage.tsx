@@ -1,56 +1,56 @@
-import { useState, ChangeEvent } from "react"
-import { NavLink } from "react-router-dom"
 import { useUser } from "src/hooks/user"
+import { Button, Form, Input } from "antd"
+import { UserOutlined, LockOutlined } from "@ant-design/icons"
 
 const SignUpPage = () => {
-  const [email, setEmail] = useState<string>("")
-  const [password, setPassword] = useState<string>("")
-
+  // State variables with explicit types
   const { signUp } = useUser()
 
+  const onFinish = (values: any) => {
+    signUp(values.email, values.password)
+  }
+
   return (
-    <main>
-      <section>
-        <div>
-          <div>
-            <h1>FocusApp</h1>
-            <form onSubmit={() => signUp(email, password)}>
-              <div>
-                <label htmlFor="email-address">Email address</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                    setEmail(e.target.value)
-                  }
-                  required
-                  placeholder="Email address"
-                />
-              </div>
+    <>
+      <h2> Sign Up</h2>
+      <Form
+        name="normal_login"
+        className="login-form"
+        initialValues={{ remember: true }}
+        onFinish={onFinish}
+      >
+        <Form.Item
+          name="email"
+          rules={[{ required: true, message: "Please input your Email!" }]}
+        >
+          <Input
+            prefix={<UserOutlined className="site-form-item-icon" />}
+            placeholder="Email"
+          />
+        </Form.Item>
+        <Form.Item
+          name="password"
+          rules={[{ required: true, message: "Please input your Password!" }]}
+        >
+          <Input
+            prefix={<LockOutlined className="site-form-item-icon" />}
+            type="password"
+            placeholder="Password"
+          />
+        </Form.Item>
 
-              <div>
-                <label htmlFor="password">Password</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                    setPassword(e.target.value)
-                  }
-                  required
-                  placeholder="Password"
-                />
-              </div>
-
-              <button type="submit">Sign up</button>
-            </form>
-
-            <p>
-              Already have an account? <NavLink to="/login">Sign in</NavLink>
-            </p>
-          </div>
-        </div>
-      </section>
-    </main>
+        <Form.Item>
+          <Button
+            type="primary"
+            htmlType="submit"
+            className="login-form-button"
+          >
+            Sign Up
+          </Button>
+          Or <a href="">Login</a>
+        </Form.Item>
+      </Form>
+    </>
   )
 }
 
