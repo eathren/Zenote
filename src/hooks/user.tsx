@@ -11,10 +11,10 @@ import { useEffect, useState, FormEvent } from "react"
 import { useNavigate } from "react-router-dom"
 import { auth } from "src/firebase"
 
+// Added navigate as an argument
 export const useUser = () => {
   const [user, setUser] = useState<User | null>(null)
   const navigate = useNavigate()
-
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       setUser(currentUser)
@@ -38,8 +38,10 @@ export const useUser = () => {
 
       // Navigate to the home page if signed in
       if (user) {
-        navigate("/home")
+        navigate("/")
       }
+
+      return user
     } catch (error) {
       const authError: AuthError = error as AuthError
       console.error("Error during sign-in:", authError.code)
@@ -50,6 +52,7 @@ export const useUser = () => {
   const signOut = async () => {
     try {
       await firebaseSignOut(auth)
+      navigate("/") // Navigate to home after sign out
     } catch (error) {
       console.error("Error signing out:", error)
     }
@@ -59,7 +62,7 @@ export const useUser = () => {
   const signIn = async (email: string, password: string) => {
     try {
       await firebaseSignIn(auth, email, password)
-      navigate("/")
+      navigate("/") // Navigate to home after sign in
     } catch (error) {
       console.error("Error signing in:", error)
     }

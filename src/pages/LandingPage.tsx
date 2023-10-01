@@ -1,5 +1,5 @@
 const LandingPage = () => {
-  return <></>
+  return <> Landing Page</>
 }
 
 export default LandingPage

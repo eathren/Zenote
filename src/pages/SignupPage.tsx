@@ -5,7 +5,6 @@ import { UserOutlined, LockOutlined } from "@ant-design/icons"
 const SignUpPage = () => {
   // State variables with explicit types
   const { signUp } = useUser()
-
   const onFinish = (values: any) => {
     signUp(values.email, values.password)
   }
