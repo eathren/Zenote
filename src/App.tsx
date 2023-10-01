@@ -1,12 +1,13 @@
 import "./App.css"
 
 import { BrowserRouter, Routes, Route } from "react-router-dom"
-import { SignUpPage } from "src/pages/signup.tsx"
-import { LoginPage } from "src/pages/login.tsx"
+import SignUpPage from "src/pages/SignupPage"
+import LoginPage from "src/pages/LoginPage"
 import { HomePage } from "src/pages/index.tsx"
 import { BasicLayout } from "src/layout/layout.tsx"
-import { SubPage } from "src/pages/subpage"
 import { FlowPage } from "./pages/flow"
+import GraphPage from "./pages/GraphPage"
+import NodePage from "./pages/NodePage"
 
 function App() {
   return (
@@ -22,10 +23,18 @@ function App() {
             }
           />
           <Route
-            path="/:id"
+            path="/:graphId"
             element={
               <BasicLayout>
-                <SubPage />
+                <GraphPage />
+              </BasicLayout>
+            }
+          />
+          <Route
+            path="/:graphId/:nodeId"
+            element={
+              <BasicLayout>
+                <NodePage />
               </BasicLayout>
             }
           />

@@ -1,45 +1,12 @@
-import { useState, FormEvent, ChangeEvent } from "react"
-import { signInWithEmailAndPassword, UserCredential } from "firebase/auth"
-import { AuthError } from "firebase/auth"
-import { auth } from "../firebase"
-import { NavLink, useNavigate } from "react-router-dom"
+import { useState, ChangeEvent } from "react"
+import { NavLink } from "react-router-dom"
+import { useUser } from "src/hooks/user"
 
-export const LoginPage = () => {
-  const navigate = useNavigate()
-
+const LoginPage = () => {
   // State variables with explicit types
   const [email, setEmail] = useState<string>("")
   const [password, setPassword] = useState<string>("")
-
-  // Explicitly type the event parameter for the onLogin function
-  const onLogin = async (e: FormEvent) => {
-    e.preventDefault()
-
-    try {
-      // Type for userCredential is UserCredential
-      const userCredential: UserCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      )
-
-      // Signed in
-      const user = userCredential.user
-
-      // Navigate to home page if signed in
-      if (user) {
-        navigate("/home")
-      }
-    } catch (error) {
-      // Type for error is AuthError
-      const authError: AuthError | any = error
-      const errorCode = authError.code
-      // const errorMessage = authError.message;
-
-      // Handle error (e.g., show error message)
-      console.error("Error during sign-in:", errorCode)
-    }
-  }
+  const { signIn } = useUser()
 
   return (
     <>
@@ -48,7 +15,7 @@ export const LoginPage = () => {
           <div>
             <p>FocusApp</p>
 
-            <form onSubmit={onLogin}>
+            <form onSubmit={() => signIn(email, password)}>
               <div>
                 <label htmlFor="email-address">Email address</label>
                 <input
@@ -91,3 +58,5 @@ export const LoginPage = () => {
     </>
   )
 }
+
+export default LoginPage
