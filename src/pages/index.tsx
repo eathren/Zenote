@@ -1,11 +1,11 @@
-import { TreeView } from "src/components/Tree"
-import { useTree } from "src/hooks/useTree"
+import AddGraphButton from "src/components/Graphs/AddGraphButton"
+import GraphSelector from "src/components/Graphs/GraphSelector"
 
 export const HomePage = () => {
-  const { tree } = useTree()
   return (
     <>
-      <TreeView tree={tree} />
+      <GraphSelector />
+      <AddGraphButton />
     </>
   )
 }

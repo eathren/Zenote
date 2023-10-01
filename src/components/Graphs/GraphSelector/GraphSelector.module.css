@@ -1,0 +1,8 @@
+.card__body {
+  width: 300px;
+  margin: 10px;
+}
+
+.card__body:hover {
+  cursor: pointer;
+}

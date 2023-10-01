@@ -6,6 +6,7 @@ import { LoginPage } from "src/pages/login.tsx"
 import { HomePage } from "src/pages/index.tsx"
 import { BasicLayout } from "src/layout/layout.tsx"
 import { SubPage } from "src/pages/subpage"
+import { FlowPage } from "./pages/flow"
 
 function App() {
   return (
@@ -25,6 +26,14 @@ function App() {
             element={
               <BasicLayout>
                 <SubPage />
+              </BasicLayout>
+            }
+          />
+          <Route
+            path="/flow"
+            element={
+              <BasicLayout>
+                <FlowPage />
               </BasicLayout>
             }
           />

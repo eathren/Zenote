@@ -3,6 +3,11 @@ export type GraphElement = GraphNode | GraphEdge
 export type GraphNodeObj = Record<string, GraphNode>
 export type GraphEdgeObj = Record<string, GraphEdge>
 
+export interface Graph {
+  id: string
+  name: string
+}
+
 export interface GraphNode {
   // Required Properties
   id: string
@@ -12,6 +17,7 @@ export interface GraphNode {
   // Optional Properties
   expanded?: boolean
   completed?: false
+  position?: { x: number; y: number }
 }
 
 export type GraphEdge = {

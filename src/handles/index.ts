@@ -7,7 +7,7 @@ import {
   addDoc,
 } from "firebase/firestore"
 import { debounce } from "lodash"
-import { GraphNode, GraphEdge } from "src/types/Graph"
+import { GraphNode, GraphEdge } from "src/types/index"
 
 export const updateNodeInDB = async (
   nodeId: string,
