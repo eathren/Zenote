@@ -1,12 +1,12 @@
-import { Graph } from "src/types/index"
+import { GraphObj } from "src/types/index"
 import { GraphNodeObj, GraphEdgeObj } from "src/types"
 import { create } from "zustand"
 
 type GraphActions = {
-  setGraphs: (graphs: Graph[]) => void
-  addGraph: (graphId: string, graphName: string) => void
+  setGraphs: (graphs: GraphObj[]) => void
+  addGraph: (graphId: string) => void
   removeGraph: (graphId: string) => void
-  updateGraph: (graph: Graph) => void
+  updateGraph: (graph: GraphObj) => void
 
   setNodes: (nodes: GraphNodeObj) => void
   addNode: (node: GraphNodeObj) => void
@@ -20,7 +20,7 @@ type GraphActions = {
 }
 
 type GraphState = {
-  graphs: Graph[]
+  graphs: GraphObj[]
 
   nodes: GraphNodeObj
   edges: GraphEdgeObj
@@ -35,23 +35,19 @@ const useGraphStore = create<GraphState>((set) => ({
   actions: {
     // Graphs
     setGraphs: (graphs) => set({ graphs }),
-    addGraph: (graphId, graphName) =>
+    addGraph: (graphId) =>
       set((state) => ({
-        graphs: [
-          ...state.graphs,
-          {
-            id: graphId,
-            name: graphName,
-          },
-        ],
+        graphs: [...state.graphs, { id: graphId, data: {} } as GraphObj],
       })),
     removeGraph: (graphId) =>
       set((state) => ({
         graphs: state.graphs.filter((graph) => graph.id !== graphId),
       })),
-    updateGraph: (graph) =>
+    updateGraph: (updatedGraph) =>
       set((state) => ({
-        graphs: state.graphs.map((g) => (g.id === graph.id ? graph : g)),
+        graphs: state.graphs.map((graph) =>
+          graph.id === updatedGraph.id ? updatedGraph : graph
+        ),
       })),
 
     // Nodes
@@ -80,8 +76,7 @@ const useGraphStore = create<GraphState>((set) => ({
   },
 }))
 
-export const useGraphs = () => useGraphStore((state) => state.graphs)
-export const useNodes = () => useGraphStore((state) => state.nodes)
-export const useEdges = () => useGraphStore((state) => state.edges)
-
+export const useSavedGraphs = () => useGraphStore((state) => state.graphs)
+export const useSavedNodes = () => useGraphStore((state) => state.nodes)
+export const useSavedEdges = () => useGraphStore((state) => state.edges)
 export const useGraphActions = () => useGraphStore((state) => state.actions)

@@ -5,108 +5,135 @@ import {
   doc,
   deleteDoc,
   addDoc,
+  getDocs,
+  updateDoc,
+  query,
+  where,
 } from "firebase/firestore"
-import { debounce } from "lodash"
-import { GraphNode, GraphEdge } from "src/types/index"
+import {
+  deleteObject,
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadString,
+} from "firebase/storage"
+import { GraphNode, Graph } from "src/types/index"
 
-export const updateNodeInDB = async (
+const storage = getStorage()
+const db = getFirestore()
+
+export const addGraphInDB = async (graphName: string) => {
+  const graphsCollection = collection(db, "graphs")
+  const graph = {
+    name: graphName,
+    date_created: Date.now(),
+  }
+  try {
+    const docRef = await addDoc(graphsCollection, graph)
+    return docRef.id
+  } catch (error) {
+    console.error("Failed to add graph in DB:", error)
+  }
+}
+
+export const getGraphsFromDB = async () => {
+  const graphsCollection = collection(db, "graphs")
+  const graphsSnapshot = await getDocs(graphsCollection)
+  const graphs: Graph[] = []
+  graphsSnapshot.forEach((doc) => {
+    graphs.push(doc.data() as Graph)
+  })
+  return graphs
+}
+
+// Nodes
+
+export const fetchMarkdown = async (nodeId: string) => {
+  try {
+    // Reference to storage bucket
+    // Reference to file in storage
+    const storageRef = ref(storage, `markdown/${nodeId}.md`)
+
+    const url = await getDownloadURL(storageRef)
+
+    // Fetch markdown content from the URL
+    const response = await fetch(url)
+    const text = await response.text()
+    return text
+  } catch (error) {
+    console.error("Error fetching markdown:", error)
+  }
+}
+
+export const uploadMarkdown = async (nodeId: string, markdown: string) => {
+  const storageRef = ref(storage, `markdown/${nodeId}.md`)
+  await uploadString(storageRef, markdown)
+  const url = await getDownloadURL(storageRef)
+  return url
+}
+
+export const deleteMarkdown = async (nodeId: string) => {
+  const storageRef = ref(storage, `markdown/${nodeId}.md`)
+  await deleteObject(storageRef)
+}
+
+export const getNodes = async (graphId: string) => {
+  const nodesCollection = collection(db, "nodes")
+  const q = query(nodesCollection, where("graphId", "==", graphId))
+  const nodesSnapshot = await getDocs(q)
+  const nodes: GraphNode[] = nodesSnapshot.docs.map((doc) => ({
+    ...(doc.data() as GraphNode),
+    id: doc.id,
+  }))
+  return nodes
+}
+
+export const addNode = async (graphId: string) => {
+  // Get a reference to the Firestore 'nodes' collection
+  const nodesCollection = collection(db, "nodes")
+
+  // Generate the initial Markdown content and upload it, retrieving the generated URL
+  const markdownContent = "# Untitled"
+
+  // Create a new node object with default values
+  const newNode = {
+    name: "",
+    graphId,
+  }
+
+  // Add the new node to the Firestore 'nodes' collection
+  const docRef = await addDoc(nodesCollection, newNode)
+
+  // Generate a unique Markdown file name based on the Firestore-generated ID for the new node
+  const markdownUrl = await uploadMarkdown(docRef.id, markdownContent)
+
+  // Update the Firestore document with the new Markdown file name and URL
+  const nodeDoc = doc(db, "nodes", docRef.id)
+  await setDoc(nodeDoc, { markdownUrl }, { merge: true })
+
+  // Return the generated Firestore ID for the new node
+  return docRef.id
+}
+
+export const updateNode = async (
   nodeId: string,
-  updatedFields: Partial<GraphNode>
+  name: string,
+  markdown: string
 ) => {
-  const db = getFirestore()
-  const docRef = doc(db, "nodes", nodeId)
-  await setDoc(docRef, updatedFields, { merge: true })
+  const nodeRef = doc(db, "nodes", nodeId)
+
+  const markdownUrl = await uploadMarkdown(name, markdown) // Upload new Markdown and get URL
+
+  await updateDoc(nodeRef, {
+    name,
+    markdownUrl,
+  })
 }
 
-export const updateEdgeInDB = async (
-  edgeId: string,
-  updatedFields: Partial<GraphEdge>
-) => {
-  const db = getFirestore()
-  const docRef = doc(db, "edges", edgeId)
-  await setDoc(docRef, updatedFields, { merge: true })
+export const deleteNode = async (nodeId: string) => {
+  const nodeRef = doc(db, "nodes", nodeId)
+
+  await deleteMarkdown(nodeId) // Delete Markdown content
+
+  await deleteDoc(nodeRef)
 }
-
-export const addEmptyNodeInDB = async (nodeId?: string | undefined) => {
-  const db = getFirestore()
-  const nodesCollection = collection(db, "nodes")
-  try {
-    const docRef = await addDoc(nodesCollection, {
-      content: "",
-      date_created: Date.now(),
-    })
-    const newId = docRef.id
-    if (nodeId) {
-      const edge = { src: nodeId, dest: newId } as GraphEdge
-      addEdgeInDB(edge)
-    }
-    return newId
-  } catch (error) {
-    console.error("Failed to add empty node in DB:", error)
-  }
-}
-
-export const addNodeInDB = async (newNode: GraphNode) => {
-  const db = getFirestore()
-  const nodesCollection = collection(db, "nodes")
-  try {
-    const docRef = await addDoc(nodesCollection, newNode)
-    return docRef.id
-  } catch (error) {
-    console.error("Failed to add node in DB:", error)
-  }
-}
-
-export const deleteNodeInDB = async (nodeId: string) => {
-  const db = getFirestore()
-  const nodeDoc = doc(db, "nodes", nodeId)
-  try {
-    await deleteDoc(nodeDoc)
-  } catch (error) {
-    console.error("Failed to delete node in DB:", error)
-  }
-}
-
-export const addEdgeInDB = async (newEdge: GraphEdge) => {
-  const db = getFirestore()
-  const edgesCollection = collection(db, "edges")
-  try {
-    const docRef = await addDoc(edgesCollection, newEdge)
-    return docRef.id
-  } catch (error) {
-    console.error("Failed to add edge in DB:", error)
-  }
-}
-
-export const deleteEdgeInDB = async (edgeId: string) => {
-  const db = getFirestore()
-  const edgeDoc = doc(db, "edges", edgeId)
-  try {
-    await deleteDoc(edgeDoc)
-  } catch (error) {
-    console.error("Failed to delete edge in DB:", error)
-  }
-}
-
-// Update actions
-export const debouncedUpdateNode = debounce(
-  async (nodeId: string, updatedFields: Partial<GraphNode>) => {
-    try {
-      await updateNodeInDB(nodeId, updatedFields)
-    } catch (error) {
-      console.error("Failed to update node in DB:", error)
-    }
-  },
-  300
-)
-
-export const debouncedUpdateEdge = debounce(
-  async (edgeId: string, updatedFields: Partial<GraphEdge>) => {
-    try {
-      await updateEdgeInDB(edgeId, updatedFields)
-    } catch (error) {
-      console.error("Failed to update edge in DB:", error)
-    }
-  },
-  300
-)

@@ -1,28 +1,16 @@
+import React, { useCallback } from "react"
 import { Header as CustomHeader } from "src/components/Header"
 import { RadarChartOutlined, FileAddOutlined } from "@ant-design/icons"
-import { Popover } from "antd"
-import { Button, Layout, theme } from "antd"
-import React from "react"
-import styles from "./index.module.css"
-import { matchPath } from "react-router-dom"
+import { Popover, Button, Layout } from "antd"
+import { matchPath, useParams } from "react-router-dom"
+import { addNode } from "src/handles"
+import { theme } from "antd"
+
 const { Header, Content, Sider } = Layout
 
 type LayoutProps = {
   children: React.ReactNode
 }
-
-const ButtonList = [
-  {
-    icon: <FileAddOutlined />,
-    text: "Add Node",
-    onClick: null,
-  },
-  {
-    icon: <RadarChartOutlined />,
-    text: "Open Graph View",
-    onClick: null,
-  },
-]
 
 export const BasicLayout = ({ children }: LayoutProps) => {
   const {
@@ -30,29 +18,47 @@ export const BasicLayout = ({ children }: LayoutProps) => {
   } = theme.useToken()
 
   const isHome = matchPath(window.location.pathname, "/")
+  const { graphId } = useParams<{ graphId?: string }>()
+  // Define the function to handle adding a node
+  const handleAddNode = useCallback(() => {
+    if (graphId) addNode(graphId)
+  }, [graphId])
+
+  const ButtonList = [
+    {
+      icon: <FileAddOutlined />,
+      text: "Add Node",
+      onClick: handleAddNode,
+    },
+    {
+      icon: <RadarChartOutlined />,
+      text: "Open Graph View",
+      onClick: handleAddNode,
+    },
+  ]
+
   return (
     <>
-      <Layout style={{ minHeight: "100vh" }}>
+      <Layout style={{ height: "100vh" }}>
         <Header>
           <CustomHeader />
         </Header>
         <Layout>
           {isHome ? null : (
             <Sider width={50} style={{ background: colorBgContainer }}>
-              {ButtonList.map((item, index) => {
-                return (
-                  <div key={index}>
-                    <Popover placement="right" title={item.text}>
-                      <Button
-                        type="text"
-                        style={{ width: "100%", marginTop: "10px" }}
-                      >
-                        {item.icon}
-                      </Button>
-                    </Popover>
-                  </div>
-                )
-              })}
+              {ButtonList.map((item, index) => (
+                <div key={index}>
+                  <Popover placement="right" title={item.text}>
+                    <Button
+                      type="text"
+                      style={{ width: "100%", marginTop: "10px" }}
+                      onClick={() => item.onClick()}
+                    >
+                      {item.icon}
+                    </Button>
+                  </Popover>
+                </div>
+              ))}
             </Sider>
           )}
           <Layout style={{ padding: "0 24px 24px" }}>
@@ -70,7 +76,6 @@ export const BasicLayout = ({ children }: LayoutProps) => {
           </Layout>
         </Layout>
       </Layout>
-      <div className={styles.layout__body}>{children}</div>
     </>
   )
 }

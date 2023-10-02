@@ -4,20 +4,22 @@ export type GraphNodeObj = Record<string, GraphNode>
 export type GraphEdgeObj = Record<string, GraphEdge>
 
 export interface Graph {
-  id: string
+  id?: string
   name: string
+  date_created: number
+}
+
+export interface GraphObj extends Graph {
+  id: string
+  data: Graph
 }
 
 export interface GraphNode {
   // Required Properties
   id: string
-  content: string
+  graphId: string
   date_created: number
   date_modified?: number
-  // Optional Properties
-  expanded?: boolean
-  completed?: false
-  position?: { x: number; y: number }
 }
 
 export type GraphEdge = {

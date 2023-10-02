@@ -1,8 +1,8 @@
-import { useGraphs } from "src/stores/graphStore"
-import { Graph } from "src/types"
+import { useGraphs } from "src/hooks/graphs"
 import { Card } from "antd"
 import { useNavigate } from "react-router-dom"
 import styles from "./GraphSelector.module.css"
+import { GraphObj } from "src/types"
 
 const GraphSelector = () => {
   const graphs = useGraphs()
@@ -10,7 +10,8 @@ const GraphSelector = () => {
 
   return (
     <>
-      {graphs.map((graph: Graph) => {
+      {console.log(graphs)}
+      {graphs?.graphs?.map((graph: GraphObj) => {
         return (
           <Card
             className={styles.card__body}
@@ -19,7 +20,7 @@ const GraphSelector = () => {
             onClick={() => navigate(`/${graph.id}`)}
             hoverable={true}
           >
-            {graph.name}
+            {graph.data.name}
           </Card>
         )
       })}
