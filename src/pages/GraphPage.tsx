@@ -3,11 +3,11 @@ import { useParams } from "react-router-dom"
 import ForceGraph from "src/components/ForceGraph"
 import { getNodes } from "src/handles"
 import { useLoadingStore } from "src/stores/loadingStore"
-import { GraphNode } from "src/types"
+import { GraphEdge, GraphNode } from "src/types"
 
 const GraphPage = () => {
   const [nodes, setNodes] = useState<GraphNode[]>([])
-
+  const edges: GraphEdge[] = []
   const { graphId } = useParams()
   const { setLoadingNodes } = useLoadingStore()
   useEffect(() => {
@@ -24,7 +24,7 @@ const GraphPage = () => {
 
   return (
     <>
-      <ForceGraph nodes={nodes} />
+      <ForceGraph nodes={nodes} edges={edges} width={800} height={600} />
     </>
   )
 }

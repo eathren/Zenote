@@ -17,6 +17,7 @@ export interface GraphObj extends Graph {
 export interface GraphNode {
   // Required Properties
   id: string
+  name: string
   graphId: string
   date_created: number
   date_modified?: number

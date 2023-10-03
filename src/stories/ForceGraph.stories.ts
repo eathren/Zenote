@@ -1,6 +1,6 @@
 import ForceGraph from "src/components/ForceGraph"
 import type { Meta, StoryObj } from "@storybook/react"
-import { GraphNode } from "src/types"
+import { GraphEdge, GraphNode } from "src/types"
 
 // More on how to set up stories at: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 const meta = {
@@ -20,16 +20,53 @@ const nodes: GraphNode[] = [
     id: "1",
     graphId: "g1",
     date_created: new Date().getTime(),
+    name: "Node 1",
   },
-  { id: "2", graphId: "g1", date_created: new Date().getTime() },
-  { id: "3", graphId: "g1", date_created: new Date().getTime() },
-  { id: "4", graphId: "g1", date_created: new Date().getTime() },
-  { id: "5", graphId: "g1", date_created: new Date().getTime() },
-  { id: "6", graphId: "g1", date_created: new Date().getTime() },
+  {
+    id: "2",
+    graphId: "g1",
+    date_created: new Date().getTime(),
+    name: "Node 2",
+  },
+  {
+    id: "3",
+    graphId: "g1",
+    date_created: new Date().getTime(),
+    name: "Node 3",
+  },
+  {
+    id: "4",
+    graphId: "g1",
+    date_created: new Date().getTime(),
+    name: "Node 4",
+  },
+  {
+    id: "5",
+    graphId: "g1",
+    date_created: new Date().getTime(),
+    name: "Node 5",
+  },
+  {
+    id: "6",
+    graphId: "g1",
+    date_created: new Date().getTime(),
+    name: "Node 6",
+  },
 ]
+
+// const edges: GraphEdge[] = [
+//   {
+//     src: "1",
+//     dest: "2",
+//     id: "1",
+//   },
+// ]
 
 export const Primary: Story = {
   args: {
     nodes: nodes,
+    edges: [],
+    width: 800,
+    height: 800,
   },
 }
