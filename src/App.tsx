@@ -8,16 +8,17 @@ import GraphPage from "./pages/GraphPage"
 import NodePage from "./pages/NodePage"
 import { useUser } from "./hooks/user"
 import LandingPage from "./pages/LandingPage"
+import { useLoadingStore } from "./stores/loadingStore"
 import "./App.css"
 
 function App() {
   const { user } = useUser()
-
+  const { isLoadingUserAuth } = useLoadingStore()
   return (
     <>
       <Routes>
-        {/* Show LandingPage as landing page if user is not logged in */}
-        {!user ? (
+        {!user && !isLoadingUserAuth ? (
+          // Not authenticated and not loading
           <Route
             path="/"
             element={
@@ -26,7 +27,11 @@ function App() {
               </BasicLayout>
             }
           />
+        ) : isLoadingUserAuth ? (
+          // Loading authentication status
+          <div>Loading...</div>
         ) : (
+          // Authenticated
           <>
             <Route
               path="/"
@@ -62,7 +67,6 @@ function App() {
             />
           </>
         )}
-        {/* Common routes that are always accessible */}
         <Route
           path="/signup"
           element={

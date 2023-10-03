@@ -10,17 +10,21 @@ import {
 import { useEffect, useState, FormEvent } from "react"
 import { useNavigate } from "react-router-dom"
 import { auth } from "src/firebase"
+import { useLoadingStore } from "src/stores/loadingStore"
 
 // Added navigate as an argument
 export const useUser = () => {
   const [user, setUser] = useState<User | null>(null)
   const navigate = useNavigate()
+  const { setLoadingUserAuth } = useLoadingStore()
   useEffect(() => {
+    setLoadingUserAuth(true)
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       setUser(currentUser)
     })
 
     // Clean up subscription
+    setLoadingUserAuth(false)
     return () => unsubscribe()
   }, [])
 
