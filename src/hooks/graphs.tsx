@@ -18,10 +18,9 @@ export const useGraphs = () => {
       const updatedGraphs: GraphObj[] = []
 
       snapshot.forEach((doc) => {
-        //@ts-ignore
         const graph: GraphObj = {
-          id: doc.id,
           data: doc.data() as Graph,
+          id: doc.id,
         }
         console.log(graph)
         updatedGraphs.push(graph)

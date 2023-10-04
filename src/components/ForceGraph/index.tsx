@@ -39,7 +39,7 @@ const ForceGraph: React.FC<ForceGraphProps> = ({
       .forceSimulation(nodes)
       .force(
         "link",
-        d3.forceLink(edges).id((d) => d.id)
+        d3.forceLink(edges).id((d) => (d as GraphNode).id)
       )
       .force("charge", d3.forceManyBody())
       .force("center", d3.forceCenter(width / 2, height / 2))
@@ -78,12 +78,12 @@ const ForceGraph: React.FC<ForceGraphProps> = ({
     // Update positions on each simulation tick
     simulation.on("tick", () => {
       link
-        .attr("x1", (d: any) => d.source.x)
-        .attr("y1", (d: any) => d.source.y)
-        .attr("x2", (d: any) => d.target.x)
-        .attr("y2", (d: any) => d.target.y)
+        .attr("x1", (d) => (d.source as GraphNode).x!)
+        .attr("y1", (d) => (d.source as GraphNode).y!)
+        .attr("x2", (d) => (d.target as GraphNode).x!)
+        .attr("y2", (d) => (d.target as GraphNode).y!)
 
-      nodeGroup.attr("transform", (d) => `translate(${d.x}, ${d.y})`)
+      nodeGroup.attr("transform", (d) => `translate(${d.x!}, ${d.y!})`)
     })
 
     return () => {

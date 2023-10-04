@@ -9,21 +9,19 @@ export interface Graph {
   date_created: number
 }
 
-export interface GraphObj extends Graph {
+export interface GraphObj {
   id: string
   data: Graph
 }
 
-export interface GraphNode {
+export interface GraphNode extends d3.SimulationNodeDatum {
   // Required Properties
   id: string
   name: string
   graphId: string
-  date_created: number
-  date_modified?: number
 }
 
-export type GraphEdge = {
+export interface GraphEdge extends d3.SimulationLinkDatum<GraphNode> {
   id: string
   src: string
   dest: string
