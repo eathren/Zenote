@@ -21,7 +21,6 @@ type GraphActions = {
 
 type GraphState = {
   graphs: GraphObj[]
-
   nodes: GraphNodeObj
   edges: GraphEdgeObj
   actions: GraphActions

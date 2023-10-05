@@ -23,7 +23,5 @@ export interface GraphNode extends d3.SimulationNodeDatum {
 
 export interface GraphEdge extends d3.SimulationLinkDatum<GraphNode> {
   id: string
-  src: string
-  dest: string
   label?: string
 }

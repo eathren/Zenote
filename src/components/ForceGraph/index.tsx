@@ -1,21 +1,16 @@
 import * as d3 from "d3"
-import React, { useEffect, useRef } from "react"
+import { useEffect, useRef } from "react"
+import { useNavigate } from "react-router-dom"
 import { GraphNode, GraphEdge } from "src/types"
 
 type ForceGraphProps = {
   nodes: GraphNode[]
   edges: GraphEdge[]
-  width: number
-  height: number
 }
 
-const ForceGraph: React.FC<ForceGraphProps> = ({
-  nodes,
-  edges,
-  width,
-  height,
-}) => {
+const ForceGraph = ({ nodes, edges }: ForceGraphProps) => {
   const svgRef = useRef<SVGSVGElement>(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (!svgRef.current) {
@@ -23,16 +18,18 @@ const ForceGraph: React.FC<ForceGraphProps> = ({
     }
 
     const svg = d3.select(svgRef.current)
+    svg.selectAll("*").remove() // Clear SVG for redrawing
 
-    // Clear the SVG for redrawing
-    svg.selectAll("*").remove()
-
-    // Add grey background to the SVG
+    // Dark mode background
     svg
       .append("rect")
-      .attr("width", width)
-      .attr("height", height)
-      .attr("fill", "grey")
+      .attr("width", "100%")
+      .attr("height", "100%")
+      .attr("fill", "#141414")
+
+    const parentElement = svgRef.current.parentElement
+    const width = parentElement ? parentElement.clientWidth : 800
+    const height = parentElement ? parentElement.clientHeight : 600
 
     // Initialize D3 force simulation
     const simulation = d3
@@ -50,24 +47,29 @@ const ForceGraph: React.FC<ForceGraphProps> = ({
       .selectAll("line")
       .data(edges)
       .join("line")
-      .attr("stroke", "white")
+      .attr("stroke", "#AAAAAA") // Light grey for dark mode
 
-    // Create groups for nodes and text
     const nodeGroup = svg.append("g").selectAll("g").data(nodes).join("g")
 
-    // Append circles to each group
+    // Append circles and text to each group
     nodeGroup
       .append("circle")
       .attr("r", 5)
-      .attr("fill", "white")
-      .on("mouseover", function () {
-        d3.select(this).attr("fill", "blue")
+      .attr("fill", "#AAAAAA") // Light grey for dark mode
+      .on("click", function (d: GraphNode) {
+        navigate(`/${d.graphId}/${d.id}`)
+      })
+      .on("mouseover", function (d: GraphNode) {
+        d3.select(this).attr("fill", "lightblue").attr("r", 7)
+        link
+          .filter((l: GraphEdge) => l.source === d || l.target === d)
+          .attr("stroke", "lightblue")
       })
       .on("mouseout", function () {
-        d3.select(this).attr("fill", "white")
+        d3.select(this).attr("fill", "#AAAAAA").attr("r", 5)
+        link.attr("stroke", "#AAAAAA")
       })
 
-    // Append text to each group
     nodeGroup
       .append("text")
       .text((d) => d.name)
@@ -75,7 +77,6 @@ const ForceGraph: React.FC<ForceGraphProps> = ({
       .attr("dx", 8)
       .attr("dy", 4)
 
-    // Update positions on each simulation tick
     simulation.on("tick", () => {
       link
         .attr("x1", (d) => (d.source as GraphNode).x!)
@@ -89,9 +90,9 @@ const ForceGraph: React.FC<ForceGraphProps> = ({
     return () => {
       simulation.stop()
     }
-  }, [nodes, edges, width, height])
+  }, [nodes, edges, navigate])
 
-  return <svg ref={svgRef} width={width} height={height}></svg>
+  return <svg ref={svgRef} width="100%" height="100%" />
 }
 
 export default ForceGraph

@@ -1,15 +1,15 @@
 import { useParams } from "react-router-dom"
 import ForceGraph from "src/components/ForceGraph"
+import { useGraphEdges } from "src/hooks/edges"
 import { useGraphNodes } from "src/hooks/nodes"
-import { GraphEdge } from "src/types"
 
 const GraphPage = () => {
-  const edges: GraphEdge[] = []
   const { graphId } = useParams()
   const { nodes } = useGraphNodes(graphId)
+  const { edges } = useGraphEdges(graphId)
   return (
     <>
-      <ForceGraph nodes={nodes} edges={edges} width={800} height={600} />
+      <ForceGraph nodes={nodes} edges={edges} />
     </>
   )
 }

@@ -1,18 +1,18 @@
 import ForceGraph from "src/components/ForceGraph"
 import type { Meta, StoryObj } from "@storybook/react"
-import { GraphNode } from "src/types"
+import { GraphEdge, GraphNode } from "src/types"
+import { withRouter } from "storybook-addon-react-router-v6"
 
-// More on how to set up stories at: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
-const meta = {
+const meta: Meta<typeof ForceGraph> = {
   title: "Example/ForceGraph",
   component: ForceGraph,
+  decorators: [withRouter],
   parameters: {},
-  // This component will have an automatically generated Autodocs entry: https://storybook.js.org/docs/react/writing-docs/autodocs
   tags: ["autodocs"],
-  // More on argTypes: https://storybook.js.org/docs/react/api/argtypes
-} satisfies Meta<typeof ForceGraph>
+}
 
 export default meta
+
 type Story = StoryObj<typeof meta>
 
 const nodes: GraphNode[] = [
@@ -31,36 +31,31 @@ const nodes: GraphNode[] = [
     graphId: "g1",
     name: "Node 3",
   },
-  {
-    id: "4",
-    graphId: "g1",
-    name: "Node 4",
-  },
-  {
-    id: "5",
-    graphId: "g1",
-    name: "Node 5",
-  },
-  {
-    id: "6",
-    graphId: "g1",
-    name: "Node 6",
-  },
+  { id: "4", graphId: "g1", name: "Node 4" },
+  { id: "5", graphId: "g1", name: "Node 5" },
 ]
 
-// const edges: GraphEdge[] = [
-//   {
-//     src: "1",
-//     dest: "2",
-//     id: "1",
-//   },
-// ]
+const edges: GraphEdge[] = [
+  {
+    source: "1",
+    target: "2",
+    id: "1",
+  },
+  {
+    source: "1",
+    target: "3",
+    id: "2",
+  },
+  {
+    source: "1",
+    target: "4",
+    id: "3",
+  },
+]
 
 export const Primary: Story = {
   args: {
     nodes: nodes,
-    edges: [],
-    width: 800,
-    height: 800,
+    edges: edges,
   },
 }

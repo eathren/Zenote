@@ -9,72 +9,77 @@ import { useUser } from "./hooks/user"
 import LandingPage from "./pages/LandingPage"
 import { useLoadingStore } from "./stores/loadingStore"
 import "./App.css"
+import { ConfigProvider, theme } from "antd"
+
+const { darkAlgorithm } = theme
 
 function App() {
   const { user } = useUser()
   const { isLoadingUserAuth } = useLoadingStore()
   return (
     <>
-      <Routes>
-        {!user && !isLoadingUserAuth ? (
-          // Not authenticated and not loading
-          <Route
-            path="/"
-            element={
-              <BasicLayout>
-                <LandingPage />
-              </BasicLayout>
-            }
-          />
-        ) : isLoadingUserAuth ? (
-          // Loading authentication status
-          <div>Loading...</div>
-        ) : (
-          // Authenticated
-          <>
+      <ConfigProvider theme={{ algorithm: darkAlgorithm }}>
+        <Routes>
+          {!user && !isLoadingUserAuth ? (
+            // Not authenticated and not loading
             <Route
               path="/"
               element={
                 <BasicLayout>
-                  <HomePage />
+                  <LandingPage />
                 </BasicLayout>
               }
             />
-            <Route
-              path="/:graphId"
-              element={
-                <BasicLayout>
-                  <GraphPage />
-                </BasicLayout>
-              }
-            />
-            <Route
-              path="/:graphId/:nodeId"
-              element={
-                <BasicLayout>
-                  <NodePage />
-                </BasicLayout>
-              }
-            />
-          </>
-        )}
-        <Route
-          path="/signup"
-          element={
-            <BasicLayout>
-              <SignUpPage />
-            </BasicLayout>
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            <BasicLayout>
-              <LoginPage />
-            </BasicLayout>
-          }
-        />
-      </Routes>
+          ) : isLoadingUserAuth ? (
+            // Loading authentication status
+            <div>Loading...</div>
+          ) : (
+            // Authenticated
+            <>
+              <Route
+                path="/"
+                element={
+                  <BasicLayout>
+                    <HomePage />
+                  </BasicLayout>
+                }
+              />
+              <Route
+                path="/:graphId"
+                element={
+                  <BasicLayout>
+                    <GraphPage />
+                  </BasicLayout>
+                }
+              />
+              <Route
+                path="/:graphId/:nodeId"
+                element={
+                  <BasicLayout>
+                    <NodePage />
+                  </BasicLayout>
+                }
+              />
+            </>
+          )}
+          <Route
+            path="/signup"
+            element={
+              <BasicLayout>
+                <SignUpPage />
+              </BasicLayout>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <BasicLayout>
+                <LoginPage />
+              </BasicLayout>
+            }
+          />
+        </Routes>
+      </ConfigProvider>
     </>
   )
 }

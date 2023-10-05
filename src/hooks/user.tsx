@@ -26,7 +26,7 @@ export const useUser = () => {
     // Clean up subscription
     setLoadingUserAuth(false)
     return () => unsubscribe()
-  }, [])
+  }, [setLoadingUserAuth])
 
   // Function to handle login
   const onLogin = async (e: FormEvent, email: string, password: string) => {
