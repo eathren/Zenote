@@ -56,10 +56,11 @@ const ForceGraph = ({ nodes, edges }: ForceGraphProps) => {
       .append("circle")
       .attr("r", 5)
       .attr("fill", "#AAAAAA") // Light grey for dark mode
-      .on("click", function (d: GraphNode) {
+      .on("click", function (_event, d: GraphNode) {
         navigate(`/${d.graphId}/${d.id}`)
+        console.log("clicked", d.graphId, d.id)
       })
-      .on("mouseover", function (d: GraphNode) {
+      .on("mouseover", function (_event, d: GraphNode) {
         d3.select(this).attr("fill", "lightblue").attr("r", 7)
         link
           .filter((l: GraphEdge) => l.source === d || l.target === d)
