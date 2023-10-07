@@ -6,12 +6,16 @@ import MDEditor from "@uiw/react-md-editor"
 import { EditOutlined } from "@ant-design/icons"
 import { Button } from "antd"
 
+// const regex = /\[\[([^\]]+)\]\]/g
+
 const NodePage = () => {
   const { nodeId } = useParams<{ nodeId: string }>()
   const [markdownContent, setMarkdownContent] = useState<string>("")
   const [isEditing, setIsEditing] = useState<boolean>(false)
   const editorRef = useRef<HTMLDivElement | null>(null) // Ref for the editor container
+  const [matches, setMatches] = useState<string[]>([])
 
+  console.log(matches)
   // Simulated Markdown fetching, replace this with real data fetch
   useEffect(() => {
     if (!nodeId) return
@@ -37,6 +41,22 @@ const NodePage = () => {
     }
   }
 
+  useEffect(() => {
+    // Regular expression to match text enclosed in [[...]]
+    const regex = /\[\[([^\]]+)\]\]/g
+
+    let match
+    const foundMatches: string[] = []
+
+    // Find all matches
+    while ((match = regex.exec(markdownContent)) !== null) {
+      foundMatches.push(match[1])
+    }
+
+    // Update state
+    setMatches(foundMatches)
+  }, [markdownContent])
+
   // Add event listener for clicks outside the editor
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside)
@@ -46,6 +66,12 @@ const NodePage = () => {
     }
   }, [])
 
+  const handleEditorChange = (newValue?: string | undefined) => {
+    if (newValue !== undefined) {
+      setMarkdownContent(newValue)
+    }
+  }
+
   return (
     <div style={{ color: "white" }}>
       <Button icon={<EditOutlined />} />
@@ -54,7 +80,7 @@ const NodePage = () => {
           <MDEditor
             data-color-mode="dark"
             value={markdownContent}
-            onChange={setMarkdownContent}
+            onChange={handleEditorChange}
           />
         ) : (
           <Markdown>{markdownContent}</Markdown>
