@@ -2,6 +2,7 @@ import { collection, query, where, onSnapshot } from "firebase/firestore"
 import { useEffect, useState } from "react"
 import { GraphNode } from "src/types"
 import { db } from "../firebase"
+import { useNodeStore } from "src/stores/nodeStore"
 
 /**
  * Custom hook to fetch and store graph nodes from Firebase Firestore based on graphId.
@@ -11,8 +12,8 @@ import { db } from "../firebase"
  * @returns {boolean} loading - Indicates whether the data is still loading.
  * @returns {Error | null} error - Contains the error if something went wrong, otherwise null.
  */
-export const useGraphNodes = (graphId?: string) => {
-  const [nodes, setNodes] = useState<GraphNode[]>([])
+export const useNodes = (graphId?: string) => {
+  const { nodes, setNodes } = useNodeStore()
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<Error | null>(null)
 
@@ -52,7 +53,7 @@ export const useGraphNodes = (graphId?: string) => {
     return () => {
       unsubscribe()
     }
-  }, [graphId])
+  }, [graphId, setNodes])
 
   return { nodes, loading, error }
 }

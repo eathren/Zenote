@@ -1,7 +1,8 @@
-import { collection, query, where, onSnapshot } from "firebase/firestore"
 import { useEffect, useState } from "react"
+import { collection, query, where, onSnapshot } from "firebase/firestore"
 import { GraphEdge } from "src/types"
 import { db } from "../firebase"
+import { useEdgeStore } from "src/stores/edgeStore"
 
 /**
  * Custom hook to fetch and store graph edges from Firebase Firestore based on graphId.
@@ -11,8 +12,8 @@ import { db } from "../firebase"
  * @returns {boolean} loading - Indicates whether the data is still loading.
  * @returns {Error | null} error - Contains the error if something went wrong, otherwise null.
  */
-export const useGraphEdges = (graphId?: string) => {
-  const [edges, setEdges] = useState<GraphEdge[]>([])
+export const useEdges = (graphId?: string) => {
+  const { edges, setEdges } = useEdgeStore()
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<Error | null>(null)
 
@@ -22,13 +23,9 @@ export const useGraphEdges = (graphId?: string) => {
       return
     }
 
-    // Reference to Firestore collection
     const edgesCollection = collection(db, "edges")
-
-    // Build the query
     const q = query(edgesCollection, where("graphId", "==", graphId))
 
-    // Subscribe to changes in the collection filtered by graphId
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
@@ -48,11 +45,10 @@ export const useGraphEdges = (graphId?: string) => {
       }
     )
 
-    // Clean up subscription
     return () => {
       unsubscribe()
     }
-  }, [graphId])
+  }, [graphId, setEdges])
 
   return { edges, loading, error }
 }

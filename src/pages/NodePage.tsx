@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react"
 import Markdown from "react-markdown"
 import { useParams } from "react-router-dom"
-import { fetchMarkdown } from "src/handles"
+import { addEdge, fetchMarkdown, uploadMarkdown } from "src/handles"
 import MDEditor from "@uiw/react-md-editor"
 import { EditOutlined } from "@ant-design/icons"
 import { Button } from "antd"
+import { debounce } from "lodash"
 
-// const regex = /\[\[([^\]]+)\]\]/g
+const regex = /\[\[([^\]]+)\]\]/g
 
 const NodePage = () => {
   const { nodeId } = useParams<{ nodeId: string }>()
@@ -15,8 +16,17 @@ const NodePage = () => {
   const editorRef = useRef<HTMLDivElement | null>(null) // Ref for the editor container
   const [matches, setMatches] = useState<string[]>([])
 
-  console.log(matches)
-  // Simulated Markdown fetching, replace this with real data fetch
+  const debouncedUpload = debounce(() => {
+    if (nodeId && markdownContent) {
+      console.log("uploading")
+      uploadMarkdown(nodeId, markdownContent)
+    }
+  }, 500)
+
+  useEffect(() => {
+    debouncedUpload()
+  }, [debouncedUpload, markdownContent])
+
   useEffect(() => {
     if (!nodeId) return
     const fetchMarkdownAsync = async (nodeId: string) => {
@@ -55,7 +65,12 @@ const NodePage = () => {
 
     // Update state
     setMatches(foundMatches)
-  }, [markdownContent])
+    matches.forEach(async (matchedNodeId) => {
+      console.log("adding edge")
+      if (!nodeId) return
+      await addEdge(nodeId, matchedNodeId)
+    })
+  }, [])
 
   // Add event listener for clicks outside the editor
   useEffect(() => {

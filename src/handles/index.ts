@@ -17,7 +17,7 @@ import {
   ref,
   uploadString,
 } from "firebase/storage"
-import { GraphNode, Graph } from "src/types/index"
+import { GraphNode, Graph } from "source/types/index"
 
 const storage = getStorage()
 const db = getFirestore()
@@ -136,4 +136,46 @@ export const deleteNode = async (nodeId: string) => {
   await deleteMarkdown(nodeId) // Delete Markdown content
 
   await deleteDoc(nodeRef)
+}
+
+export const addEdge = async (source: string, target: string) => {
+  // Get a reference to the Firestore 'edges' collection
+  const edgesCollection = collection(db, "edges")
+
+  // Check if the edge already exists
+  const q = query(
+    edgesCollection,
+    where("source", "==", source),
+    where("target", "==", target)
+  )
+  const querySnapshot = await getDocs(q)
+
+  if (querySnapshot.empty) {
+    // If the edge doesn't exist, create it
+    const newEdge = {
+      source,
+      target,
+    }
+
+    // Add the new edge to the Firestore 'edges' collection
+    await addDoc(edgesCollection, newEdge)
+  }
+}
+
+export const deleteEdge = async (source: string, target: string) => {
+  const edgesCollection = collection(db, "edges")
+  const q = query(
+    edgesCollection,
+    where("source", "==", source),
+    where("target", "==", target)
+  )
+
+  const querySnapshot = await getDocs(q)
+
+  if (!querySnapshot.empty) {
+    // If the edge exists, delete it
+    querySnapshot.forEach(async (documentSnapshot) => {
+      await deleteDoc(doc(edgesCollection, documentSnapshot.id))
+    })
+  }
 }

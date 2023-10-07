@@ -1,11 +1,9 @@
 import { Button, Modal, Input } from "antd"
 import { useState } from "react"
-import { useGraphActions } from "src/stores/graphStore"
 import { useNavigate } from "react-router-dom"
 import { addGraphInDB } from "src/handles"
 
 const AddGraphButton = () => {
-  const { addGraph } = useGraphActions()
   const [modalOpen, setModalOpen] = useState(false)
   const [graphName, setGraphName] = useState("")
   const navigate = useNavigate()
@@ -16,7 +14,6 @@ const AddGraphButton = () => {
   const createGraph = () => {
     addGraphInDB(graphName).then((docId) => {
       if (docId) {
-        addGraph(docId)
         navigate(`/${docId}`)
       }
     })
