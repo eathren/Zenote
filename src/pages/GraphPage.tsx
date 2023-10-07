@@ -10,7 +10,7 @@ const GraphPage = () => {
   const { edges, loading: edgesLoading } = useEdges(graphId)
 
   if (nodesLoading || edgesLoading) {
-    return <Spin style={{ color: "white" }}></Spin>
+    return <div> Loading ... </div>
   }
   return (
     <>

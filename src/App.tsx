@@ -78,6 +78,14 @@ function App() {
               </BasicLayout>
             }
           />
+          <Route
+            path="*"
+            element={
+              <BasicLayout>
+                <h1>404</h1>
+              </BasicLayout>
+            }
+          />
         </Routes>
       </ConfigProvider>
     </>

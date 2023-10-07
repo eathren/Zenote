@@ -150,6 +150,7 @@ export const addEdge = async (
   source: string,
   target: string
 ) => {
+  if (!graphId || !source || !target) return
   // Get a reference to the Firestore 'edges' collection
   const edgesCollection = collection(db, "edges")
 
