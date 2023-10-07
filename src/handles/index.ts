@@ -17,7 +17,7 @@ import {
   ref,
   uploadString,
 } from "firebase/storage"
-import { GraphNode, Graph } from "source/types/index"
+import { GraphNode, Graph } from "src/types/index"
 
 const storage = getStorage()
 const db = getFirestore()

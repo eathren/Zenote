@@ -7,7 +7,7 @@ import { EditOutlined } from "@ant-design/icons"
 import { Button } from "antd"
 import { debounce } from "lodash"
 
-const regex = /\[\[([^\]]+)\]\]/g
+// const regex = /\[\[([^\]]+)\]\]/g
 
 const NodePage = () => {
   const { nodeId } = useParams<{ nodeId: string }>()
