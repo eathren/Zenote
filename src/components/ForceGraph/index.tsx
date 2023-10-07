@@ -77,6 +77,7 @@ const ForceGraph = ({ nodes, edges }: ForceGraphProps) => {
       .attr("font-size", "8px")
       .attr("dx", 8)
       .attr("dy", 4)
+      .attr("fill", "#FFFFFF") // Changed text color to white
 
     simulation.on("tick", () => {
       link

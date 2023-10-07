@@ -1,31 +1,42 @@
 import { useState, useEffect, useRef } from "react"
 import Markdown from "react-markdown"
 import { useParams } from "react-router-dom"
-import { addEdge, fetchMarkdown, uploadMarkdown } from "src/handles"
+import {
+  addEdge,
+  fetchMarkdown,
+  updateNodeTitle,
+  uploadMarkdown,
+} from "src/handles"
 import MDEditor from "@uiw/react-md-editor"
 import { EditOutlined } from "@ant-design/icons"
 import { Button } from "antd"
 import { debounce } from "lodash"
-
-// const regex = /\[\[([^\]]+)\]\]/g
+import { useEdges } from "src/hooks/useEdges"
+import { findNodeId } from "src/utils"
+import { useNodes } from "src/hooks/useNodes"
 
 const NodePage = () => {
-  const { nodeId } = useParams<{ nodeId: string }>()
+  const { graphId, nodeId } = useParams<{ nodeId: string; graphId: string }>()
   const [markdownContent, setMarkdownContent] = useState<string>("")
   const [isEditing, setIsEditing] = useState<boolean>(false)
-  const editorRef = useRef<HTMLDivElement | null>(null) // Ref for the editor container
-  const [matches, setMatches] = useState<string[]>([])
+  const editorRef = useRef<HTMLDivElement | null>(null)
+
+  const { edges } = useEdges(graphId)
+  const { nodes } = useNodes(graphId)
+
+  const truncate = (str: string, length: number) => {
+    return str.length > length ? str.substring(0, length) + "..." : str
+  }
 
   const debouncedUpload = debounce(() => {
     if (nodeId && markdownContent) {
-      console.log("uploading")
       uploadMarkdown(nodeId, markdownContent)
     }
   }, 500)
 
   useEffect(() => {
     debouncedUpload()
-  }, [debouncedUpload, markdownContent])
+  }, [markdownContent])
 
   useEffect(() => {
     if (!nodeId) return
@@ -35,6 +46,27 @@ const NodePage = () => {
     }
     fetchMarkdownAsync(nodeId)
   }, [nodeId])
+
+  useEffect(() => {
+    const regex = /\[\[([^\]]+)\]\]/g
+    let match
+    const foundMatches: string[] = []
+
+    while ((match = regex.exec(markdownContent)) !== null) {
+      foundMatches.push(match[1])
+    }
+
+    const addNewEdges = async () => {
+      for (const newEdge of foundMatches) {
+        const targetId = findNodeId(nodes, newEdge)
+        if (graphId && nodeId && targetId) {
+          await addEdge(graphId, nodeId, targetId)
+        }
+      }
+    }
+
+    addNewEdges()
+  }, [markdownContent, edges, nodes, nodeId, graphId])
 
   // Handle clicks inside the editor
   const handleClickInside = () => {
@@ -52,25 +84,19 @@ const NodePage = () => {
   }
 
   useEffect(() => {
-    // Regular expression to match text enclosed in [[...]]
-    const regex = /\[\[([^\]]+)\]\]/g
+    // Remove Markdown-specific characters like '#', '*', '_', etc.
+    const cleanString = markdownContent
+      .split("\n")[0]
+      .replace(/[*_#`~]/g, "")
+      .trim()
 
-    let match
-    const foundMatches: string[] = []
+    // Truncate to 50 characters
+    const truncatedTitle = truncate(cleanString, 50)
 
-    // Find all matches
-    while ((match = regex.exec(markdownContent)) !== null) {
-      foundMatches.push(match[1])
+    if (nodeId) {
+      updateNodeTitle(nodeId, truncatedTitle)
     }
-
-    // Update state
-    setMatches(foundMatches)
-    matches.forEach(async (matchedNodeId) => {
-      console.log("adding edge")
-      if (!nodeId) return
-      await addEdge(nodeId, matchedNodeId)
-    })
-  }, [])
+  }, [markdownContent, nodeId])
 
   // Add event listener for clicks outside the editor
   useEffect(() => {

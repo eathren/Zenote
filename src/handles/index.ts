@@ -97,7 +97,7 @@ export const addNode = async (graphId: string) => {
 
   // Create a new node object with default values
   const newNode = {
-    name: "",
+    name: "Untitled",
     graphId,
   }
 
@@ -130,6 +130,13 @@ export const updateNode = async (
   })
 }
 
+export const updateNodeTitle = async (nodeId: string, newTitle: string) => {
+  const nodeRef = doc(db, "nodes", nodeId)
+  await updateDoc(nodeRef, {
+    name: newTitle,
+  })
+}
+
 export const deleteNode = async (nodeId: string) => {
   const nodeRef = doc(db, "nodes", nodeId)
 
@@ -138,21 +145,28 @@ export const deleteNode = async (nodeId: string) => {
   await deleteDoc(nodeRef)
 }
 
-export const addEdge = async (source: string, target: string) => {
+export const addEdge = async (
+  graphId: string,
+  source: string,
+  target: string
+) => {
   // Get a reference to the Firestore 'edges' collection
   const edgesCollection = collection(db, "edges")
 
   // Check if the edge already exists
   const q = query(
     edgesCollection,
+    where("graphId", "==", graphId),
     where("source", "==", source),
     where("target", "==", target)
   )
+
   const querySnapshot = await getDocs(q)
 
   if (querySnapshot.empty) {
     // If the edge doesn't exist, create it
     const newEdge = {
+      graphId,
       source,
       target,
     }
