@@ -1,4 +1,3 @@
-import { Spin } from "antd"
 import { useParams } from "react-router-dom"
 import ForceGraph from "src/components/ForceGraph"
 import { useEdges } from "src/hooks/useEdges"
