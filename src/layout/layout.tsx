@@ -7,8 +7,10 @@ import { addNode } from "src/handles"
 import { theme } from "antd"
 import { useNodes } from "src/hooks/useNodes"
 import { isNodeNameUnique } from "src/utils"
+import styles from "./index.module.css" // Import the CSS file
+import ButtonGroup from "antd/es/button/button-group"
 
-const { Header, Content, Sider } = Layout
+const { Header, Content, Sider, Footer } = Layout
 
 type LayoutProps = {
   children: React.ReactNode
@@ -70,7 +72,7 @@ export const BasicLayout = ({ children }: LayoutProps) => {
         </Header>
         <Layout>
           {isHome ? null : (
-            <Sider width={50} style={{ background: colorBgContainer }}>
+            <Sider className={styles.sidebar} width={50} style={{}}>
               {ButtonList.map((item, index) => (
                 <div key={index}>
                   <Popover placement="right" title={item.text}>
@@ -86,25 +88,39 @@ export const BasicLayout = ({ children }: LayoutProps) => {
               ))}
             </Sider>
           )}
-          <Layout style={{ padding: "0 24px 24px" }}>
+          <Layout style={{ padding: 0 }}>
             <Content
               style={{
                 padding: 24,
                 margin: 0,
-                marginTop: 24,
                 minHeight: 280,
                 background: colorBgContainer,
               }}
             >
               {children}
             </Content>
+            <Footer className={styles.footer}>
+              {isHome ? null : (
+                <ButtonGroup>
+                  {ButtonList.map((item, index) => (
+                    <div key={index} style={{ margin: "0 5px" }}>
+                      <Popover placement="top" title={item.text}>
+                        <Button type="text" onClick={() => item.onClick()}>
+                          {item.icon}
+                        </Button>
+                      </Popover>
+                    </div>
+                  ))}
+                </ButtonGroup>
+              )}
+            </Footer>
           </Layout>
         </Layout>
 
         {/* Modal for adding a new node */}
         <Modal
           title="Add a new node"
-          visible={modalOpen}
+          open={modalOpen}
           onOk={confirmAddNode}
           onCancel={() => setModalOpen(false)}
         >

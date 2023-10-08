@@ -1,8 +1,8 @@
 import { Routes, Route } from "react-router-dom"
 import SignUpPage from "src/pages/SignupPage"
 import LoginPage from "src/pages/LoginPage"
-import { HomePage } from "src/pages/index.tsx"
-import { BasicLayout } from "src/layout/layout.tsx"
+import { HomePage } from "src/pages/index"
+import { BasicLayout } from "src/layout/layout"
 import GraphPage from "./pages/GraphPage"
 import NodePage from "./pages/NodePage"
 import { useUser } from "./hooks/user"
@@ -17,6 +17,7 @@ function App() {
   const { user } = useUser()
   const { isLoadingUserAuth } = useLoadingStore()
 
+  // Show a loading state while user auth status is being determined
   if (isLoadingUserAuth) {
     return <div>Loading...</div>
   }
@@ -24,6 +25,7 @@ function App() {
   return (
     <ConfigProvider theme={{ algorithm: darkAlgorithm }}>
       <Routes>
+        {/* Conditionally render routes based on user authentication */}
         {user ? (
           <>
             <Route
@@ -52,31 +54,34 @@ function App() {
             />
           </>
         ) : (
-          <Route
-            path="/"
-            element={
-              <BasicLayout>
-                <LandingPage />
-              </BasicLayout>
-            }
-          />
+          <>
+            <Route
+              path="/"
+              element={
+                <BasicLayout>
+                  <LandingPage />
+                </BasicLayout>
+              }
+            />
+            <Route
+              path="/signup"
+              element={
+                <BasicLayout>
+                  <SignUpPage />
+                </BasicLayout>
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                <BasicLayout>
+                  <LoginPage />
+                </BasicLayout>
+              }
+            />
+          </>
         )}
-        <Route
-          path="/signup"
-          element={
-            <BasicLayout>
-              <SignUpPage />
-            </BasicLayout>
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            <BasicLayout>
-              <LoginPage />
-            </BasicLayout>
-          }
-        />
+        {/* 404 page. Place it at the bottom so it only matches if no other routes match */}
         <Route
           path="*"
           element={
