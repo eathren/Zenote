@@ -66,7 +66,7 @@ export const BasicLayout = ({ children }: LayoutProps) => {
 
   return (
     <>
-      <Layout style={{ height: "100vh" }}>
+      <Layout className={styles.layout__body}>
         <Header>
           <CustomHeader />
         </Header>
