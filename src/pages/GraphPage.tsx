@@ -6,8 +6,8 @@ import { useNodes } from "src/hooks/useNodes"
 
 const GraphPage = () => {
   const { graphId } = useParams()
-  const { nodes, loading: nodesLoading } = useNodes(graphId)
-  const { edges, loading: edgesLoading } = useEdges(graphId)
+  const { loading: nodesLoading } = useNodes(graphId)
+  const { loading: edgesLoading } = useEdges(graphId)
 
   return (
     <>
