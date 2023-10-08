@@ -14,7 +14,7 @@ const GraphPage = () => {
       {nodesLoading || edgesLoading ? (
         <Spin style={{ position: "absolute", left: "50%", top: "50%" }} />
       ) : (
-        <ForceGraph nodes={nodes} edges={edges} />
+        <ForceGraph />
       )}
     </>
   )

@@ -1,17 +1,18 @@
 import * as d3 from "d3"
 import { useEffect, useRef } from "react"
 import { useNavigate, useParams } from "react-router-dom"
+import { useEdges } from "src/hooks/useEdges"
+import { useNodes } from "src/hooks/useNodes"
 import { GraphNode, GraphEdge } from "src/types" // Update the import path as needed
 
-type ForceGraphProps = {
-  nodes: GraphNode[]
-  edges: GraphEdge[]
-}
-
-const ForceGraph = ({ nodes, edges }: ForceGraphProps) => {
+const ForceGraph = () => {
   const svgRef = useRef<SVGSVGElement>(null)
   const navigate = useNavigate()
+
   const { graphId } = useParams()
+  const { nodes } = useNodes(graphId)
+  const { edges } = useEdges(graphId)
+
   useEffect(() => {
     if (!svgRef.current) {
       return
@@ -97,7 +98,7 @@ const ForceGraph = ({ nodes, edges }: ForceGraphProps) => {
         nodeGroup.attr("opacity", 1)
       })
       .on("click", (_event, d) => {
-        navigate(`/${graphId}{/${d.id}`)
+        navigate(`/${graphId}/${d.id}`)
       })
 
     nodeGroup
@@ -154,13 +155,14 @@ const ForceGraph = ({ nodes, edges }: ForceGraphProps) => {
         d.fy = null
       }
 
+      simulation.alpha(1).restart()
       return d3
         .drag<SVGCircleElement, GraphNode>()
         .on("start", dragstarted)
         .on("drag", dragged)
         .on("end", dragended)
     }
-  }, [nodes, edges, navigate])
+  }, [nodes, edges, navigate, graphId])
 
   return <svg ref={svgRef} width="100%" height="100%" />
 }
