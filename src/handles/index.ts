@@ -88,16 +88,16 @@ export const getNodes = async (graphId: string) => {
   return nodes
 }
 
-export const addNode = async (graphId: string) => {
+export const addNode = async (graphId: string, nodeName: string) => {
   // Get a reference to the Firestore 'nodes' collection
   const nodesCollection = collection(db, "nodes")
 
   // Generate the initial Markdown content and upload it, retrieving the generated URL
-  const markdownContent = "# Untitled"
+  const markdownContent = `# ${nodeName}`
 
   // Create a new node object with default values
   const newNode = {
-    name: "Untitled",
+    name: nodeName || "Untitled",
     graphId,
   }
 

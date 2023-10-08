@@ -8,8 +8,7 @@ import {
   uploadMarkdown,
 } from "src/handles"
 import MDEditor from "@uiw/react-md-editor"
-import { EditOutlined } from "@ant-design/icons"
-import { Button } from "antd"
+import { Typography } from "antd"
 import { debounce } from "lodash"
 import { useEdges } from "src/hooks/useEdges"
 import { findNodeId } from "src/utils"
@@ -114,20 +113,21 @@ const NodePage = () => {
   }
 
   return (
-    <div style={{ color: "white" }}>
-      <Button icon={<EditOutlined />} />
-      <div ref={editorRef} onClick={handleClickInside}>
-        {isEditing ? (
-          <MDEditor
-            data-color-mode="dark"
-            value={markdownContent}
-            onChange={handleEditorChange}
-          />
-        ) : (
-          <Markdown>{markdownContent}</Markdown>
-        )}
+    <Typography>
+      <div style={{ color: "white" }}>
+        <div ref={editorRef} onClick={handleClickInside}>
+          {isEditing ? (
+            <MDEditor
+              data-color-mode="dark"
+              value={markdownContent}
+              onChange={handleEditorChange}
+            />
+          ) : (
+            <Markdown>{markdownContent}</Markdown>
+          )}
+        </div>
       </div>
-    </div>
+    </Typography>
   )
 }
 

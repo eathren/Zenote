@@ -1,3 +1,4 @@
+import { Spin } from "antd"
 import { useParams } from "react-router-dom"
 import ForceGraph from "src/components/ForceGraph"
 import { useEdges } from "src/hooks/useEdges"
@@ -8,12 +9,13 @@ const GraphPage = () => {
   const { nodes, loading: nodesLoading } = useNodes(graphId)
   const { edges, loading: edgesLoading } = useEdges(graphId)
 
-  if (nodesLoading || edgesLoading) {
-    return <div> Loading ... </div>
-  }
   return (
     <>
-      <ForceGraph nodes={nodes} edges={edges} />
+      {nodesLoading || edgesLoading ? (
+        <Spin style={{ position: "absolute", left: "50%", top: "50%" }} />
+      ) : (
+        <ForceGraph nodes={nodes} edges={edges} />
+      )}
     </>
   )
 }

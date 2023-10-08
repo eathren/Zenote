@@ -1,7 +1,7 @@
 import * as d3 from "d3"
 import { useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
-import { GraphNode, GraphEdge } from "src/types"
+import { GraphNode, GraphEdge } from "src/types" // Update the import path as needed
 
 type ForceGraphProps = {
   nodes: GraphNode[]
@@ -17,67 +17,105 @@ const ForceGraph = ({ nodes, edges }: ForceGraphProps) => {
       return
     }
 
-    const svg = d3.select(svgRef.current)
+    const svg = d3.select<SVGSVGElement, unknown>(svgRef.current)
     svg.selectAll("*").remove() // Clear SVG for redrawing
-
-    // Dark mode background
-    svg
-      .append("rect")
-      .attr("width", "100%")
-      .attr("height", "100%")
-      .attr("fill", "#141414")
 
     const parentElement = svgRef.current.parentElement
     const width = parentElement ? parentElement.clientWidth : 800
     const height = parentElement ? parentElement.clientHeight : 600
 
-    // Initialize D3 force simulation
     const simulation = d3
       .forceSimulation(nodes)
       .force(
         "link",
-        d3.forceLink(edges).id((d) => (d as GraphNode).id)
+        d3
+          .forceLink(edges)
+          .id((d) => (d as GraphNode).id)
+          .distance(100)
       )
       .force("charge", d3.forceManyBody())
       .force("center", d3.forceCenter(width / 2, height / 2))
 
-    // Draw edges
-    const link = svg
+    const container = svg.append("g")
+
+    const link = container
       .append("g")
+      .attr("class", "links")
       .selectAll("line")
       .data(edges)
       .join("line")
-      .attr("stroke", "#AAAAAA") // Light grey for dark mode
+      .attr("stroke", "#AAAAAA")
+      .style("transition", "all 0.3s ease-in-out")
 
-    const nodeGroup = svg.append("g").selectAll("g").data(nodes).join("g")
+    const nodeGroup = container
+      .append("g")
+      .attr("class", "nodes")
+      .selectAll("g")
+      .data(nodes)
+      .join("g")
+      .call(drag(simulation) as any)
 
-    // Append circles and text to each group
     nodeGroup
       .append("circle")
       .attr("r", 5)
-      .attr("fill", "#AAAAAA") // Light grey for dark mode
-      .on("click", function (_event, d: GraphNode) {
-        navigate(`/${d.graphId}/${d.id}`)
-        console.log("clicked", d.graphId, d.id)
-      })
-      .on("mouseover", function (_event, d: GraphNode) {
-        d3.select(this).attr("fill", "lightblue").attr("r", 7)
+      .attr("fill", "#AAAAAA")
+      .style("transition", "all 0.3s ease-in-out")
+      .on("mouseover", function (_event, d) {
+        d3.select(this).attr("r", 10).attr("fill", "green")
+
         link
           .filter((l: GraphEdge) => l.source === d || l.target === d)
-          .attr("stroke", "lightblue")
+          .attr("stroke", "green")
+
+        // Fade out other nodes and links
+        link
+          .filter((l: GraphEdge) => l.source !== d && l.target !== d)
+          .attr("stroke-opacity", 0.1)
+
+        nodeGroup
+          .filter((n: GraphNode) => {
+            return (
+              n !== d &&
+              !edges.find(
+                (e) =>
+                  (e.source === n && e.target === d) ||
+                  (e.source === d && e.target === n)
+              )
+            )
+          })
+          .attr("opacity", 0.1)
       })
-      .on("mouseout", function () {
-        d3.select(this).attr("fill", "#AAAAAA").attr("r", 5)
-        link.attr("stroke", "#AAAAAA")
+      .on("mouseout", function (_event, d) {
+        d3.select(this).attr("r", 5).attr("fill", "#AAAAAA")
+
+        link
+          .filter((l: GraphEdge) => l.source === d || l.target === d)
+          .attr("stroke", "#AAAAAA")
+
+        // Revert fading out of other nodes and links
+        link.attr("stroke-opacity", 1)
+        nodeGroup.attr("opacity", 1)
+      })
+      .on("click", (_event, d) => {
+        navigate(`/subpage/${d.id}`)
       })
 
     nodeGroup
       .append("text")
       .text((d) => d.name)
       .attr("font-size", "8px")
-      .attr("dx", 8)
-      .attr("dy", 4)
-      .attr("fill", "#FFFFFF") // Changed text color to white
+      .attr("dx", 0)
+      .attr("dy", 20)
+      .attr("fill", "#FFFFFF")
+
+    const zoom: d3.ZoomBehavior<SVGSVGElement, unknown> = d3
+      .zoom<SVGSVGElement, unknown>()
+      .on("zoom", (event: d3.D3ZoomEvent<SVGSVGElement, unknown>) => {
+        const transform = event.transform
+        container.attr("transform", transform.toString())
+      })
+
+    svg.call(zoom)
 
     simulation.on("tick", () => {
       link
@@ -89,8 +127,38 @@ const ForceGraph = ({ nodes, edges }: ForceGraphProps) => {
       nodeGroup.attr("transform", (d) => `translate(${d.x!}, ${d.y!})`)
     })
 
-    return () => {
-      simulation.stop()
+    function drag(simulation: d3.Simulation<GraphNode, undefined>) {
+      function dragstarted(
+        event: d3.D3DragEvent<SVGCircleElement, GraphNode, unknown>,
+        d: GraphNode
+      ) {
+        if (!event.active) simulation.alphaTarget(0.3).restart()
+        d.fx = d.x
+        d.fy = d.y
+      }
+
+      function dragged(
+        event: d3.D3DragEvent<SVGCircleElement, GraphNode, unknown>,
+        d: GraphNode
+      ) {
+        d.fx = event.x
+        d.fy = event.y
+      }
+
+      function dragended(
+        event: d3.D3DragEvent<SVGCircleElement, GraphNode, unknown>,
+        d: GraphNode
+      ) {
+        if (!event.active) simulation.alphaTarget(0)
+        d.fx = null
+        d.fy = null
+      }
+
+      return d3
+        .drag<SVGCircleElement, GraphNode>()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended)
     }
   }, [nodes, edges, navigate])
 

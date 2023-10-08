@@ -3,14 +3,21 @@ import { Card } from "antd"
 import { useNavigate } from "react-router-dom"
 import styles from "./GraphSelector.module.css"
 import { Graph } from "src/types"
+import { Skeleton } from "antd"
 
 const GraphSelector = () => {
-  const { graphs } = useGraphs()
+  const { graphs, loading } = useGraphs()
   const navigate = useNavigate()
+
+  if (loading)
+    return (
+      <>
+        <Skeleton active />;
+      </>
+    )
 
   return (
     <>
-      {console.log(graphs)}
       {graphs?.map((graph: Graph) => {
         return (
           <Card

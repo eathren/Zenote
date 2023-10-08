@@ -7,10 +7,13 @@ const AddGraphButton = () => {
   const [modalOpen, setModalOpen] = useState(false)
   const [graphName, setGraphName] = useState("")
   const navigate = useNavigate()
+
+  // Handle changes in the graph name input
   const handleGraphNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setGraphName(e.target.value)
   }
 
+  // Function to create a new graph
   const createGraph = () => {
     addGraphInDB(graphName).then((docId) => {
       if (docId) {
@@ -21,11 +24,18 @@ const AddGraphButton = () => {
     setGraphName("")
   }
 
+  // Handle the onKeyDown event for the input
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      createGraph()
+    }
+  }
+
   return (
     <div>
       <Button onClick={() => setModalOpen(true)}>Add Graph</Button>
       <Modal
-        title="Vertically centered modal dialog"
+        title="Create a new graph"
         centered
         open={modalOpen}
         onOk={createGraph}
@@ -35,7 +45,8 @@ const AddGraphButton = () => {
           placeholder="Graph Name..."
           value={graphName}
           onChange={handleGraphNameChange}
-        ></Input>
+          onKeyDown={handleKeyDown} // Added onKeyDown handler
+        />
       </Modal>
     </div>
   )
