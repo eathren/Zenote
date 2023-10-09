@@ -17,7 +17,7 @@ const AddGraphButton = () => {
   const createGraph = () => {
     addGraphInDB(graphName).then((docId) => {
       if (docId) {
-        navigate(`/${docId}`)
+        navigate(`/graphs/${docId}`)
       }
     })
     setModalOpen(false)
