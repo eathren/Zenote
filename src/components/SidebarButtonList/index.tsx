@@ -1,16 +1,16 @@
-import React from "react"
-import { Popover, Button } from "antd"
+import React from "react";
+import { Popover, Button } from "antd";
 
 type ButtonItem = {
-  icon: React.ReactNode
-  text: string
-  onClick: () => void
-  disabled?: boolean
-}
+  icon: React.ReactNode;
+  text: string;
+  onClick: () => void;
+  disabled?: boolean;
+};
 
 type SidebarButtonListProps = {
-  buttonList: ButtonItem[]
-}
+  buttonList: ButtonItem[];
+};
 
 const SidebarButtonList: React.FC<SidebarButtonListProps> = ({
   buttonList,
@@ -32,7 +32,7 @@ const SidebarButtonList: React.FC<SidebarButtonListProps> = ({
         </div>
       ))}
     </>
-  )
-}
+  );
+};
 
-export default SidebarButtonList
+export default SidebarButtonList;

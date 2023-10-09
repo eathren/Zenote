@@ -1,7 +1,7 @@
-import ForceGraph from "src/components/ForceGraph"
-import type { Meta, StoryObj } from "@storybook/react"
-import { GraphEdge, GraphNode } from "src/types"
-import { withRouter } from "storybook-addon-react-router-v6"
+import ForceGraph from "src/components/ForceGraph";
+import type { Meta, StoryObj } from "@storybook/react";
+import { GraphEdge, GraphNode } from "src/types";
+import { withRouter } from "storybook-addon-react-router-v6";
 
 const meta: Meta<typeof ForceGraph> = {
   title: "Example/ForceGraph",
@@ -9,11 +9,11 @@ const meta: Meta<typeof ForceGraph> = {
   decorators: [withRouter],
   parameters: {},
   tags: ["autodocs"],
-}
+};
 
-export default meta
+export default meta;
 
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<typeof meta>;
 
 const nodes: GraphNode[] = [
   {
@@ -33,7 +33,7 @@ const nodes: GraphNode[] = [
   },
   { id: "4", graphId: "g1", name: "Node 4" },
   { id: "5", graphId: "g1", name: "Node 5" },
-]
+];
 
 const edges: GraphEdge[] = [
   {
@@ -51,11 +51,11 @@ const edges: GraphEdge[] = [
     target: "4",
     id: "3",
   },
-]
+];
 
 export const Primary: Story = {
   args: {
     nodes: nodes,
     edges: edges,
   },
-}
+};

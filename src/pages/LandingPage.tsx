@@ -1,5 +1,6 @@
-import { Typography } from "antd"
-const { Title } = Typography
+import { Typography } from "antd";
+const { Title } = Typography;
+
 const LandingPage = () => {
   return (
     <>
@@ -7,7 +8,7 @@ const LandingPage = () => {
         <Title>Landing Page</Title>
       </Typography>
     </>
-  )
-}
+  );
+};
 
-export default LandingPage
+export default LandingPage;

@@ -1,29 +1,29 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
 
 type UseForwardHistoryOptions = {
-  enable?: boolean
-}
+  enable?: boolean;
+};
 
 export const useForwardHistory = ({
   enable = true,
 }: UseForwardHistoryOptions = {}) => {
-  const [hasForwardHistory, setHasForwardHistory] = useState(false)
+  const [hasForwardHistory, setHasForwardHistory] = useState(false);
 
   useEffect(() => {
     if (!enable) {
-      return
+      return;
     }
 
     const updateForwardHistoryState = () => {
-      setHasForwardHistory(window.history.length > 1)
-    }
+      setHasForwardHistory(window.history.length > 1);
+    };
 
-    window.addEventListener("popstate", updateForwardHistoryState)
+    window.addEventListener("popstate", updateForwardHistoryState);
 
     return () => {
-      window.removeEventListener("popstate", updateForwardHistoryState)
-    }
-  }, [enable])
+      window.removeEventListener("popstate", updateForwardHistoryState);
+    };
+  }, [enable]);
 
-  return { hasForwardHistory }
-}
+  return { hasForwardHistory };
+};

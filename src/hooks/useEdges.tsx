@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react"
-import { collection, query, where, onSnapshot } from "firebase/firestore"
-import { GraphEdge } from "src/types"
-import { db } from "../firebase"
-import { useEdgeStore } from "src/stores/edgeStore"
+import { useEffect, useState } from "react";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { GraphEdge } from "src/types";
+import { db } from "../firebase";
+import { useEdgeStore } from "src/stores/edgeStore";
 
 /**
  * Custom hook to fetch and store graph edges from Firebase Firestore based on graphId.
@@ -13,42 +13,42 @@ import { useEdgeStore } from "src/stores/edgeStore"
  * @returns {Error | null} error - Contains the error if something went wrong, otherwise null.
  */
 export const useEdges = (graphId?: string) => {
-  const { edges, setEdges } = useEdgeStore()
-  const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<Error | null>(null)
+  const { edges, setEdges } = useEdgeStore();
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     if (!graphId) {
-      setLoading(false)
-      return
+      setLoading(false);
+      return;
     }
 
-    const edgesCollection = collection(db, "edges")
-    const q = query(edgesCollection, where("graphId", "==", graphId))
+    const edgesCollection = collection(db, "edges");
+    const q = query(edgesCollection, where("graphId", "==", graphId));
 
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        const fetchedEdges: GraphEdge[] = []
+        const fetchedEdges: GraphEdge[] = [];
 
         snapshot.forEach((doc) => {
-          const data = doc.data() as GraphEdge
-          fetchedEdges.push({ ...data, id: doc.id })
-        })
+          const data = doc.data() as GraphEdge;
+          fetchedEdges.push({ ...data, id: doc.id });
+        });
 
-        setEdges(fetchedEdges)
-        setLoading(false)
+        setEdges(fetchedEdges);
+        setLoading(false);
       },
       (err) => {
-        setError(err)
-        setLoading(false)
-      }
-    )
+        setError(err);
+        setLoading(false);
+      },
+    );
 
     return () => {
-      unsubscribe()
-    }
-  }, [graphId, setEdges])
+      unsubscribe();
+    };
+  }, [graphId, setEdges]);
 
-  return { edges, loading, error }
-}
+  return { edges, loading, error };
+};

@@ -6,80 +6,80 @@ import {
   signOut as firebaseSignOut,
   signInWithEmailAndPassword as firebaseSignIn,
   createUserWithEmailAndPassword as firebaseSignUp,
-} from "firebase/auth"
-import { useEffect, useState, FormEvent } from "react"
-import { useNavigate } from "react-router-dom"
-import { auth } from "src/firebase"
-import { useLoadingStore } from "src/stores/loadingStore"
+} from "firebase/auth";
+import { useEffect, useState, FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
+import { auth } from "src/firebase";
 
-// Added navigate as an argument
 export const useUser = () => {
-  const [user, setUser] = useState<User | null>(null)
-  const navigate = useNavigate()
-  const { setLoadingUserAuth } = useLoadingStore()
-  useEffect(() => {
-    setLoadingUserAuth(true)
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-      setUser(currentUser)
-    })
+  const [user, setUser] = useState<User | null>(null);
 
-    // Clean up subscription
-    setLoadingUserAuth(false)
-    return () => unsubscribe()
-  }, [setLoadingUserAuth])
+  const navigate = useNavigate();
+
+  const [loading, isLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    // Subscribe to authentication state changes
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      setUser(currentUser);
+      isLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   // Function to handle login
   const onLogin = async (e: FormEvent, email: string, password: string) => {
-    e.preventDefault()
+    e.preventDefault();
 
     try {
       const userCredential: UserCredential = await signInWithEmailAndPassword(
         auth,
         email,
-        password
-      )
-      const user = userCredential.user
+        password,
+      );
+      const user = userCredential.user;
 
       // Navigate to the home page if signed in
       if (user) {
-        navigate("/")
+        navigate("/");
       }
 
-      return user
+      return user;
     } catch (error) {
-      const authError: AuthError = error as AuthError
-      console.error("Error during sign-in:", authError.code)
+      const authError: AuthError = error as AuthError;
+      console.error("Error during sign-in:", authError.code);
     }
-  }
+  };
 
   // Function to handle sign out
   const signOut = async () => {
     try {
-      await firebaseSignOut(auth)
-      navigate("/") // Navigate to home after sign out
+      await firebaseSignOut(auth);
+      navigate("/"); // Navigate to home after sign out
     } catch (error) {
-      console.error("Error signing out:", error)
+      console.error("Error signing out:", error);
     }
-  }
+  };
 
   // Function to handle sign in
   const signIn = async (email: string, password: string) => {
     try {
-      await firebaseSignIn(auth, email, password)
-      navigate("/") // Navigate to home after sign in
+      await firebaseSignIn(auth, email, password);
+      navigate("/");
     } catch (error) {
-      console.error("Error signing in:", error)
+      console.error("Error signing in:", error);
     }
-  }
+  };
 
   // Function to handle sign up
   const signUp = async (email: string, password: string) => {
     try {
-      await firebaseSignUp(auth, email, password)
+      await firebaseSignUp(auth, email, password);
     } catch (error) {
-      console.error("Error signing up:", error)
+      console.error("Error signing up:", error);
     }
-  }
+  };
 
-  return { user, onLogin, signOut, signIn, signUp }
-}
+  return { user, onLogin, signOut, signIn, signUp, loading };
+};

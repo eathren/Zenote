@@ -1,14 +1,14 @@
-import { GraphEdge } from "src/types/index"
-import { create } from "zustand"
-import { persist, createJSONStorage } from "zustand/middleware"
+import { GraphEdge } from "src/types/index";
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 type EdgeState = {
-  edges: GraphEdge[]
-  setEdges: (edges: GraphEdge[]) => void
-  addEdge: (edge: GraphEdge) => void
-  removeEdge: (edgeId: string) => void
-  updateEdge: (edge: GraphEdge) => void
-}
+  edges: GraphEdge[];
+  setEdges: (edges: GraphEdge[]) => void;
+  addEdge: (edge: GraphEdge) => void;
+  removeEdge: (edgeId: string) => void;
+  updateEdge: (edge: GraphEdge) => void;
+};
 
 export const useEdgeStore = create<EdgeState>()(
   persist(
@@ -28,6 +28,6 @@ export const useEdgeStore = create<EdgeState>()(
     {
       name: "edge-storage",
       storage: createJSONStorage(() => sessionStorage),
-    }
-  )
-)
+    },
+  ),
+);

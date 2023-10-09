@@ -1,14 +1,14 @@
-import { useUser } from "src/hooks/user"
-import { Button, Checkbox, Form, Input } from "antd"
-import { UserOutlined, LockOutlined } from "@ant-design/icons"
-import { Typography } from "antd"
-const { Title } = Typography
+import { useUser } from "src/hooks/user";
+import { Button, Checkbox, Form, Input } from "antd";
+import { UserOutlined, LockOutlined } from "@ant-design/icons";
+import { Typography } from "antd";
+const { Title } = Typography;
+
 const LoginPage = () => {
-  // State variables with explicit types
-  const { signIn } = useUser()
+  const { signIn } = useUser();
   const onFinish = (values: any) => {
-    signIn(values.email, values.password)
-  }
+    signIn(values.email, values.password);
+  };
 
   return (
     <>
@@ -55,7 +55,7 @@ const LoginPage = () => {
         </Form>
       </Typography>
     </>
-  )
-}
+  );
+};
 
-export default LoginPage
+export default LoginPage;

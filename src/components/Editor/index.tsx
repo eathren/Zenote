@@ -1,11 +1,11 @@
-import React, { useEffect, useRef } from "react"
-import Markdown from "react-markdown"
-import MDEditor from "@uiw/react-md-editor"
+import React, { useEffect, useRef } from "react";
+import Markdown from "react-markdown";
+import MDEditor from "@uiw/react-md-editor";
 
 interface EditorAreaProps {
-  isEditing: boolean
-  markdownContent: string
-  handleEditorChange: (newValue?: string | undefined) => void
+  isEditing: boolean;
+  markdownContent: string;
+  handleEditorChange: (newValue?: string | undefined) => void;
 }
 
 const EditorArea: React.FC<EditorAreaProps> = ({
@@ -13,11 +13,11 @@ const EditorArea: React.FC<EditorAreaProps> = ({
   markdownContent,
   handleEditorChange,
 }) => {
-  const editorRef = useRef<HTMLDivElement | null>(null) // Ref for the editor div
+  const editorRef = useRef<HTMLDivElement | null>(null); // Ref for the editor div
 
   const handleClickInside = () => {
     // Logic to handle clicks inside the editor can be added here, if any
-  }
+  };
 
   const handleClickOutside = (event: MouseEvent) => {
     if (
@@ -26,15 +26,15 @@ const EditorArea: React.FC<EditorAreaProps> = ({
     ) {
       // Logic to handle clicks outside the editor can be added here, if any
     }
-  }
+  };
 
   useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside)
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [])
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <div ref={editorRef} onClick={handleClickInside}>
@@ -51,7 +51,7 @@ const EditorArea: React.FC<EditorAreaProps> = ({
         )
       }
     </div>
-  )
-}
+  );
+};
 
-export default EditorArea
+export default EditorArea;

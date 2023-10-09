@@ -1,14 +1,14 @@
-import { Graph } from "src/types/index"
-import { create } from "zustand"
-import { persist, createJSONStorage } from "zustand/middleware"
+import { Graph } from "src/types/index";
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 type GraphState = {
-  graphs: Graph[]
-  setGraphs: (graphs: Graph[]) => void
-  addGraph: (graph: Graph) => void
-  removeGraph: (graphId: string) => void
-  updateGraph: (graph: Graph) => void
-}
+  graphs: Graph[];
+  setGraphs: (graphs: Graph[]) => void;
+  addGraph: (graph: Graph) => void;
+  removeGraph: (graphId: string) => void;
+  updateGraph: (graph: Graph) => void;
+};
 
 export const useGraphStore = create<GraphState>()(
   persist<GraphState>(
@@ -32,6 +32,6 @@ export const useGraphStore = create<GraphState>()(
     {
       name: "graph-storage",
       storage: createJSONStorage(() => sessionStorage),
-    }
-  )
-)
+    },
+  ),
+);

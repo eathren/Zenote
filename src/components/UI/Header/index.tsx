@@ -1,11 +1,11 @@
-import { HomeOutlined } from "@ant-design/icons"
-import styles from "./index.module.css"
-import { Link } from "react-router-dom"
-import { Button } from "antd"
-import { useUser } from "src/hooks/user"
+import { HomeOutlined } from "@ant-design/icons";
+import styles from "./index.module.css";
+import { Link } from "react-router-dom";
+import { Button } from "antd";
+import { useUser } from "src/hooks/user";
 
 export const Header = () => {
-  const { user, signOut } = useUser()
+  const { user, signOut } = useUser();
   return (
     <div className={styles.header__body}>
       <div className={styles.header__icon}>
@@ -36,5 +36,5 @@ export const Header = () => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};

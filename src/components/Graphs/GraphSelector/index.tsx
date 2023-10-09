@@ -1,20 +1,20 @@
-import { useGraphs } from "src/hooks/useGraphs"
-import { Card } from "antd"
-import { useNavigate } from "react-router-dom"
-import styles from "./GraphSelector.module.css"
-import { Graph } from "src/types"
-import { Skeleton } from "antd"
+import { useGraphs } from "src/hooks/useGraphs";
+import { Card } from "antd";
+import { useNavigate } from "react-router-dom";
+import styles from "./GraphSelector.module.css";
+import { Graph } from "src/types";
+import { Skeleton } from "antd";
 
 const GraphSelector = () => {
-  const { graphs, loading } = useGraphs()
-  const navigate = useNavigate()
+  const { graphs, loading } = useGraphs();
+  const navigate = useNavigate();
 
   if (loading)
     return (
       <>
         <Skeleton active />;
       </>
-    )
+    );
 
   return (
     <>
@@ -29,10 +29,10 @@ const GraphSelector = () => {
           >
             {graph.name}
           </Card>
-        )
+        );
       })}
     </>
-  )
-}
+  );
+};
 
-export default GraphSelector
+export default GraphSelector;

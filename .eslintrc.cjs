@@ -5,7 +5,7 @@ module.exports = {
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:react-hooks/recommended",
-    "plugin:storybook/recommended"
+    "plugin:storybook/recommended",
   ],
   ignorePatterns: ["dist", ".eslintrc.cjs"],
   parser: "@typescript-eslint/parser",
@@ -19,4 +19,4 @@ module.exports = {
     "@typescript-eslint/no-unsafe-assignment": "off", // To accept assignments to `unknown` without complaint
     // "@typescript-eslint/no-unsafe-call": "off", // To accept calling an unknown method
   },
-}
+};
