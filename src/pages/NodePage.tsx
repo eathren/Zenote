@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import {
   addEdge,
@@ -12,6 +12,7 @@ import { useEdges } from "src/hooks/useEdges";
 import { findNodeId } from "src/utils";
 import { useNodes } from "src/hooks/useNodes";
 import EditorArea from "src/components/Editor";
+
 
 const NodePage = () => {
   const { graphId, nodeId } = useParams<{ nodeId: string; graphId: string }>();
@@ -27,15 +28,8 @@ const NodePage = () => {
     return str.length > length ? str.substring(0, length) + "..." : str;
   };
 
-  const debouncedUpload = debounce(() => {
-    if (nodeId && markdownContent) {
-      uploadMarkdown(nodeId, markdownContent);
-    }
-  }, 1000);
+  
 
-  useEffect(() => {
-    debouncedUpload();
-  }, [markdownContent]);
 
   useEffect(() => {
     if (!nodeId || !graphId) return;
@@ -101,11 +95,41 @@ const NodePage = () => {
     };
   }, []);
 
+
+  // const delayedQuery = useMemo(() => debounce(() => {
+  //   if (nodeId && markdownContent) {
+  //     uploadMarkdown(nodeId, markdownContent);
+  //   }
+  // }, 2000), [nodeId, markdownContent]);
+
+  // Create a memoized debounced function
+  // const debouncedUpload = useCallback(
+  //   debounce(() => {
+  //     if (nodeId && markdownContent) {
+  //       uploadMarkdown(nodeId, markdownContent);
+  //     }
+  //   }, 1000),
+    // [nodeId, markdownContent]
+  // );
+
+
+  const debounceUpload = useCallback(
+    debounce((newValue: string) => {
+      if (nodeId && newValue) {
+        console.log("uploading");
+        uploadMarkdown(nodeId, newValue);
+      }
+    }, 1000),
+    []
+  );
+
   const handleEditorChange = (newValue?: string | undefined) => {
     if (newValue !== undefined) {
       setMarkdownContent(newValue);
+      debounceUpload(newValue)
     }
   };
+
 
   return (
     <Typography>

@@ -7,7 +7,7 @@ import {
   ArrowRightOutlined,
 } from "@ant-design/icons";
 import { Popover, Button, Layout, Modal, Input, notification } from "antd";
-import { matchPath, useParams } from "react-router-dom";
+import {  matchPath, useNavigate, useParams } from "react-router-dom";
 import { addNode } from "src/handles";
 import { theme } from "antd";
 import { useNodes } from "src/hooks/useNodes";
@@ -30,11 +30,11 @@ export const BasicLayout = ({ children }: LayoutProps) => {
   const isHome = matchPath(window.location.pathname, "/");
   const { graphId } = useParams<{ graphId?: string }>();
   const { nodes } = useNodes(graphId);
-
   const [modalOpen, setModalOpen] = useState(false);
   const [nodeName, setNodeName] = useState("");
-
   const { hasForwardHistory } = useForwardHistory();
+  const [isCollapsed, setIsCollapsed] = useState(false)
+  const navigate = useNavigate()
 
   const handleNodeNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNodeName(e.target.value);
@@ -73,6 +73,11 @@ export const BasicLayout = ({ children }: LayoutProps) => {
     window.history.forward();
   };
 
+  const handleNavigateGraphView =  () => {
+    navigate(`/graphs/${graphId}`)
+  }
+  
+
   const ButtonList = [
     {
       icon: <FileAddOutlined />,
@@ -82,12 +87,13 @@ export const BasicLayout = ({ children }: LayoutProps) => {
     {
       icon: <RadarChartOutlined />,
       text: "Open Graph View",
-      onClick: handleAddNode,
+      onClick: handleNavigateGraphView,
     },
     {
       icon: <ArrowLeftOutlined />,
       text: "Go Back",
       onClick: goBackInHistory,
+      disabled: false,
     },
     {
       icon: <ArrowRightOutlined />,
@@ -105,7 +111,7 @@ export const BasicLayout = ({ children }: LayoutProps) => {
         </Header>
         <Layout>
           {isHome ? null : (
-            <Sider className={styles.sidebar} width={50} style={{}}>
+            <Sider onCollapse={() => setIsCollapsed(!isCollapsed)} collapsible={true} collapsed={isCollapsed} className={styles.sidebar} width={50} style={{}}>
               {ButtonList.map((item, index) => (
                 <div key={index}>
                   <Popover placement="right" title={item.text}>
