@@ -18,10 +18,12 @@ import {
   uploadString,
 } from "firebase/storage"
 import { GraphNode, Graph } from "src/types/index"
+import { notification } from "antd"
 
 const storage = getStorage()
 const db = getFirestore()
 
+// Graphs
 export const addGraphInDB = async (graphName: string) => {
   const graphsCollection = collection(db, "graphs")
   const graph = {
@@ -32,7 +34,10 @@ export const addGraphInDB = async (graphName: string) => {
     const docRef = await addDoc(graphsCollection, graph)
     return docRef.id
   } catch (error) {
-    console.error("Failed to add graph in DB:", error)
+    notification.error({
+      message: "Error",
+      description: "Failed to add graph in DB",
+    })
   }
 }
 
@@ -46,22 +51,37 @@ export const getGraphsFromDB = async () => {
   return graphs
 }
 
-// Nodes
+export const deleteGraph = async (graphId: string) => {
+  try {
+    const graphRef = doc(db, "graphs", graphId)
+    await deleteDoc(graphRef)
 
+    // Delete all nodes and edges related to this graph
+    const nodes = await getNodes(graphId)
+    nodes.forEach(async (node) => {
+      await deleteNode(node.id)
+    })
+  } catch (error) {
+    notification.error({
+      message: "Error",
+      description: "Failed to delete graph",
+    })
+  }
+}
+
+// Nodes
 export const fetchMarkdown = async (nodeId: string) => {
   try {
-    // Reference to storage bucket
-    // Reference to file in storage
     const storageRef = ref(storage, `markdown/${nodeId}.md`)
-
     const url = await getDownloadURL(storageRef)
-
-    // Fetch markdown content from the URL
     const response = await fetch(url)
     const text = await response.text()
     return text
   } catch (error) {
-    console.error("Error fetching markdown:", error)
+    notification.error({
+      message: "Error",
+      description: "Failed to fetch markdown",
+    })
   }
 }
 
@@ -89,29 +109,15 @@ export const getNodes = async (graphId: string) => {
 }
 
 export const addNode = async (graphId: string, nodeName: string) => {
-  // Get a reference to the Firestore 'nodes' collection
   const nodesCollection = collection(db, "nodes")
-
-  // Generate the initial Markdown content and upload it, retrieving the generated URL
-  const markdownContent = `# ${nodeName}`
-
-  // Create a new node object with default values
   const newNode = {
     name: nodeName || "Untitled",
     graphId,
   }
-
-  // Add the new node to the Firestore 'nodes' collection
   const docRef = await addDoc(nodesCollection, newNode)
-
-  // Generate a unique Markdown file name based on the Firestore-generated ID for the new node
-  const markdownUrl = await uploadMarkdown(docRef.id, markdownContent)
-
-  // Update the Firestore document with the new Markdown file name and URL
+  const markdownUrl = await uploadMarkdown(docRef.id, `# ${nodeName}`)
   const nodeDoc = doc(db, "nodes", docRef.id)
   await setDoc(nodeDoc, { markdownUrl }, { merge: true })
-
-  // Return the generated Firestore ID for the new node
   return docRef.id
 }
 
@@ -121,9 +127,7 @@ export const updateNode = async (
   markdown: string
 ) => {
   const nodeRef = doc(db, "nodes", nodeId)
-
-  const markdownUrl = await uploadMarkdown(name, markdown) // Upload new Markdown and get URL
-
+  const markdownUrl = await uploadMarkdown(name, markdown)
   await updateDoc(nodeRef, {
     name,
     markdownUrl,
@@ -138,41 +142,58 @@ export const updateNodeTitle = async (nodeId: string, newTitle: string) => {
 }
 
 export const deleteNode = async (nodeId: string) => {
-  const nodeRef = doc(db, "nodes", nodeId)
+  try {
+    const nodeRef = doc(db, "nodes", nodeId)
 
-  await deleteMarkdown(nodeId) // Delete Markdown content
+    // Delete associated edges
+    const edgesCollection = collection(db, "edges")
+    const q1 = query(edgesCollection, where("source", "==", nodeId))
+    const q2 = query(edgesCollection, where("target", "==", nodeId))
+    const querySnapshot1 = await getDocs(q1)
+    const querySnapshot2 = await getDocs(q2)
 
-  await deleteDoc(nodeRef)
+    querySnapshot1.forEach(async (documentSnapshot) => {
+      await deleteDoc(doc(edgesCollection, documentSnapshot.id))
+    })
+
+    querySnapshot2.forEach(async (documentSnapshot) => {
+      await deleteDoc(doc(edgesCollection, documentSnapshot.id))
+    })
+
+    // Delete markdown
+    await deleteMarkdown(nodeId)
+
+    // Delete node
+    await deleteDoc(nodeRef)
+  } catch (error) {
+    notification.error({
+      message: "Error",
+      description: "Failed to delete node",
+    })
+  }
 }
 
+// Edges
 export const addEdge = async (
   graphId: string,
   source: string,
   target: string
 ) => {
   if (!graphId || !source || !target) return
-  // Get a reference to the Firestore 'edges' collection
   const edgesCollection = collection(db, "edges")
-
-  // Check if the edge already exists
   const q = query(
     edgesCollection,
     where("graphId", "==", graphId),
     where("source", "==", source),
     where("target", "==", target)
   )
-
   const querySnapshot = await getDocs(q)
-
   if (querySnapshot.empty) {
-    // If the edge doesn't exist, create it
     const newEdge = {
       graphId,
       source,
       target,
     }
-
-    // Add the new edge to the Firestore 'edges' collection
     await addDoc(edgesCollection, newEdge)
   }
 }
@@ -184,11 +205,8 @@ export const deleteEdge = async (source: string, target: string) => {
     where("source", "==", source),
     where("target", "==", target)
   )
-
   const querySnapshot = await getDocs(q)
-
   if (!querySnapshot.empty) {
-    // If the edge exists, delete it
     querySnapshot.forEach(async (documentSnapshot) => {
       await deleteDoc(doc(edgesCollection, documentSnapshot.id))
     })

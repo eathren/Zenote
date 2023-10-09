@@ -6,15 +6,16 @@ import { useNodes } from "src/hooks/useNodes"
 
 const GraphPage = () => {
   const { graphId } = useParams()
-  const { loading: nodesLoading } = useNodes(graphId)
-  const { loading: edgesLoading } = useEdges(graphId)
+  const { nodes, loading: nodesLoading } = useNodes(graphId)
+  const { edges, loading: edgesLoading } = useEdges(graphId)
 
+  if (!graphId) return <></>
   return (
     <>
       {nodesLoading || edgesLoading ? (
         <Spin style={{ position: "absolute", left: "50%", top: "50%" }} />
       ) : (
-        <ForceGraph />
+        <ForceGraph graphId={graphId} nodes={nodes} edges={edges} />
       )}
     </>
   )

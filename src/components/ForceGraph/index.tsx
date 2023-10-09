@@ -1,17 +1,18 @@
 import * as d3 from "d3"
 import { useEffect, useRef } from "react"
-import { useNavigate, useParams } from "react-router-dom"
-import { useEdges } from "src/hooks/useEdges"
-import { useNodes } from "src/hooks/useNodes"
+import { useNavigate } from "react-router-dom"
 import { GraphNode, GraphEdge } from "src/types" // Update the import path as needed
 
-const ForceGraph = () => {
+type ForceGraphProps = {
+  graphId: string
+  nodes: GraphNode[]
+  edges: GraphEdge[]
+}
+
+const ForceGraph = (props: ForceGraphProps) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const navigate = useNavigate()
-
-  const { graphId } = useParams()
-  const { nodes } = useNodes(graphId)
-  const { edges } = useEdges(graphId)
+  const { graphId, nodes, edges } = props
 
   useEffect(() => {
     if (!svgRef.current) {
@@ -98,7 +99,7 @@ const ForceGraph = () => {
         nodeGroup.attr("opacity", 1)
       })
       .on("click", (_event, d) => {
-        navigate(`/${graphId}/${d.id}`)
+        navigate(`/graphs/${graphId}/node/${d.id}`)
       })
 
     nodeGroup

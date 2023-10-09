@@ -24,7 +24,7 @@ const GraphSelector = () => {
             className={styles.card__body}
             key={graph.id}
             bordered={true}
-            onClick={() => navigate(`/${graph.id}`)}
+            onClick={() => navigate(`/graphs/${graph.id}`)}
             hoverable={true}
           >
             {graph.name}

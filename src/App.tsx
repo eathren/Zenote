@@ -37,7 +37,7 @@ function App() {
               }
             />
             <Route
-              path="/:graphId"
+              path="/graphs/:graphId"
               element={
                 <BasicLayout>
                   <GraphPage />
@@ -45,7 +45,7 @@ function App() {
               }
             />
             <Route
-              path="/:graphId/:nodeId"
+              path="/graphs/:graphId/node/:nodeId"
               element={
                 <BasicLayout>
                   <NodePage />

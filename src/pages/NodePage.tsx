@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react"
-import Markdown from "react-markdown"
 import { useParams } from "react-router-dom"
 import {
   addEdge,
@@ -7,17 +6,18 @@ import {
   updateNodeTitle,
   uploadMarkdown,
 } from "src/handles"
-import MDEditor from "@uiw/react-md-editor"
-import { Typography } from "antd"
+import { Spin, Typography } from "antd"
 import { debounce } from "lodash"
 import { useEdges } from "src/hooks/useEdges"
 import { findNodeId } from "src/utils"
 import { useNodes } from "src/hooks/useNodes"
+import EditorArea from "src/components/Editor"
 
 const NodePage = () => {
   const { graphId, nodeId } = useParams<{ nodeId: string; graphId: string }>()
   const [markdownContent, setMarkdownContent] = useState<string>("")
   const [isEditing, setIsEditing] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const editorRef = useRef<HTMLDivElement | null>(null)
 
   const { edges } = useEdges(graphId)
@@ -31,20 +31,22 @@ const NodePage = () => {
     if (nodeId && markdownContent) {
       uploadMarkdown(nodeId, markdownContent)
     }
-  }, 500)
+  }, 1000)
 
   useEffect(() => {
     debouncedUpload()
   }, [markdownContent])
 
   useEffect(() => {
-    if (!nodeId) return
+    if (!nodeId || !graphId) return
     const fetchMarkdownAsync = async (nodeId: string) => {
+      setIsLoading(true)
       const md = await fetchMarkdown(nodeId)
       if (md) setMarkdownContent(md)
+      setIsLoading(false)
     }
     fetchMarkdownAsync(nodeId)
-  }, [nodeId])
+  }, [graphId, nodeId])
 
   useEffect(() => {
     const regex = /\[\[([^\]]+)\]\]/g
@@ -67,12 +69,10 @@ const NodePage = () => {
     addNewEdges()
   }, [markdownContent, edges, nodes, nodeId, graphId])
 
-  // Handle clicks inside the editor
   const handleClickInside = () => {
     setIsEditing(true)
   }
 
-  // Handle clicks outside the editor
   const handleClickOutside = (event: MouseEvent) => {
     if (
       editorRef.current &&
@@ -83,21 +83,16 @@ const NodePage = () => {
   }
 
   useEffect(() => {
-    // Remove Markdown-specific characters like '#', '*', '_', etc.
     const cleanString = markdownContent
       .split("\n")[0]
       .replace(/[*_#`~]/g, "")
       .trim()
-
-    // Truncate to 50 characters
     const truncatedTitle = truncate(cleanString, 50)
-
     if (nodeId) {
       updateNodeTitle(nodeId, truncatedTitle)
     }
   }, [markdownContent, nodeId])
 
-  // Add event listener for clicks outside the editor
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside)
 
@@ -114,18 +109,16 @@ const NodePage = () => {
 
   return (
     <Typography>
-      <div style={{ color: "white" }}>
-        <div ref={editorRef} onClick={handleClickInside}>
-          {isEditing ? (
-            <MDEditor
-              data-color-mode="dark"
-              value={markdownContent}
-              onChange={handleEditorChange}
-            />
-          ) : (
-            <Markdown>{markdownContent}</Markdown>
-          )}
-        </div>
+      <div ref={editorRef} onClick={handleClickInside}>
+        {isLoading ? (
+          <Spin tip="Loading..."></Spin>
+        ) : (
+          <EditorArea
+            isEditing={isEditing}
+            markdownContent={markdownContent}
+            handleEditorChange={handleEditorChange}
+          />
+        )}
       </div>
     </Typography>
   )

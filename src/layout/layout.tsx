@@ -1,14 +1,20 @@
 import React, { useCallback, useState } from "react"
 import { Header as CustomHeader } from "src/components/UI/Header"
-import { RadarChartOutlined, FileAddOutlined } from "@ant-design/icons"
+import {
+  RadarChartOutlined,
+  FileAddOutlined,
+  ArrowLeftOutlined,
+  ArrowRightOutlined,
+} from "@ant-design/icons"
 import { Popover, Button, Layout, Modal, Input, notification } from "antd"
 import { matchPath, useParams } from "react-router-dom"
 import { addNode } from "src/handles"
 import { theme } from "antd"
 import { useNodes } from "src/hooks/useNodes"
 import { isNodeNameUnique } from "src/utils"
-import styles from "./index.module.css" // Import the CSS file
-import ButtonGroup from "antd/es/button/button-group"
+import styles from "./index.module.css"
+import FooterButtonList from "src/components/FooterButtonList"
+import { useForwardHistory } from "src/hooks/useForwardHistory"
 
 const { Header, Content, Sider, Footer } = Layout
 
@@ -27,6 +33,8 @@ export const BasicLayout = ({ children }: LayoutProps) => {
 
   const [modalOpen, setModalOpen] = useState(false)
   const [nodeName, setNodeName] = useState("")
+
+  const { hasForwardHistory } = useForwardHistory()
 
   const handleNodeNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNodeName(e.target.value)
@@ -51,6 +59,20 @@ export const BasicLayout = ({ children }: LayoutProps) => {
     }
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      confirmAddNode()
+    }
+  }
+
+  const goBackInHistory = () => {
+    window.history.back()
+  }
+
+  const goForwardInHistory = () => {
+    window.history.forward()
+  }
+
   const ButtonList = [
     {
       icon: <FileAddOutlined />,
@@ -61,6 +83,17 @@ export const BasicLayout = ({ children }: LayoutProps) => {
       icon: <RadarChartOutlined />,
       text: "Open Graph View",
       onClick: handleAddNode,
+    },
+    {
+      icon: <ArrowLeftOutlined />,
+      text: "Go Back",
+      onClick: goBackInHistory,
+    },
+    {
+      icon: <ArrowRightOutlined />,
+      text: "Go Forward",
+      onClick: goForwardInHistory,
+      disabled: !hasForwardHistory,
     },
   ]
 
@@ -80,6 +113,7 @@ export const BasicLayout = ({ children }: LayoutProps) => {
                       type="text"
                       style={{ width: "100%", marginTop: "10px" }}
                       onClick={() => item.onClick()}
+                      disabled={item.disabled}
                     >
                       {item.icon}
                     </Button>
@@ -100,24 +134,11 @@ export const BasicLayout = ({ children }: LayoutProps) => {
               {children}
             </Content>
             <Footer className={styles.footer}>
-              {isHome ? null : (
-                <ButtonGroup>
-                  {ButtonList.map((item, index) => (
-                    <div key={index} style={{ margin: "0 5px" }}>
-                      <Popover placement="top" title={item.text}>
-                        <Button type="text" onClick={() => item.onClick()}>
-                          {item.icon}
-                        </Button>
-                      </Popover>
-                    </div>
-                  ))}
-                </ButtonGroup>
-              )}
+              {isHome ? null : <FooterButtonList buttonList={ButtonList} />}
             </Footer>
           </Layout>
         </Layout>
 
-        {/* Modal for adding a new node */}
         <Modal
           title="Add a new node"
           open={modalOpen}
@@ -128,6 +149,7 @@ export const BasicLayout = ({ children }: LayoutProps) => {
             placeholder="Node Name..."
             value={nodeName}
             onChange={handleNodeNameChange}
+            onKeyDown={handleKeyDown}
           />
         </Modal>
       </Layout>
