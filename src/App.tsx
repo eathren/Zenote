@@ -32,7 +32,15 @@ function App() {
 
   // Show loading spinner until Firebase check is complete
   if (loading) {
-    return <Spin>Loading...</Spin>
+    return (
+      <ConfigProvider theme={{ algorithm: darkAlgorithm }}>
+        <BasicLayout>
+          <Spin
+            style={{ position: "absolute", left: "50%", top: "50%" }}
+          ></Spin>
+        </BasicLayout>
+      </ConfigProvider>
+    )
   }
 
   return (
