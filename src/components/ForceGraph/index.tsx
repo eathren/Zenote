@@ -63,11 +63,11 @@ const ForceGraph = (props: ForceGraphProps) => {
       .attr("fill", "#AAAAAA")
       .style("transition", "all 0.3s ease-in-out")
       .on("mouseover", function (_event, d) {
-        d3.select(this).attr("r", 10).attr("fill", "green")
+        d3.select(this).attr("r", 10).attr("fill", "#82a8ff")
 
         link
           .filter((l: GraphEdge) => l.source === d || l.target === d)
-          .attr("stroke", "green")
+          .attr("stroke", "#82a8ff")
 
         // Fade out other nodes and links
         link

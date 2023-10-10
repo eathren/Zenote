@@ -1,8 +1,8 @@
-import { collection, query, where, onSnapshot } from "firebase/firestore";
-import { useEffect, useState } from "react";
-import { GraphNode } from "src/types";
-import { db } from "../firebase";
-import { useNodeStore } from "src/stores/nodeStore";
+import { collection, query, where, onSnapshot } from "firebase/firestore"
+import { useEffect, useState } from "react"
+import { GraphNode } from "src/types"
+import { db } from "../firebase"
+import { useNodeStore } from "src/stores/nodeStore"
 
 /**
  * Custom hook to fetch and store graph nodes from Firebase Firestore based on graphId.
@@ -13,47 +13,47 @@ import { useNodeStore } from "src/stores/nodeStore";
  * @returns {Error | null} error - Contains the error if something went wrong, otherwise null.
  */
 export const useNodes = (graphId?: string) => {
-  const { nodes, setNodes } = useNodeStore();
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
+  const { nodes, setNodes } = useNodeStore()
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
     if (!graphId) {
-      setLoading(false);
-      return;
+      setLoading(false)
+      return
     }
 
     // Reference to Firestore collection
-    const nodesCollection = collection(db, "nodes");
+    const nodesCollection = collection(db, "nodes")
 
     // Build the query
-    const q = query(nodesCollection, where("graphId", "==", graphId));
+    const q = query(nodesCollection, where("graphId", "==", graphId))
 
     // Subscribe to changes in the collection filtered by graphId
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        const fetchedNodes: GraphNode[] = [];
+        const fetchedNodes: GraphNode[] = []
 
         snapshot.forEach((doc) => {
-          const data = doc.data() as GraphNode;
-          fetchedNodes.push({ ...data, id: doc.id });
-        });
+          const data = doc.data() as GraphNode
+          fetchedNodes.push({ ...data, id: doc.id })
+        })
 
-        setNodes(fetchedNodes);
-        setLoading(false);
+        setNodes(fetchedNodes)
+        setLoading(false)
       },
       (err) => {
-        setError(err);
-        setLoading(false);
-      },
-    );
+        setError(err)
+        setLoading(false)
+      }
+    )
 
     // Clean up subscription
     return () => {
-      unsubscribe();
-    };
-  }, [graphId, setNodes]);
+      unsubscribe()
+    }
+  }, [graphId, setNodes])
 
-  return { nodes, loading, error };
-};
+  return { nodes, loading, error }
+}
