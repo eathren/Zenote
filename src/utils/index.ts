@@ -1,9 +1,9 @@
-import { GraphNode } from "src/types";
+import { GraphNode } from "src/types"
 
 export const findNodeId = (nodes: GraphNode[], name: string): string | null => {
-  const node = nodes.find((node) => node.name === name);
-  return node ? node.id : null;
-};
+  const node = nodes.find((node) => node.name === name)
+  return node ? node.id : null
+}
 /**
  * Check if a node name is unique within a specific graph.
  *
@@ -14,9 +14,12 @@ export const findNodeId = (nodes: GraphNode[], name: string): string | null => {
 export const isNodeNameUnique = (
   nodes: GraphNode[],
   newName: string,
+  graphId: string | undefined
 ): boolean => {
-  return !nodes.some((node) => node.name === newName);
-};
+  return !nodes.some(
+    (node) => node.name === newName && node.graphId === graphId
+  )
+}
 
 /**
  * Generate a unique node name based on a proposed name.
@@ -28,15 +31,15 @@ export const isNodeNameUnique = (
  */
 export const generateUniqueNodeName = (
   nodes: GraphNode[],
-  baseName: string,
+  baseName: string
 ): string => {
-  let uniqueName = baseName;
-  let counter = 1;
+  let uniqueName = baseName
+  let counter = 1
 
   while (!isNodeNameUnique(nodes, uniqueName)) {
-    uniqueName = `${baseName}-${counter}`;
-    counter++;
+    uniqueName = `${baseName}-${counter}`
+    counter++
   }
 
-  return uniqueName;
-};
+  return uniqueName
+}

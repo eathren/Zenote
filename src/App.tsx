@@ -13,6 +13,7 @@ import { BasicLayout } from "src/layout/layout"
 import "./App.css"
 
 import { ReactNode } from "react"
+import PlaygroundPage from "./pages/PlaygroundPage"
 
 const { darkAlgorithm } = theme
 
@@ -68,6 +69,16 @@ function App() {
             <ProtectedRoute>
               <BasicLayout>
                 <GraphPage />
+              </BasicLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/graphs/:graphId/playground"
+          element={
+            <ProtectedRoute>
+              <BasicLayout>
+                <PlaygroundPage />
               </BasicLayout>
             </ProtectedRoute>
           }

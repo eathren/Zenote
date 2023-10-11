@@ -1,82 +1,81 @@
-import React, { useCallback, useState } from "react";
-import { Header as CustomHeader } from "src/components/UI/Header";
+import React, { useCallback, useState } from "react"
+import { Header as CustomHeader } from "src/components/UI/Header"
 import {
   RadarChartOutlined,
   FileAddOutlined,
   ArrowLeftOutlined,
   ArrowRightOutlined,
-} from "@ant-design/icons";
-import { Popover, Button, Layout, Modal, Input, notification } from "antd";
-import {  matchPath, useNavigate, useParams } from "react-router-dom";
-import { addNode } from "src/handles";
-import { theme } from "antd";
-import { useNodes } from "src/hooks/useNodes";
-import { isNodeNameUnique } from "src/utils";
-import styles from "./index.module.css";
-import FooterButtonList from "src/components/FooterButtonList";
-import { useForwardHistory } from "src/hooks/useForwardHistory";
+} from "@ant-design/icons"
+import { Popover, Button, Layout, Modal, Input, notification } from "antd"
+import { matchPath, useNavigate, useParams } from "react-router-dom"
+import { addNode } from "src/handles"
+import { theme } from "antd"
+import { useNodes } from "src/hooks/useNodes"
+import { isNodeNameUnique } from "src/utils"
+import styles from "./index.module.css"
+import FooterButtonList from "src/components/FooterButtonList"
+import { useForwardHistory } from "src/hooks/useForwardHistory"
 
-const { Header, Content, Sider, Footer } = Layout;
+const { Header, Content, Sider, Footer } = Layout
 
 type LayoutProps = {
-  children: React.ReactNode;
-};
+  children: React.ReactNode
+}
 
 export const BasicLayout = ({ children }: LayoutProps) => {
   const {
     token: { colorBgContainer },
-  } = theme.useToken();
+  } = theme.useToken()
 
-  const isHome = matchPath(window.location.pathname, "/");
-  const { graphId } = useParams<{ graphId?: string }>();
-  const { nodes } = useNodes(graphId);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [nodeName, setNodeName] = useState("");
-  const { hasForwardHistory } = useForwardHistory();
+  const isHome = matchPath(window.location.pathname, "/")
+  const { graphId } = useParams<{ graphId?: string }>()
+  const { data: nodes } = useNodes(graphId)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [nodeName, setNodeName] = useState("")
+  const { hasForwardHistory } = useForwardHistory()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const navigate = useNavigate()
 
   const handleNodeNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNodeName(e.target.value);
-  };
+    setNodeName(e.target.value)
+  }
 
   const handleAddNode = useCallback(() => {
-    setModalOpen(true);
-  }, []);
+    setModalOpen(true)
+  }, [])
 
   const confirmAddNode = () => {
-    const unique = isNodeNameUnique(nodes, nodeName);
+    const unique = isNodeNameUnique(nodes, nodeName, graphId)
     if (unique) {
-      if (graphId) addNode(graphId, nodeName);
-      setModalOpen(false);
-      setNodeName("");
+      if (graphId) addNode(graphId, nodeName)
+      setModalOpen(false)
+      setNodeName("")
     } else {
       notification.error({
         message: "Node Name Error",
         description:
           "This node name already exists. Please choose another name.",
-      });
+      })
     }
-  };
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
-      confirmAddNode();
+      confirmAddNode()
     }
-  };
+  }
 
   const goBackInHistory = () => {
-    window.history.back();
-  };
+    window.history.back()
+  }
 
   const goForwardInHistory = () => {
-    window.history.forward();
-  };
+    window.history.forward()
+  }
 
-  const handleNavigateGraphView =  () => {
+  const handleNavigateGraphView = () => {
     navigate(`/graphs/${graphId}`)
   }
-  
 
   const ButtonList = [
     {
@@ -101,7 +100,7 @@ export const BasicLayout = ({ children }: LayoutProps) => {
       onClick: goForwardInHistory,
       disabled: !hasForwardHistory,
     },
-  ];
+  ]
 
   return (
     <>
@@ -111,7 +110,14 @@ export const BasicLayout = ({ children }: LayoutProps) => {
         </Header>
         <Layout>
           {isHome ? null : (
-            <Sider onCollapse={() => setIsCollapsed(!isCollapsed)} collapsible={true} collapsed={isCollapsed} className={styles.sidebar} width={50} style={{}}>
+            <Sider
+              onCollapse={() => setIsCollapsed(!isCollapsed)}
+              collapsible={true}
+              collapsed={isCollapsed}
+              className={styles.sidebar}
+              width={50}
+              style={{}}
+            >
               {ButtonList.map((item, index) => (
                 <div key={index}>
                   <Popover placement="right" title={item.text}>
@@ -160,5 +166,5 @@ export const BasicLayout = ({ children }: LayoutProps) => {
         </Modal>
       </Layout>
     </>
-  );
-};
+  )
+}
