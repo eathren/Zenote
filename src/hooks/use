@@ -1,0 +1,59 @@
+import { useEffect, useState } from "react"
+import { db } from "../firebase"
+import { collection, query, where, onSnapshot } from "firebase/firestore"
+
+export const useGraphData = <T extends { id: string }>(
+  collectionName: string,
+  graphId: string
+) => {
+  const [data, setData] = useState<T[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const q = query(
+      collection(db, collectionName),
+      where("graphId", "==", graphId)
+    )
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        setLoading(false)
+        setError(null)
+
+        snapshot.docChanges().forEach((change) => {
+          const newData: T = {
+            id: change.doc.id,
+            ...change.doc.data(),
+          } as T
+
+          setData((prevData) => {
+            switch (change.type) {
+              case "added":
+                return [...prevData, newData]
+              case "modified":
+                return prevData.map((item) =>
+                  item.id === newData.id ? newData : item
+                )
+              case "removed":
+                return prevData.filter((item) => item.id !== newData.id)
+              default:
+                return prevData
+            }
+          })
+        })
+      },
+      (err) => {
+        setError(err)
+        setLoading(false)
+      }
+    )
+
+    return () => {
+      unsubscribe()
+    }
+  }, [collectionName, graphId])
+
+  return { data, loading, error }
+}

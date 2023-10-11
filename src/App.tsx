@@ -7,13 +7,13 @@ import HomePage from "src/pages/HomePage"
 import GraphPage from "src/pages/GraphPage"
 import NodePage from "src/pages/NodePage"
 import LandingPage from "src/pages/LandingPage"
+import PlaygroundPage from "./pages/PlaygroundPage"
 import { useUser } from "src/hooks/user"
 import { ConfigProvider, theme } from "antd"
 import { BasicLayout } from "src/layout/layout"
 import "./App.css"
 
 import { ReactNode } from "react"
-import PlaygroundPage from "./pages/PlaygroundPage"
 
 const { darkAlgorithm } = theme
 

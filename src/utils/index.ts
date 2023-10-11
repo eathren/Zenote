@@ -14,7 +14,7 @@ export const findNodeId = (nodes: GraphNode[], name: string): string | null => {
 export const isNodeNameUnique = (
   nodes: GraphNode[],
   newName: string,
-  graphId: string | undefined
+  graphId?: string
 ): boolean => {
   return !nodes.some(
     (node) => node.name === newName && node.graphId === graphId
