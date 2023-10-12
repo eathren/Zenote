@@ -1,57 +1,71 @@
-import React, { useEffect, useRef } from "react";
-import Markdown from "react-markdown";
-import MDEditor from "@uiw/react-md-editor";
+import React, { useEffect, useRef, useState } from "react"
+import Markdown from "react-markdown"
+import { Input } from "antd"
+
+const { TextArea } = Input
 
 interface EditorAreaProps {
-  isEditing: boolean;
-  markdownContent: string;
-  handleEditorChange: (newValue?: string | undefined) => void;
+  markdownContent: string
+  handleEditorChange: (newValue?: string | undefined) => void
 }
 
 const EditorArea: React.FC<EditorAreaProps> = ({
-  isEditing,
   markdownContent,
   handleEditorChange,
 }) => {
-  const editorRef = useRef<HTMLDivElement | null>(null); // Ref for the editor div
-
-  const handleClickInside = () => {
-    // Logic to handle clicks inside the editor can be added here, if any
-  };
-
-  const handleClickOutside = (event: MouseEvent) => {
-    if (
-      editorRef.current &&
-      !editorRef.current.contains(event.target as Node)
-    ) {
-      // Logic to handle clicks outside the editor can be added here, if any
-    }
-  };
+  const [isEditing, setIsEditing] = useState(false)
+  const [cursorPosition, setCursorPosition] = useState<number | null>(null)
+  const textAreaRef = useRef<any>(null) // Change this to any
+  const lineRefs = useRef<(HTMLDivElement | null)[]>([])
 
   useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
+    if (isEditing && textAreaRef.current && cursorPosition !== null) {
+      const textArea: HTMLTextAreaElement =
+        textAreaRef.current.resizableTextArea.textArea
+      textArea.focus()
+      textArea.setSelectionRange(cursorPosition, cursorPosition)
+    }
+  }, [isEditing, cursorPosition])
 
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  const handleLineClick = (lineIndex: number) => {
+    if (lineRefs.current[lineIndex]) {
+      const linesBeforeClicked = markdownContent
+        .split("\n")
+        .slice(0, lineIndex)
+        .join("\n")
+
+      setCursorPosition(linesBeforeClicked.length + lineIndex) // Adding lineIndex for newlines
+      setIsEditing(true)
+    }
+  }
 
   return (
-    <div ref={editorRef} onClick={handleClickInside}>
-      {
-        // Conditional rendering: show editor if in editing mode, otherwise show markdown display
-        isEditing ? (
-          <MDEditor
-            data-color-mode="dark"
-            value={markdownContent}
-            onChange={handleEditorChange}
-          />
-        ) : (
-          <Markdown>{markdownContent}</Markdown>
-        )
-      }
+    <div>
+      {isEditing ? (
+        <TextArea
+          ref={textAreaRef}
+          autoSize={{ minRows: 10 }}
+          value={markdownContent}
+          onChange={(e) => {
+            handleEditorChange(e.target.value)
+          }}
+          onBlur={() => setIsEditing(false)}
+        />
+      ) : (
+        <div>
+          {markdownContent.split("\n").map((line, index) => (
+            <div
+              ref={(el) => (lineRefs.current[index] = el)}
+              key={index}
+              onClick={() => handleLineClick(index)}
+            >
+              <Markdown>{line}</Markdown>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
-  );
-};
+  )
+}
 
-export default EditorArea;
+export default EditorArea
