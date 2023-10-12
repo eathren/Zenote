@@ -1,25 +1,29 @@
-import { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import { useParams } from "react-router-dom"
 import {
-  addEdge,
   fetchMarkdown,
+  fetchNode,
   updateNodeTitle,
   uploadMarkdown,
+  addEdgeToNode,
 } from "src/handles"
-import { Spin, Typography } from "antd"
+import { Typography, Button, Drawer, Tabs } from "antd"
 import { debounce } from "lodash"
-import { useEdges } from "src/hooks/useEdges"
-import { findNodeId } from "src/utils"
+import { GraphNode } from "src/types" // Assuming you have a GraphNode type definition
 import { useNodes } from "src/hooks/useNodes"
-import EditorArea from "src/components/Editor"
+import DocumentTab from "src/components/DocumentTab"
+import DataTab from "src/components/DataTab"
+
+const { TabPane } = Tabs
 
 const NodePage = () => {
   const { graphId, nodeId } = useParams<{ nodeId: string; graphId: string }>()
   const [markdownContent, setMarkdownContent] = useState<string>("")
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [showSidebar, setShowSidebar] = useState<boolean>(false)
+  const [currentNode, setCurrentNode] = useState<GraphNode | null>(null)
 
-  const { data: edges } = useEdges(graphId)
-  const { data: nodes } = useNodes(graphId)
+  const { nodes } = useNodes(graphId)
 
   const truncate = (str: string, length: number) => {
     return str.length > length ? str.substring(0, length) + "..." : str
@@ -36,26 +40,16 @@ const NodePage = () => {
     fetchMarkdownAsync(nodeId)
   }, [graphId, nodeId])
 
+  // New useEffect to fetch the node based on nodeId
   useEffect(() => {
-    const regex = /\[\[([^\]]+)\]\]/g
-    let match
-    const foundMatches: string[] = []
-
-    while ((match = regex.exec(markdownContent)) !== null) {
-      foundMatches.push(match[1])
+    if (!nodeId) return
+    const fetchNodeAsync = async () => {
+      const node = await fetchNode(nodeId)
+      if (node) setCurrentNode(node)
+      console.log(node)
     }
-
-    const addNewEdges = async () => {
-      for (const newEdge of foundMatches) {
-        const targetId = findNodeId(nodes, newEdge)
-        if (graphId && nodeId && targetId) {
-          await addEdge(graphId, nodeId, targetId)
-        }
-      }
-    }
-
-    addNewEdges()
-  }, [markdownContent, edges, nodes, nodeId, graphId])
+    fetchNodeAsync()
+  }, [nodeId])
 
   useEffect(() => {
     const cleanString = markdownContent
@@ -74,7 +68,7 @@ const NodePage = () => {
         console.log("uploading")
         uploadMarkdown(nodeId, newValue)
       }
-    }, 1000),
+    }, 1500),
     []
   )
 
@@ -85,17 +79,43 @@ const NodePage = () => {
     }
   }
 
+  const toggleSidebar = () => {
+    setShowSidebar(!showSidebar)
+  }
+
   return (
-    <Typography>
-      {isLoading ? (
-        <Spin style={{ position: "absolute", left: "50%", top: "50%" }}></Spin>
-      ) : (
-        <EditorArea
-          markdownContent={markdownContent}
-          handleEditorChange={handleEditorChange}
-        />
-      )}
-    </Typography>
+    <div>
+      <Typography>
+        <Button onClick={toggleSidebar}>Toggle Sidebar</Button>
+        <Tabs defaultActiveKey="1">
+          <TabPane tab="Document" key="1">
+            <DocumentTab
+              markdownContent={markdownContent}
+              isLoading={isLoading}
+              handleEditorChange={handleEditorChange}
+            />
+          </TabPane>
+          <TabPane tab="Data" key="2">
+            <DataTab
+              currentNode={currentNode}
+              nodes={nodes}
+              graphId={graphId}
+              nodeId={nodeId}
+              addEdgeToNode={addEdgeToNode}
+            />
+          </TabPane>
+        </Tabs>
+      </Typography>
+      <Drawer
+        title="Node Details"
+        placement="right"
+        closable={true}
+        onClose={toggleSidebar}
+        open={showSidebar}
+      >
+        {/* Drawer contents */}
+      </Drawer>
+    </div>
   )
 }
 
