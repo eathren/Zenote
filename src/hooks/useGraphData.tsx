@@ -28,7 +28,7 @@ export const useGraphData = <T extends { id: string }>(
         setError(null)
 
         // Initialize an array to collect the new state
-        let updatedData: T[] = []
+        const updatedData: T[] = []
 
         snapshot.forEach((doc) => {
           const newData: T = {
