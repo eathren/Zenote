@@ -1,5 +1,5 @@
 import * as d3 from "d3"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { GraphNode, GraphEdge } from "src/types" // Update the import path as needed
 
@@ -12,8 +12,13 @@ const ForceGraph = (props: ForceGraphProps) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const navigate = useNavigate()
   const { graphId, nodes } = props
-  const edges: GraphEdge[] = nodes.flatMap((node) => node.edges)
+  const [edges, setEdges] = useState<GraphEdge[]>([])
 
+  useEffect(() => {
+    const filteredNodes = nodes.filter((node) => node !== undefined)
+    const e = filteredNodes.flatMap((node) => node.edges || []) // Use || [] to handle undefined edges
+    setEdges(e)
+  }, [nodes])
   useEffect(() => {
     if (!svgRef.current) {
       return
