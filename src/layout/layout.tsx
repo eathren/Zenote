@@ -6,12 +6,10 @@ import {
   ArrowLeftOutlined,
   ArrowRightOutlined,
 } from "@ant-design/icons"
-import { Popover, Button, Layout, Modal, Input, notification } from "antd"
+import { Popover, Button, Layout } from "antd"
 import { matchPath, useNavigate, useParams } from "react-router-dom"
-import { addNode } from "src/handles"
 import { theme } from "antd"
 import { useNodes } from "src/hooks/useNodes"
-import { isNodeNameUnique } from "src/utils"
 import styles from "./index.module.css"
 import FooterButtonList from "src/components/FooterButtonList"
 import { useForwardHistory } from "src/hooks/useForwardHistory"

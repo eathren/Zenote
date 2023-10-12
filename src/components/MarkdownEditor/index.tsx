@@ -3,8 +3,8 @@ import { useParams } from "react-router-dom"
 import { fetchMarkdown, updateNodeTitle, uploadMarkdown } from "src/handles"
 import { Spin, Typography, Button, Drawer } from "antd"
 import { debounce } from "lodash"
-import { findNodeId } from "src/utils"
-import { useNodes } from "src/hooks/useNodes"
+// import { findNodeId } from "src/utils"
+// import { useNodes } from "src/hooks/useNodes"
 import EditorArea from "src/components/Editor"
 
 const NodePage = () => {
@@ -13,7 +13,7 @@ const NodePage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [showSidebar, setShowSidebar] = useState<boolean>(false) // New state for showing or hiding the sidebar
 
-  const { nodes } = useNodes(graphId)
+  // const { nodes } = useNodes(graphId)
 
   const truncate = (str: string, length: number) => {
     return str.length > length ? str.substring(0, length) + "..." : str
@@ -88,7 +88,7 @@ const NodePage = () => {
         placement="right"
         closable={true}
         onClose={toggleSidebar}
-        visible={showSidebar}
+        open={showSidebar}
       >
         {/* Your tags, edges, and other metadata can go here */}
       </Drawer>

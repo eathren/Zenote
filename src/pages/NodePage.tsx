@@ -1,16 +1,18 @@
-import { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import { useParams } from "react-router-dom"
 import {
   fetchMarkdown,
   fetchNode,
   updateNodeTitle,
   uploadMarkdown,
+  addEdgeToNode,
 } from "src/handles"
-import { Spin, Typography, Button, Drawer, Tabs } from "antd"
+import { Typography, Button, Drawer, Tabs } from "antd"
 import { debounce } from "lodash"
 import { GraphNode } from "src/types" // Assuming you have a GraphNode type definition
 import { useNodes } from "src/hooks/useNodes"
-import EditorArea from "src/components/Editor"
+import DocumentTab from "src/components/DocumentTab"
+import DataTab from "src/components/DataTab"
 
 const { TabPane } = Tabs
 
@@ -20,6 +22,8 @@ const NodePage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [showSidebar, setShowSidebar] = useState<boolean>(false)
   const [currentNode, setCurrentNode] = useState<GraphNode | null>(null)
+
+  const { nodes } = useNodes(graphId)
 
   const truncate = (str: string, length: number) => {
     return str.length > length ? str.substring(0, length) + "..." : str
@@ -85,27 +89,20 @@ const NodePage = () => {
         <Button onClick={toggleSidebar}>Toggle Sidebar</Button>
         <Tabs defaultActiveKey="1">
           <TabPane tab="Document" key="1">
-            {isLoading ? (
-              <Spin
-                style={{ position: "absolute", left: "50%", top: "50%" }}
-              ></Spin>
-            ) : (
-              <EditorArea
-                markdownContent={markdownContent}
-                handleEditorChange={handleEditorChange}
-              />
-            )}
+            <DocumentTab
+              markdownContent={markdownContent}
+              isLoading={isLoading}
+              handleEditorChange={handleEditorChange}
+            />
           </TabPane>
           <TabPane tab="Data" key="2">
-            {/* Here you can display the loaded node details if it exists */}
-            {currentNode && (
-              <div>
-                {/* Display node details here */}
-                <p>Node Title: {currentNode.name}</p>
-                <p>Node ID: {currentNode.id}</p>
-                <p> Edges: {currentNode.edges.map((edge) => edge.id)}</p>
-              </div>
-            )}
+            <DataTab
+              currentNode={currentNode}
+              nodes={nodes}
+              graphId={graphId}
+              nodeId={nodeId}
+              addEdgeToNode={addEdgeToNode}
+            />
           </TabPane>
         </Tabs>
       </Typography>

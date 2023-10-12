@@ -12,11 +12,12 @@ export interface GraphNode extends d3.SimulationNodeDatum {
   name: string
   graphId: string
   date_created: number
+
   // Optional Properties
   markdownUrl?: string
-  tags?: { [tagName: string]: boolean }
-  groups?: { [groupName: string]: boolean }
-  edges?: { [edgeId: string]: GraphEdge }
+  tags?: string[]
+  groups?: string[]
+  edges?: GraphEdge[]
 }
 
 export interface GraphEdge extends d3.SimulationLinkDatum<GraphNode> {

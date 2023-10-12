@@ -20,7 +20,7 @@ import {
 } from "firebase/storage"
 import { GraphNode, Graph, GraphEdge } from "src/types/index"
 import { notification } from "antd"
-
+import { v4 as uuidv4 } from "uuid"
 const storage = getStorage()
 const db = getFirestore()
 
@@ -212,21 +212,42 @@ const fetchSingleDoc = async (collectionName: string, docId: string) => {
   return docSnap.data()
 }
 
-export const addEdgeToNode = async (nodeId: string, edge: GraphEdge) => {
-  const nodeData = (await fetchSingleDoc("nodes", nodeId)) as GraphNode // fetch single node
-  nodeData.edges.push(edge)
+export const addEdgeToNode = async (
+  graphId: string,
+  nodeId: string,
+  targetNodeId: string
+) => {
+  const nodeData = (await fetchSingleDoc("nodes", nodeId)) as GraphNode // Fetch single node
+
+  const newEdge = {
+    id: uuidv4(),
+    graphId,
+    source: nodeId,
+    target: targetNodeId,
+    date_created: Date.now(),
+  }
+
+  // Check if nodeData.edges is defined and is an array
+  if (!Array.isArray(nodeData.edges)) {
+    nodeData.edges = []
+  }
+
+  // Push the new edge into the edges array
+  nodeData.edges.push(newEdge)
+
   const nodeRef = doc(db, "nodes", nodeId)
   await updateDoc(nodeRef, {
     edges: nodeData.edges,
   })
 }
-
 export const removeEdgeFromNode = async (
   nodeId: string,
   targetNodeId: string
 ) => {
   const nodeData = (await fetchSingleDoc("nodes", nodeId)) as GraphNode // fetch single node
-  const newEdges = nodeData.edges.filter((edge) => edge.target !== targetNodeId)
+  const newEdges = nodeData.edges?.filter(
+    (edge) => edge.target !== targetNodeId
+  )
   const nodeRef = doc(db, "nodes", nodeId)
   await updateDoc(nodeRef, {
     edges: newEdges,
