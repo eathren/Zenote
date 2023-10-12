@@ -1,25 +1,25 @@
 import { useState, useEffect, useCallback } from "react"
 import { useParams } from "react-router-dom"
 import {
-  addEdge,
   fetchMarkdown,
+  fetchNode,
   updateNodeTitle,
   uploadMarkdown,
 } from "src/handles"
-import { Spin, Typography } from "antd"
+import { Spin, Typography, Button, Drawer, Tabs } from "antd"
 import { debounce } from "lodash"
-import { useEdges } from "src/hooks/useEdges"
-import { findNodeId } from "src/utils"
+import { GraphNode } from "src/types" // Assuming you have a GraphNode type definition
 import { useNodes } from "src/hooks/useNodes"
 import EditorArea from "src/components/Editor"
+
+const { TabPane } = Tabs
 
 const NodePage = () => {
   const { graphId, nodeId } = useParams<{ nodeId: string; graphId: string }>()
   const [markdownContent, setMarkdownContent] = useState<string>("")
   const [isLoading, setIsLoading] = useState<boolean>(false)
-
-  const { data: edges } = useEdges(graphId)
-  const { data: nodes } = useNodes(graphId)
+  const [showSidebar, setShowSidebar] = useState<boolean>(false)
+  const [currentNode, setCurrentNode] = useState<GraphNode | null>(null)
 
   const truncate = (str: string, length: number) => {
     return str.length > length ? str.substring(0, length) + "..." : str
@@ -36,26 +36,16 @@ const NodePage = () => {
     fetchMarkdownAsync(nodeId)
   }, [graphId, nodeId])
 
+  // New useEffect to fetch the node based on nodeId
   useEffect(() => {
-    const regex = /\[\[([^\]]+)\]\]/g
-    let match
-    const foundMatches: string[] = []
-
-    while ((match = regex.exec(markdownContent)) !== null) {
-      foundMatches.push(match[1])
+    if (!nodeId) return
+    const fetchNodeAsync = async () => {
+      const node = await fetchNode(nodeId)
+      if (node) setCurrentNode(node)
+      console.log(node)
     }
-
-    const addNewEdges = async () => {
-      for (const newEdge of foundMatches) {
-        const targetId = findNodeId(nodes, newEdge)
-        if (graphId && nodeId && targetId) {
-          await addEdge(graphId, nodeId, targetId)
-        }
-      }
-    }
-
-    addNewEdges()
-  }, [markdownContent, edges, nodes, nodeId, graphId])
+    fetchNodeAsync()
+  }, [nodeId])
 
   useEffect(() => {
     const cleanString = markdownContent
@@ -74,7 +64,7 @@ const NodePage = () => {
         console.log("uploading")
         uploadMarkdown(nodeId, newValue)
       }
-    }, 1000),
+    }, 1500),
     []
   )
 
@@ -85,17 +75,50 @@ const NodePage = () => {
     }
   }
 
+  const toggleSidebar = () => {
+    setShowSidebar(!showSidebar)
+  }
+
   return (
-    <Typography>
-      {isLoading ? (
-        <Spin style={{ position: "absolute", left: "50%", top: "50%" }}></Spin>
-      ) : (
-        <EditorArea
-          markdownContent={markdownContent}
-          handleEditorChange={handleEditorChange}
-        />
-      )}
-    </Typography>
+    <div>
+      <Typography>
+        <Button onClick={toggleSidebar}>Toggle Sidebar</Button>
+        <Tabs defaultActiveKey="1">
+          <TabPane tab="Document" key="1">
+            {isLoading ? (
+              <Spin
+                style={{ position: "absolute", left: "50%", top: "50%" }}
+              ></Spin>
+            ) : (
+              <EditorArea
+                markdownContent={markdownContent}
+                handleEditorChange={handleEditorChange}
+              />
+            )}
+          </TabPane>
+          <TabPane tab="Data" key="2">
+            {/* Here you can display the loaded node details if it exists */}
+            {currentNode && (
+              <div>
+                {/* Display node details here */}
+                <p>Node Title: {currentNode.name}</p>
+                <p>Node ID: {currentNode.id}</p>
+                <p> Edges: {currentNode.edges.map((edge) => edge.id)}</p>
+              </div>
+            )}
+          </TabPane>
+        </Tabs>
+      </Typography>
+      <Drawer
+        title="Node Details"
+        placement="right"
+        closable={true}
+        onClose={toggleSidebar}
+        open={showSidebar}
+      >
+        {/* Drawer contents */}
+      </Drawer>
+    </div>
   )
 }
 

@@ -15,6 +15,7 @@ import { isNodeNameUnique } from "src/utils"
 import styles from "./index.module.css"
 import FooterButtonList from "src/components/FooterButtonList"
 import { useForwardHistory } from "src/hooks/useForwardHistory"
+import AddNodeModal from "src/components/AddNodeModal"
 
 const { Header, Content, Sider, Footer } = Layout
 
@@ -29,41 +30,15 @@ export const BasicLayout = ({ children }: LayoutProps) => {
 
   const isHome = matchPath(window.location.pathname, "/")
   const { graphId } = useParams<{ graphId?: string }>()
-  const { data: nodes } = useNodes(graphId)
+  const { nodes } = useNodes(graphId)
   const [modalOpen, setModalOpen] = useState(false)
-  const [nodeName, setNodeName] = useState("")
   const { hasForwardHistory } = useForwardHistory()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const navigate = useNavigate()
 
-  const handleNodeNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNodeName(e.target.value)
-  }
-
   const handleAddNode = useCallback(() => {
     setModalOpen(true)
   }, [])
-
-  const confirmAddNode = () => {
-    const unique = isNodeNameUnique(nodes, nodeName, graphId)
-    if (unique) {
-      if (graphId) addNode(graphId, nodeName)
-      setModalOpen(false)
-      setNodeName("")
-    } else {
-      notification.error({
-        message: "Node Name Error",
-        description:
-          "This node name already exists. Please choose another name.",
-      })
-    }
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      confirmAddNode()
-    }
-  }
 
   const goBackInHistory = () => {
     window.history.back()
@@ -151,19 +126,12 @@ export const BasicLayout = ({ children }: LayoutProps) => {
           </Layout>
         </Layout>
 
-        <Modal
-          title="Add a new node"
-          open={modalOpen}
-          onOk={confirmAddNode}
-          onCancel={() => setModalOpen(false)}
-        >
-          <Input
-            placeholder="Node Name..."
-            value={nodeName}
-            onChange={handleNodeNameChange}
-            onKeyDown={handleKeyDown}
-          />
-        </Modal>
+        <AddNodeModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          nodes={nodes}
+          graphId={graphId}
+        />
       </Layout>
     </>
   )

@@ -11,21 +11,18 @@ export interface GraphNode extends d3.SimulationNodeDatum {
   id: string
   name: string
   graphId: string
+  date_created: number
+  // Optional Properties
   markdownUrl?: string
-  tags?: string[]
+  tags?: { [tagName: string]: boolean }
+  groups?: { [groupName: string]: boolean }
+  edges?: { [edgeId: string]: GraphEdge }
 }
 
 export interface GraphEdge extends d3.SimulationLinkDatum<GraphNode> {
   id: string
-  label?: string
-  source: string | GraphNode
-  target: string | GraphNode
-}
-
-export interface GraphData {
-  id: string
-  name: string
+  graphId: string
   date_created: number
-  nodes: GraphNode[]
-  edges: GraphEdge[]
+  label?: string
+  // source and target are already included in d3.SimulationLinkDatum
 }

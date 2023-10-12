@@ -1,71 +1,99 @@
-import React, { useState, useEffect } from "react"
-import ReactMarkdown from "react-markdown"
-import { Typography } from "antd"
-import styles from "./index.module.css"
-// Define TypeScript prop types
-type MarkdownEditorProps = {
-  isEditing: boolean
-  markdownContent: string
-  handleEditorChange: (newValue?: string | undefined) => void
-}
+import { useState, useEffect, useCallback } from "react"
+import { useParams } from "react-router-dom"
+import { fetchMarkdown, updateNodeTitle, uploadMarkdown } from "src/handles"
+import { Spin, Typography, Button, Drawer } from "antd"
+import { debounce } from "lodash"
+import { findNodeId } from "src/utils"
+import { useNodes } from "src/hooks/useNodes"
+import EditorArea from "src/components/Editor"
 
-const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
-  isEditing,
-  markdownContent,
-  handleEditorChange,
-}) => {
-  // Initialize state to manage the currently focused line
-  const [focusedLine, setFocusedLine] = useState<number | null>(null)
+const NodePage = () => {
+  const { graphId, nodeId } = useParams<{ nodeId: string; graphId: string }>()
+  const [markdownContent, setMarkdownContent] = useState<string>("")
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [showSidebar, setShowSidebar] = useState<boolean>(false) // New state for showing or hiding the sidebar
 
-  // Use markdownContent from props
-  const lines = markdownContent ? markdownContent.split("\n") : []
+  const { nodes } = useNodes(graphId)
 
-  // Handler for changes in the textarea
-  const handleLineChange = (lineNumber: number, newContent: string) => {
-    const newLines = [...lines]
-    newLines[lineNumber] = newContent
-    const updatedContent = newLines.join("\n")
-    handleEditorChange(updatedContent)
+  const truncate = (str: string, length: number) => {
+    return str.length > length ? str.substring(0, length) + "..." : str
   }
 
-  // Update local state when markdownContent changes
+  // Fetch markdown content
   useEffect(() => {
-    handleEditorChange(markdownContent)
-  }, [markdownContent, handleEditorChange])
+    if (!nodeId || !graphId) return
+    const fetchMarkdownAsync = async (nodeId: string) => {
+      setIsLoading(true)
+      const md = await fetchMarkdown(nodeId)
+      if (md) setMarkdownContent(md)
+      setIsLoading(false)
+    }
+    fetchMarkdownAsync(nodeId)
+  }, [graphId, nodeId])
+
+  // Update the title of the node
+  useEffect(() => {
+    const cleanString = markdownContent
+      .split("\n")[0]
+      .replace(/[*_#`~]/g, "")
+      .trim()
+    const truncatedTitle = truncate(cleanString, 50)
+    if (nodeId) {
+      updateNodeTitle(nodeId, truncatedTitle)
+    }
+  }, [markdownContent, nodeId])
+
+  // Debounce the upload operation
+  const debounceUpload = useCallback(
+    debounce((newValue: string) => {
+      if (nodeId && newValue) {
+        console.log("uploading")
+        uploadMarkdown(nodeId, newValue)
+      }
+    }, 1500),
+    []
+  )
+
+  const handleEditorChange = (newValue?: string | undefined) => {
+    if (newValue !== undefined) {
+      setMarkdownContent(newValue)
+      debounceUpload(newValue)
+    }
+  }
+
+  // Function to toggle sidebar
+  const toggleSidebar = () => {
+    setShowSidebar(!showSidebar)
+  }
 
   return (
-    <div className={styles.markdown__editor}>
+    <div>
       <Typography>
-        {/* Iterate over each line and render either a textarea or markdown */}
-        {lines.map((line, index) => (
-          <div key={index}>
-            {isEditing && focusedLine === index ? (
-              <textarea
-                value={line}
-                onFocus={() => setFocusedLine(index)}
-                onBlur={() => setFocusedLine(null)}
-                onChange={(e) => handleLineChange(index, e.target.value)}
-              />
-            ) : (
-              <div onFocus={() => setFocusedLine(index)}>
-                <ReactMarkdown>{line}</ReactMarkdown>
-              </div>
-            )}
-          </div>
-        ))}
-        {/* Add new line button (only if in editing mode) */}
-        {isEditing && (
-          <button
-            onClick={() => {
-              handleEditorChange(markdownContent + "\n")
-            }}
-          >
-            Add New Line
-          </button>
+        <Button onClick={toggleSidebar}>Toggle Sidebar</Button>{" "}
+        {/* New Button to toggle sidebar */}
+        {isLoading ? (
+          <Spin
+            style={{ position: "absolute", left: "50%", top: "50%" }}
+          ></Spin>
+        ) : (
+          <EditorArea
+            markdownContent={markdownContent}
+            handleEditorChange={handleEditorChange}
+          />
         )}
       </Typography>
+      {/* Sidebar Drawer */}
+      <Drawer
+        title="Node Details"
+        placement="right"
+        closable={true}
+        onClose={toggleSidebar}
+        visible={showSidebar}
+      >
+        {/* Your tags, edges, and other metadata can go here */}
+      </Drawer>
     </div>
   )
 }
 
-export default MarkdownEditor
+export default NodePage

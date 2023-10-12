@@ -6,13 +6,13 @@ import { GraphNode, GraphEdge } from "src/types" // Update the import path as ne
 type ForceGraphProps = {
   graphId: string
   nodes: GraphNode[]
-  edges: GraphEdge[]
 }
 
 const ForceGraph = (props: ForceGraphProps) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const navigate = useNavigate()
-  const { graphId, nodes, edges } = props
+  const { graphId, nodes } = props
+  const edges: GraphEdge[] = nodes.flatMap((node) => node.edges)
 
   useEffect(() => {
     if (!svgRef.current) {

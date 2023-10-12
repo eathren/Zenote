@@ -9,6 +9,7 @@ import {
   updateDoc,
   query,
   where,
+  getDoc,
 } from "firebase/firestore"
 import {
   deleteObject,
@@ -17,7 +18,7 @@ import {
   ref,
   uploadString,
 } from "firebase/storage"
-import { GraphNode, Graph } from "src/types/index"
+import { GraphNode, Graph, GraphEdge } from "src/types/index"
 import { notification } from "antd"
 
 const storage = getStorage()
@@ -108,11 +109,22 @@ export const getNodes = async (graphId: string) => {
   return nodes
 }
 
+export const fetchNode = async (nodeId: string) => {
+  const nodeRef = doc(db, "nodes", nodeId)
+  const nodeDoc = await getDoc(nodeRef)
+  const node = { id: nodeRef.id, ...nodeDoc.data() } as GraphNode
+  return node
+}
+
 export const addNode = async (graphId: string, nodeName: string) => {
   const nodesCollection = collection(db, "nodes")
   const newNode = {
     name: nodeName,
     graphId,
+    date_created: Date.now(),
+    tags: [],
+    groups: [],
+    edges: [],
   }
   const docRef = await addDoc(nodesCollection, newNode)
   const markdownUrl = await uploadMarkdown(docRef.id, `# ${nodeName}`)
@@ -124,13 +136,19 @@ export const addNode = async (graphId: string, nodeName: string) => {
 export const updateNode = async (
   nodeId: string,
   name: string,
-  markdown: string
+  markdown: string,
+  edges: GraphEdge[],
+  tags: string[],
+  groups: string[]
 ) => {
   const nodeRef = doc(db, "nodes", nodeId)
-  const markdownUrl = await uploadMarkdown(name, markdown)
+  const markdownUrl = await uploadMarkdown(nodeId, markdown)
   await updateDoc(nodeRef, {
     name,
     markdownUrl,
+    edges,
+    tags,
+    groups,
   })
 }
 
@@ -138,6 +156,20 @@ export const updateNodeTitle = async (nodeId: string, newTitle: string) => {
   const nodeRef = doc(db, "nodes", nodeId)
   await updateDoc(nodeRef, {
     name: newTitle,
+  })
+}
+
+export const updateNodeTags = async (nodeId: string, tags: string[]) => {
+  const nodeRef = doc(db, "nodes", nodeId)
+  await updateDoc(nodeRef, {
+    tags,
+  })
+}
+
+export const updateNodeGroups = async (nodeId: string, groups: string[]) => {
+  const nodeRef = doc(db, "nodes", nodeId)
+  await updateDoc(nodeRef, {
+    groups,
   })
 }
 
@@ -173,42 +205,30 @@ export const deleteNode = async (nodeId: string) => {
   }
 }
 
-// Edges
-export const addEdge = async (
-  graphId: string,
-  source: string,
-  target: string
-) => {
-  if (!graphId || !source || !target) return
-  const edgesCollection = collection(db, "edges")
-  const q = query(
-    edgesCollection,
-    where("graphId", "==", graphId),
-    where("source", "==", source),
-    where("target", "==", target)
-  )
-  const querySnapshot = await getDocs(q)
-  if (querySnapshot.empty) {
-    const newEdge = {
-      graphId,
-      source,
-      target,
-    }
-    await addDoc(edgesCollection, newEdge)
-  }
+// Fetches a single document by its ID and collection
+const fetchSingleDoc = async (collectionName: string, docId: string) => {
+  const docRef = doc(db, collectionName, docId)
+  const docSnap = await getDoc(docRef)
+  return docSnap.data()
 }
 
-export const deleteEdge = async (source: string, target: string) => {
-  const edgesCollection = collection(db, "edges")
-  const q = query(
-    edgesCollection,
-    where("source", "==", source),
-    where("target", "==", target)
-  )
-  const querySnapshot = await getDocs(q)
-  if (!querySnapshot.empty) {
-    querySnapshot.forEach(async (documentSnapshot) => {
-      await deleteDoc(doc(edgesCollection, documentSnapshot.id))
-    })
-  }
+export const addEdgeToNode = async (nodeId: string, edge: GraphEdge) => {
+  const nodeData = (await fetchSingleDoc("nodes", nodeId)) as GraphNode // fetch single node
+  nodeData.edges.push(edge)
+  const nodeRef = doc(db, "nodes", nodeId)
+  await updateDoc(nodeRef, {
+    edges: nodeData.edges,
+  })
+}
+
+export const removeEdgeFromNode = async (
+  nodeId: string,
+  targetNodeId: string
+) => {
+  const nodeData = (await fetchSingleDoc("nodes", nodeId)) as GraphNode // fetch single node
+  const newEdges = nodeData.edges.filter((edge) => edge.target !== targetNodeId)
+  const nodeRef = doc(db, "nodes", nodeId)
+  await updateDoc(nodeRef, {
+    edges: newEdges,
+  })
 }
