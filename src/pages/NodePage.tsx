@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useParams } from "react-router-dom"
 import {
   addEdge,
@@ -16,9 +16,7 @@ import EditorArea from "src/components/Editor"
 const NodePage = () => {
   const { graphId, nodeId } = useParams<{ nodeId: string; graphId: string }>()
   const [markdownContent, setMarkdownContent] = useState<string>("")
-  const [isEditing, setIsEditing] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const editorRef = useRef<HTMLDivElement | null>(null)
 
   const { data: edges } = useEdges(graphId)
   const { data: nodes } = useNodes(graphId)
@@ -59,19 +57,6 @@ const NodePage = () => {
     addNewEdges()
   }, [markdownContent, edges, nodes, nodeId, graphId])
 
-  const handleClickInside = () => {
-    setIsEditing(true)
-  }
-
-  const handleClickOutside = (event: MouseEvent) => {
-    if (
-      editorRef.current &&
-      !editorRef.current.contains(event.target as Node)
-    ) {
-      setIsEditing(false)
-    }
-  }
-
   useEffect(() => {
     const cleanString = markdownContent
       .split("\n")[0]
@@ -82,14 +67,6 @@ const NodePage = () => {
       updateNodeTitle(nodeId, truncatedTitle)
     }
   }, [markdownContent, nodeId])
-
-  useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside)
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [])
 
   const debounceUpload = useCallback(
     debounce((newValue: string) => {
@@ -110,17 +87,14 @@ const NodePage = () => {
 
   return (
     <Typography>
-      <div ref={editorRef} onClick={handleClickInside}>
-        {isLoading ? (
-          <Spin tip="Loading..."></Spin>
-        ) : (
-          <EditorArea
-            isEditing={isEditing}
-            markdownContent={markdownContent}
-            handleEditorChange={handleEditorChange}
-          />
-        )}
-      </div>
+      {isLoading ? (
+        <Spin style={{ position: "absolute", left: "50%", top: "50%" }}></Spin>
+      ) : (
+        <EditorArea
+          markdownContent={markdownContent}
+          handleEditorChange={handleEditorChange}
+        />
+      )}
     </Typography>
   )
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"
 import ReactMarkdown from "react-markdown"
-
+import { Typography } from "antd"
+import styles from "./index.module.css"
 // Define TypeScript prop types
 type MarkdownEditorProps = {
   isEditing: boolean
@@ -33,35 +34,36 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   }, [markdownContent, handleEditorChange])
 
   return (
-    <div className="markdown-editor">
-      {/* Iterate over each line and render either a textarea or markdown */}
-      {lines.map((line, index) => (
-        <div key={index}>
-          {isEditing && focusedLine === index ? (
-            <textarea
-              value={line}
-              onFocus={() => setFocusedLine(index)}
-              onBlur={() => setFocusedLine(null)}
-              onChange={(e) => handleLineChange(index, e.target.value)}
-            />
-          ) : (
-            <div onFocus={() => setFocusedLine(index)}>
-              <ReactMarkdown>{line}</ReactMarkdown>
-            </div>
-          )}
-        </div>
-      ))}
-
-      {/* Add new line button (only if in editing mode) */}
-      {isEditing && (
-        <button
-          onClick={() => {
-            handleEditorChange(markdownContent + "\n")
-          }}
-        >
-          Add New Line
-        </button>
-      )}
+    <div className={styles.markdown__editor}>
+      <Typography>
+        {/* Iterate over each line and render either a textarea or markdown */}
+        {lines.map((line, index) => (
+          <div key={index}>
+            {isEditing && focusedLine === index ? (
+              <textarea
+                value={line}
+                onFocus={() => setFocusedLine(index)}
+                onBlur={() => setFocusedLine(null)}
+                onChange={(e) => handleLineChange(index, e.target.value)}
+              />
+            ) : (
+              <div onFocus={() => setFocusedLine(index)}>
+                <ReactMarkdown>{line}</ReactMarkdown>
+              </div>
+            )}
+          </div>
+        ))}
+        {/* Add new line button (only if in editing mode) */}
+        {isEditing && (
+          <button
+            onClick={() => {
+              handleEditorChange(markdownContent + "\n")
+            }}
+          >
+            Add New Line
+          </button>
+        )}
+      </Typography>
     </div>
   )
 }
