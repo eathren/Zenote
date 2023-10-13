@@ -1,3 +1,4 @@
+import { notification } from "antd"
 import { GraphNode } from "src/types"
 
 export const findNodeId = (nodes: GraphNode[], name: string): string | null => {
@@ -42,4 +43,15 @@ export const generateUniqueNodeName = (
   }
 
   return uniqueName
+}
+
+export const openNotification = (
+  type: "success" | "error",
+  message: string,
+  description: string
+) => {
+  notification[type]({
+    message: message,
+    description: description,
+  })
 }

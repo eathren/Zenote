@@ -14,6 +14,7 @@ import { BasicLayout } from "src/layout/layout"
 import "./App.css"
 
 import { ReactNode } from "react"
+import ForgotPasswordPage from "./pages/ForgotPasswordPage"
 
 const { darkAlgorithm } = theme
 
@@ -106,6 +107,14 @@ function App() {
           element={
             <BasicLayout>
               <LoginPage />
+            </BasicLayout>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <BasicLayout>
+              <ForgotPasswordPage />
             </BasicLayout>
           }
         />

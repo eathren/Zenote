@@ -1,61 +1,98 @@
-import { useUser } from "src/hooks/user";
-import { Button, Checkbox, Form, Input } from "antd";
-import { UserOutlined, LockOutlined } from "@ant-design/icons";
-import { Typography } from "antd";
-const { Title } = Typography;
+import React, { useState } from "react"
+import { useUser } from "src/hooks/user"
+import { Button, Card, Form, Input, Row, Typography } from "antd"
+import {
+  UserOutlined,
+  LockOutlined,
+  EyeInvisibleOutlined,
+  EyeTwoTone,
+} from "@ant-design/icons"
+import { Link } from "react-router-dom"
 
-const LoginPage = () => {
-  const { signIn } = useUser();
-  const onFinish = (values: any) => {
-    signIn(values.email, values.password);
-  };
+const { Text } = Typography
+
+const LoginPage: React.FC = () => {
+  const { signIn } = useUser()
+  const [showPassword] = useState(false)
+
+  // Function to open a notification
+
+  // Function to handle form submission
+  const onFinish = async (values: { email: string; password: string }) => {
+    try {
+      await signIn(values.email, values.password)
+    } catch (error: any) {
+      //
+    }
+  }
 
   return (
     <>
-      <Typography>
-        <Title> Sign In</Title>
-        <Form
-          name="login-form"
-          initialValues={{ remember: true }}
-          onFinish={onFinish}
-        >
-          <Form.Item
-            name="email"
-            rules={[{ required: true, message: "Please input your Username!" }]}
+      <Card title="Sign In" style={{ margin: "auto", maxWidth: "400px" }}>
+        <Typography>
+          <Form
+            name="login-form"
+            initialValues={{ remember: true }}
+            onFinish={onFinish}
           >
-            <Input
-              prefix={<UserOutlined className="site-form-item-icon" />}
-              placeholder="Email"
-            />
-          </Form.Item>
-          <Form.Item
-            name="password"
-            rules={[{ required: true, message: "Please input your Password!" }]}
-          >
-            <Input
-              prefix={<LockOutlined className="site-form-item-icon" />}
-              type="password"
-              placeholder="Password"
-            />
-          </Form.Item>
-          <Form.Item>
-            <Form.Item name="remember" valuePropName="checked" noStyle>
-              <Checkbox>Remember me</Checkbox>
+            <Form.Item
+              name="email"
+              rules={[
+                { required: true, message: "Please input your Username!" },
+              ]}
+            >
+              <Input
+                prefix={<UserOutlined className="site-form-item-icon" />}
+                placeholder="Email"
+              />
             </Form.Item>
 
-            <a href="">Forgot password</a>
-          </Form.Item>
+            <Form.Item
+              name="password"
+              rules={[
+                { required: true, message: "Please input your Password!" },
+              ]}
+            >
+              <Input.Password
+                prefix={<LockOutlined className="site-form-item-icon" />}
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                iconRender={(visible) =>
+                  visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+                }
+              />
+            </Form.Item>
 
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Log in
-            </Button>
-            Or <a href="">register now!</a>
-          </Form.Item>
-        </Form>
-      </Typography>
+            <Form.Item>
+              <Link to="/forgot-password" style={{ float: "right" }}>
+                <Text type="secondary">Forgot password?</Text>
+              </Link>
+            </Form.Item>
+
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                style={{
+                  width: "80%",
+                  display: "block",
+                  margin: "auto",
+                  marginBottom: "20px",
+                }}
+              >
+                Log in
+              </Button>
+              <Row align="middle" justify="center">
+                <Text type="secondary">
+                  Don't have an account? <Link to="/signup">Sign Up</Link>
+                </Text>
+              </Row>
+            </Form.Item>
+          </Form>
+        </Typography>
+      </Card>
     </>
-  );
-};
+  )
+}
 
-export default LoginPage;
+export default LoginPage

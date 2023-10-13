@@ -4,82 +4,85 @@ import {
   UserCredential,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
-  signInWithEmailAndPassword as firebaseSignIn,
   createUserWithEmailAndPassword as firebaseSignUp,
-} from "firebase/auth";
-import { useEffect, useState, FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
-import { auth } from "src/firebase";
+} from "firebase/auth"
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { auth } from "src/firebase"
+import { openNotification } from "src/utils"
 
 export const useUser = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null)
 
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
-  const [loading, isLoading] = useState<boolean>(true);
+  const [loading, isLoading] = useState<boolean>(true)
 
   useEffect(() => {
     // Subscribe to authentication state changes
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-      setUser(currentUser);
-      isLoading(false);
-    });
+      setUser(currentUser)
+      isLoading(false)
+    })
 
-    return () => unsubscribe();
-  }, []);
-
-  // Function to handle login
-  const onLogin = async (e: FormEvent, email: string, password: string) => {
-    e.preventDefault();
-
-    try {
-      const userCredential: UserCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password,
-      );
-      const user = userCredential.user;
-
-      // Navigate to the home page if signed in
-      if (user) {
-        navigate("/");
-      }
-
-      return user;
-    } catch (error) {
-      const authError: AuthError = error as AuthError;
-      console.error("Error during sign-in:", authError.code);
-    }
-  };
+    return () => unsubscribe()
+  }, [])
 
   // Function to handle sign out
   const signOut = async () => {
     try {
-      await firebaseSignOut(auth);
-      navigate("/"); // Navigate to home after sign out
+      await firebaseSignOut(auth)
+      navigate("/") // Navigate to home after sign out
     } catch (error) {
-      console.error("Error signing out:", error);
+      console.error("Error signing out:", error)
     }
-  };
+  }
 
   // Function to handle sign in
   const signIn = async (email: string, password: string) => {
     try {
-      await firebaseSignIn(auth, email, password);
-      navigate("/");
+      const userCredential: UserCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      )
+      const user = userCredential.user
+
+      // Navigate to the home page if signed in
+      if (user) {
+        navigate("/")
+      }
+      return user
     } catch (error) {
-      console.error("Error signing in:", error);
+      const authError: AuthError = error as AuthError
+      openNotification("error", "Error during sign-in", authError.message)
+      console.error("Error during sign-in:", authError.code)
     }
-  };
+  }
 
   // Function to handle sign up
   const signUp = async (email: string, password: string) => {
     try {
-      await firebaseSignUp(auth, email, password);
-    } catch (error) {
-      console.error("Error signing up:", error);
-    }
-  };
+      const userCredential: UserCredential = await firebaseSignUp(
+        auth,
+        email,
+        password
+      )
+      const user = userCredential.user
 
-  return { user, onLogin, signOut, signIn, signUp, loading };
-};
+      // Navigate to the home page only if sign-up is successful
+      if (user) {
+        navigate("/")
+      }
+
+      return user
+    } catch (error) {
+      const authError: AuthError = error as AuthError
+      // Show an error notification
+      openNotification("error", "Error during sign-up", authError.message)
+      console.error("Error during sign-up:", authError.code)
+    }
+  }
+
+  return { user, signOut, signIn, signUp, loading }
+}
