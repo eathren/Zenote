@@ -97,25 +97,37 @@ function App() {
         <Route
           path="/signup"
           element={
-            <BasicLayout>
-              <SignUpPage />
-            </BasicLayout>
+            user ? (
+              <Navigate to="/" replace />
+            ) : (
+              <BasicLayout>
+                <SignUpPage />
+              </BasicLayout>
+            )
           }
         />
         <Route
           path="/login"
           element={
-            <BasicLayout>
-              <LoginPage />
-            </BasicLayout>
+            user ? (
+              <Navigate to="/" replace />
+            ) : (
+              <BasicLayout>
+                <LoginPage />
+              </BasicLayout>
+            )
           }
         />
         <Route
           path="/forgot-password"
           element={
-            <BasicLayout>
-              <ForgotPasswordPage />
-            </BasicLayout>
+            user ? (
+              <Navigate to="/" replace />
+            ) : (
+              <BasicLayout>
+                <ForgotPasswordPage />
+              </BasicLayout>
+            )
           }
         />
         <Route
