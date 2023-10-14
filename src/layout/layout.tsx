@@ -15,6 +15,8 @@ import styles from "./index.module.css"
 import FooterButtonList from "src/components/FooterButtonList"
 import { useForwardHistory } from "src/hooks/useForwardHistory"
 import AddNodeModal from "src/components/AddNodeModal"
+import { Header as CustomHeader } from "src/components/UI/Header"
+import { useUser } from "src/hooks/user"
 
 const { Content, Sider, Footer } = Layout
 
@@ -26,6 +28,7 @@ export const BasicLayout = ({ children }: LayoutProps) => {
   const {
     token: { colorBgContainer },
   } = theme.useToken()
+  const { user } = useUser()
 
   const isHome = matchPath(window.location.pathname, "/")
   const { graphId } = useParams<{ graphId?: string }>()
@@ -89,6 +92,7 @@ export const BasicLayout = ({ children }: LayoutProps) => {
     <>
       <Layout className={styles.layout__body}>
         <Layout className={styles.main__content}>
+          {!user && <CustomHeader />}
           {isHome ? null : (
             <Sider className={styles.sidebar} width={45} style={{}}>
               {ButtonList.map((item, index) => (
@@ -120,9 +124,11 @@ export const BasicLayout = ({ children }: LayoutProps) => {
             </Content>
           </Layout>
         </Layout>
-        <Footer className={styles.footer}>
-          {isHome ? null : <FooterButtonList buttonList={ButtonList} />}
-        </Footer>
+        {user && (
+          <Footer className={styles.footer}>
+            <FooterButtonList buttonList={ButtonList} />
+          </Footer>
+        )}
         <AddNodeModal
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}

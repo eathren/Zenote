@@ -14,21 +14,24 @@ type FooterButtonListProps = {
 }
 
 const FooterButtonList: React.FC<FooterButtonListProps> = ({ buttonList }) => {
+  // Get the current location
   return (
     <ButtonGroup>
-      {buttonList.map((item, index) => (
-        <div key={index} style={{ margin: "0 5px" }}>
-          <Popover placement="top" title={item.text}>
-            <Button
-              type="text"
-              disabled={item.disabled}
-              onClick={() => item.onClick()}
-            >
-              {item.icon}
-            </Button>
-          </Popover>
-        </div>
-      ))}
+      {buttonList.map((item, index) => {
+        return (
+          <div key={index} style={{ margin: "0 5px" }}>
+            <Popover placement="top" title={item.text}>
+              <Button
+                type="text"
+                disabled={item.disabled}
+                onClick={() => item.onClick()}
+              >
+                {item.icon}
+              </Button>
+            </Popover>
+          </div>
+        )
+      })}
     </ButtonGroup>
   )
 }
