@@ -50,10 +50,23 @@ const nodes: GraphNode[] = [
     graphId: "g1",
     name: "Node 3",
     date_created: Date.now(),
+    edges: [],
   },
-  { id: "4", graphId: "g1", name: "Node 4", date_created: Date.now() },
+  {
+    id: "4",
+    graphId: "g1",
+    name: "Node 4",
+    date_created: Date.now(),
+    edges: [],
+  },
 
-  { id: "5", graphId: "g1", name: "Node 5", date_created: Date.now() },
+  {
+    id: "5",
+    graphId: "g1",
+    name: "Node 5",
+    date_created: Date.now(),
+    edges: [],
+  },
 ]
 
 export const Primary: Story = {

@@ -7,7 +7,7 @@ import {
   uploadMarkdown,
   addEdgeToNode,
 } from "src/handles"
-import { Typography, Button, Drawer, Tabs } from "antd"
+import { Tabs } from "antd"
 import { debounce } from "lodash"
 import { GraphNode } from "src/types" // Assuming you have a GraphNode type definition
 import { useNodes } from "src/hooks/useNodes"
@@ -20,7 +20,6 @@ const NodePage = () => {
   const { graphId, nodeId } = useParams<{ nodeId: string; graphId: string }>()
   const [markdownContent, setMarkdownContent] = useState<string>("")
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [showSidebar, setShowSidebar] = useState<boolean>(false)
   const [currentNode, setCurrentNode] = useState<GraphNode | null>(null)
 
   const { nodes } = useNodes(graphId)
@@ -79,43 +78,25 @@ const NodePage = () => {
     }
   }
 
-  const toggleSidebar = () => {
-    setShowSidebar(!showSidebar)
-  }
-
   return (
-    <div>
-      <Typography>
-        <Button onClick={toggleSidebar}>Toggle Sidebar</Button>
-        <Tabs defaultActiveKey="1">
-          <TabPane tab="Document" key="1">
-            <DocumentTab
-              markdownContent={markdownContent}
-              isLoading={isLoading}
-              handleEditorChange={handleEditorChange}
-            />
-          </TabPane>
-          <TabPane tab="Data" key="2">
-            <DataTab
-              currentNode={currentNode}
-              nodes={nodes}
-              graphId={graphId}
-              nodeId={nodeId}
-              addEdgeToNode={addEdgeToNode}
-            />
-          </TabPane>
-        </Tabs>
-      </Typography>
-      <Drawer
-        title="Node Details"
-        placement="right"
-        closable={true}
-        onClose={toggleSidebar}
-        open={showSidebar}
-      >
-        {/* Drawer contents */}
-      </Drawer>
-    </div>
+    <Tabs defaultActiveKey="1">
+      <TabPane tab="Document" key="1">
+        <DocumentTab
+          markdownContent={markdownContent}
+          isLoading={isLoading}
+          handleEditorChange={handleEditorChange}
+        />
+      </TabPane>
+      <TabPane tab="Data" key="2">
+        <DataTab
+          currentNode={currentNode}
+          nodes={nodes}
+          graphId={graphId}
+          nodeId={nodeId}
+          addEdgeToNode={addEdgeToNode}
+        />
+      </TabPane>
+    </Tabs>
   )
 }
 

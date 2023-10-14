@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom"
 import { GraphNode, GraphEdge } from "src/types" // Update the import path as needed
 import { drag } from "./utils"
 import { Item, Menu, useContextMenu } from "react-contexify"
+import "react-contexify/ReactContexify.css"
 
 type ForceGraphProps = {
   graphId: string

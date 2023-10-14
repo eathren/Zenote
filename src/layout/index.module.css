@@ -1,23 +1,70 @@
+:root {
+  --footer-height: 20px;
+}
+
 .layout__body {
+  display: flex;
+  flex-direction: column;
   height: 100vh;
   max-height: 100vh;
+  overflow: hidden;
+}
+
+.main__content {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent; /* Initially set to transparent */
+}
+
+.main__content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.main__content::-webkit-scrollbar-thumb {
+  background: transparent; /* Initially set to transparent */
+}
+
+/* Show the scrollbar when user hovers */
+.main__content:hover {
+  scrollbar-color: rgba(0, 0, 0, 0.5) transparent;
+}
+
+.main__content:hover::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.5);
 }
 
 @media (max-width: 768px) {
+  .main__content {
+    max-height: calc(100vh - var(--footer-height));
+  }
   .sidebar {
     display: none;
   }
 
+  .header {
+    display: none;
+  }
+
   .footer {
+    flex: 0 0 auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    height: var(--footer-height);
   }
 }
 
 @media (min-width: 769px) {
-  footer {
+  .main__content {
+    max-height: 100vh;
+  }
+  .footer {
+    display: none;
+  }
+  .header {
     display: none;
   }
 }

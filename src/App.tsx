@@ -15,6 +15,7 @@ import "./App.css"
 
 import { ReactNode } from "react"
 import ForgotPasswordPage from "./pages/ForgotPasswordPage"
+import SettingsPage from "./pages/SettingsPage"
 
 const { darkAlgorithm } = theme
 
@@ -62,6 +63,16 @@ function App() {
                 </BasicLayout>
               </ProtectedRoute>
             )
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <BasicLayout>
+                <SettingsPage />
+              </BasicLayout>
+            </ProtectedRoute>
           }
         />
         <Route

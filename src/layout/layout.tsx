@@ -1,10 +1,11 @@
 import React, { useCallback, useState } from "react"
-import { Header as CustomHeader } from "src/components/UI/Header"
 import {
   RadarChartOutlined,
   FileAddOutlined,
   ArrowLeftOutlined,
   ArrowRightOutlined,
+  HomeOutlined,
+  SettingOutlined,
 } from "@ant-design/icons"
 import { Popover, Button, Layout } from "antd"
 import { matchPath, useNavigate, useParams } from "react-router-dom"
@@ -15,7 +16,7 @@ import FooterButtonList from "src/components/FooterButtonList"
 import { useForwardHistory } from "src/hooks/useForwardHistory"
 import AddNodeModal from "src/components/AddNodeModal"
 
-const { Header, Content, Sider, Footer } = Layout
+const { Content, Sider, Footer } = Layout
 
 type LayoutProps = {
   children: React.ReactNode
@@ -31,7 +32,6 @@ export const BasicLayout = ({ children }: LayoutProps) => {
   const { nodes } = useNodes(graphId)
   const [modalOpen, setModalOpen] = useState(false)
   const { hasForwardHistory } = useForwardHistory()
-  const [isCollapsed, setIsCollapsed] = useState(false)
   const navigate = useNavigate()
 
   const handleAddNode = useCallback(() => {
@@ -51,6 +51,11 @@ export const BasicLayout = ({ children }: LayoutProps) => {
   }
 
   const ButtonList = [
+    {
+      icon: <HomeOutlined />,
+      text: "Home",
+      onClick: () => navigate("/"),
+    },
     {
       icon: <FileAddOutlined />,
       text: "Add Node",
@@ -73,24 +78,19 @@ export const BasicLayout = ({ children }: LayoutProps) => {
       onClick: goForwardInHistory,
       disabled: !hasForwardHistory,
     },
+    {
+      icon: <SettingOutlined />,
+      text: "Settings",
+      onClick: () => navigate("/settings"),
+    },
   ]
 
   return (
     <>
       <Layout className={styles.layout__body}>
-        <Header>
-          <CustomHeader />
-        </Header>
-        <Layout>
+        <Layout className={styles.main__content}>
           {isHome ? null : (
-            <Sider
-              onCollapse={() => setIsCollapsed(!isCollapsed)}
-              collapsible={true}
-              collapsed={isCollapsed}
-              className={styles.sidebar}
-              width={50}
-              style={{}}
-            >
+            <Sider className={styles.sidebar} width={45} style={{}}>
               {ButtonList.map((item, index) => (
                 <div key={index}>
                   <Popover placement="right" title={item.text}>
@@ -118,12 +118,11 @@ export const BasicLayout = ({ children }: LayoutProps) => {
             >
               {children}
             </Content>
-            <Footer className={styles.footer}>
-              {isHome ? null : <FooterButtonList buttonList={ButtonList} />}
-            </Footer>
           </Layout>
         </Layout>
-
+        <Footer className={styles.footer}>
+          {isHome ? null : <FooterButtonList buttonList={ButtonList} />}
+        </Footer>
         <AddNodeModal
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}

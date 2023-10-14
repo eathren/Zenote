@@ -1,17 +1,17 @@
-import React from "react";
-import { Button, Popover } from "antd";
-import ButtonGroup from "antd/es/button/button-group";
+import React from "react"
+import { Button, Popover } from "antd"
+import ButtonGroup from "antd/es/button/button-group"
 
 type ButtonItemType = {
-  icon: React.ReactNode;
-  text: string;
-  onClick: () => void;
-  disabled?: boolean;
-};
+  icon: React.ReactNode
+  text: string
+  onClick: () => void
+  disabled?: boolean
+}
 
 type FooterButtonListProps = {
-  buttonList: ButtonItemType[];
-};
+  buttonList: ButtonItemType[]
+}
 
 const FooterButtonList: React.FC<FooterButtonListProps> = ({ buttonList }) => {
   return (
@@ -30,7 +30,7 @@ const FooterButtonList: React.FC<FooterButtonListProps> = ({ buttonList }) => {
         </div>
       ))}
     </ButtonGroup>
-  );
-};
+  )
+}
 
-export default FooterButtonList;
+export default FooterButtonList

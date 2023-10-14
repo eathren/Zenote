@@ -17,7 +17,7 @@ export interface GraphNode extends d3.SimulationNodeDatum {
   markdownUrl?: string
   tags?: string[]
   groups?: string[]
-  edges?: GraphEdge[]
+  edges: GraphEdge[]
 }
 
 export interface GraphEdge extends d3.SimulationLinkDatum<GraphNode> {
