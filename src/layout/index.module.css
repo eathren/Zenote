@@ -6,7 +6,8 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  max-height: 100vh;
+  min-height: -webkit-fil-available;
+  max-height: -webkit-fil-available;
   overflow: hidden;
 }
 
@@ -37,7 +38,7 @@
 
 @media (max-width: 768px) {
   .main__content {
-    max-height: calc(100vh - var(--footer-height));
+    max-height: calc(-webkit-fil-available - var(--footer-height));
   }
   .sidebar {
     display: none;
