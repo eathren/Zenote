@@ -1,19 +1,16 @@
 :root {
   --footer-height: 20px;
+  min-height: 100vh;
 }
 
 .layout__body {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  min-height: -webkit-fil-available;
-  max-height: -webkit-fil-available;
-  overflow: hidden;
+  min-height: 100vh;
 }
 
 .main__content {
-  flex: 1 1 auto;
-  overflow-y: auto;
+  height: inherit;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: transparent transparent; /* Initially set to transparent */
@@ -37,11 +34,10 @@
 }
 
 @media (max-width: 768px) {
-  .main__content {
-    max-height: calc(-webkit-fil-available - var(--footer-height));
-  }
   .sidebar {
     display: none;
+    overflow: auto;
+    height: 100vh;
   }
 
   .header {
@@ -55,13 +51,16 @@
     align-items: center;
     justify-content: center;
     height: var(--footer-height);
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-width: 100vw;
+    overflow-x: scroll;
   }
 }
 
 @media (min-width: 769px) {
-  .main__content {
-    max-height: 100vh;
-  }
   .footer {
     display: none;
   }

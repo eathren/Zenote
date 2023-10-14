@@ -90,7 +90,10 @@ export const BasicLayout = ({ children }: LayoutProps) => {
 
   return (
     <>
-      <Layout className={styles.layout__body}>
+      <Layout
+        className={styles.layout__body}
+        style={{ background: colorBgContainer }}
+      >
         {!user && <CustomHeader />}
         <Layout className={styles.main__content}>
           {isHome ? null : (
