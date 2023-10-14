@@ -15,8 +15,6 @@ const LoginPage: React.FC = () => {
   const { signIn } = useUser()
   const [showPassword] = useState(false)
 
-  // Function to open a notification
-
   // Function to handle form submission
   const onFinish = async (values: { email: string; password: string }) => {
     try {

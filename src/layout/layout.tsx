@@ -91,8 +91,8 @@ export const BasicLayout = ({ children }: LayoutProps) => {
   return (
     <>
       <Layout className={styles.layout__body}>
+        {!user && <CustomHeader />}
         <Layout className={styles.main__content}>
-          {!user && <CustomHeader />}
           {isHome ? null : (
             <Sider className={styles.sidebar} width={45} style={{}}>
               {ButtonList.map((item, index) => (

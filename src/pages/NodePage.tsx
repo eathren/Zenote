@@ -7,14 +7,12 @@ import {
   uploadMarkdown,
   addEdgeToNode,
 } from "src/handles"
-import { Tabs } from "antd"
+import { Tabs, TabsProps } from "antd"
 import { debounce } from "lodash"
 import { GraphNode } from "src/types" // Assuming you have a GraphNode type definition
 import { useNodes } from "src/hooks/useNodes"
 import DocumentTab from "src/components/DocumentTab"
 import DataTab from "src/components/DataTab"
-
-const { TabPane } = Tabs
 
 const NodePage = () => {
   const { graphId, nodeId } = useParams<{ nodeId: string; graphId: string }>()
@@ -78,16 +76,22 @@ const NodePage = () => {
     }
   }
 
-  return (
-    <Tabs defaultActiveKey="1">
-      <TabPane tab="Document" key="1">
+  const items: TabsProps["items"] = [
+    {
+      key: "1",
+      label: "Document",
+      children: (
         <DocumentTab
           markdownContent={markdownContent}
           isLoading={isLoading}
           handleEditorChange={handleEditorChange}
         />
-      </TabPane>
-      <TabPane tab="Data" key="2">
+      ),
+    },
+    {
+      key: "2",
+      label: "Data",
+      children: (
         <DataTab
           currentNode={currentNode}
           nodes={nodes}
@@ -95,9 +99,11 @@ const NodePage = () => {
           nodeId={nodeId}
           addEdgeToNode={addEdgeToNode}
         />
-      </TabPane>
-    </Tabs>
-  )
+      ),
+    },
+  ]
+
+  return <Tabs defaultActiveKey="1" items={items} />
 }
 
 export default NodePage
