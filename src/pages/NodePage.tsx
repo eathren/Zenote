@@ -9,7 +9,7 @@ import {
 } from "src/handles"
 import { Tabs, TabsProps } from "antd"
 import { debounce } from "lodash"
-import { GraphNode } from "src/types" // Assuming you have a GraphNode type definition
+import { GraphNode } from "src/types"
 import { useNodes } from "src/hooks/useNodes"
 import DocumentTab from "src/components/DocumentTab"
 import DataTab from "src/components/DataTab"
@@ -43,7 +43,6 @@ const NodePage = () => {
     const fetchNodeAsync = async () => {
       const node = await fetchNode(nodeId)
       if (node) setCurrentNode(node)
-      console.log(node)
     }
     fetchNodeAsync()
   }, [nodeId])
