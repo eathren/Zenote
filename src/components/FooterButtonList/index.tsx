@@ -22,8 +22,6 @@ const FooterButtonList: React.FC<FooterButtonListProps> = ({ buttonList }) => {
   return (
     <ButtonGroup>
       {buttonList.map((item, index) => {
-        // Only render the Settings icon if the location is root
-
         if (
           (item.text === "Add Node" &&
             (location.pathname === "/settings" ||

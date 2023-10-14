@@ -94,21 +94,35 @@ export const BasicLayout = ({ children }: LayoutProps) => {
         {!user && <CustomHeader />}
         <Layout className={styles.main__content}>
           {isHome ? null : (
-            <Sider className={styles.sidebar} width={45} style={{}}>
-              {ButtonList.map((item, index) => (
-                <div key={index}>
-                  <Popover placement="right" title={item.text}>
-                    <Button
-                      type="text"
-                      style={{ width: "100%", marginTop: "10px" }}
-                      onClick={() => item.onClick()}
-                      disabled={item.disabled}
-                    >
-                      {item.icon}
-                    </Button>
-                  </Popover>
-                </div>
-              ))}
+            <Sider className={styles.sidebar} width={55} style={{}}>
+              {ButtonList.map((item, index) => {
+                if (
+                  (item.text === "Add Node" &&
+                    (location.pathname === "/settings" ||
+                      location.pathname === "/" ||
+                      location.pathname === "/login" ||
+                      location.pathname === "/signup")) ||
+                  (!user &&
+                    item.text === "Settings" &&
+                    location.pathname === "/")
+                ) {
+                  return null
+                }
+
+                return (
+                  <div key={index} style={{ margin: "0 5px" }}>
+                    <Popover placement="top" title={item.text}>
+                      <Button
+                        type="text"
+                        disabled={item.disabled}
+                        onClick={() => item.onClick()}
+                      >
+                        {item.icon}
+                      </Button>
+                    </Popover>
+                  </div>
+                )
+              })}
             </Sider>
           )}
           <Layout style={{ padding: 0 }}>
