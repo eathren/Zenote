@@ -13,9 +13,9 @@ const EditorArea: React.FC<EditorAreaProps> = ({
   markdownContent,
   handleEditorChange,
 }) => {
-  const [isEditing, setIsEditing] = useState(false)
+  const [isEditing, setIsEditing] = useState(true)
   const [cursorPosition, setCursorPosition] = useState<number | null>(null)
-  const textAreaRef = useRef<any>(null) // Change this to any
+  const textAreaRef = useRef<any>(null)
   const lineRefs = useRef<(HTMLDivElement | null)[]>([])
 
   useEffect(() => {
@@ -27,6 +27,19 @@ const EditorArea: React.FC<EditorAreaProps> = ({
     }
   }, [isEditing, cursorPosition])
 
+  // Focus the textarea when the component mounts
+  useEffect(() => {
+    if (textAreaRef.current) {
+      const textArea: HTMLTextAreaElement =
+        textAreaRef.current.resizableTextArea.textArea
+      textArea.focus()
+    }
+  }, [])
+
+  const handlePlaceholderClick = () => {
+    setIsEditing(true)
+  }
+
   const handleLineClick = (lineIndex: number) => {
     if (lineRefs.current[lineIndex]) {
       const linesBeforeClicked = markdownContent
@@ -34,7 +47,7 @@ const EditorArea: React.FC<EditorAreaProps> = ({
         .slice(0, lineIndex)
         .join("\n")
 
-      setCursorPosition(linesBeforeClicked.length + lineIndex) // Adding lineIndex for newlines
+      setCursorPosition(linesBeforeClicked.length + lineIndex)
       setIsEditing(true)
     }
   }
@@ -43,25 +56,42 @@ const EditorArea: React.FC<EditorAreaProps> = ({
     <div>
       {isEditing ? (
         <TextArea
+          style={{
+            border: "none",
+            outline: "none",
+            resize: "none",
+            fontFamily: "inherit",
+            fontSize: "inherit",
+          }}
           ref={textAreaRef}
           autoSize={{ minRows: 10 }}
           value={markdownContent}
-          onChange={(e) => {
-            handleEditorChange(e.target.value)
-          }}
+          onChange={(e) => handleEditorChange(e.target.value)}
           onBlur={() => setIsEditing(false)}
         />
       ) : (
         <div>
-          {markdownContent.split("\n").map((line, index) => (
+          {markdownContent.length > 1 ? (
+            markdownContent.split("\n").map((line, index) => (
+              <div
+                ref={(el) => (lineRefs.current[index] = el)}
+                key={index}
+                onClick={() => handleLineClick(index)}
+              >
+                <Markdown>{line}</Markdown>
+              </div>
+            ))
+          ) : (
             <div
-              ref={(el) => (lineRefs.current[index] = el)}
-              key={index}
-              onClick={() => handleLineClick(index)}
+              style={{
+                height: "50vh",
+                cursor: "pointer",
+              }}
+              onClick={handlePlaceholderClick}
             >
-              <Markdown>{line}</Markdown>
+              Click to start editing.
             </div>
-          ))}
+          )}
         </div>
       )}
     </div>

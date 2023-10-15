@@ -3,15 +3,12 @@ import { Modal, Input, List } from "antd"
 import { useNavigate } from "react-router-dom"
 import { addNode } from "src/handles"
 import type { InputRef } from "antd"
-type Node = {
-  id: string
-  name: string
-}
+import { GraphNode } from "src/types"
 
 type AddNodeModalProps = {
   isOpen: boolean
   onClose: () => void
-  nodes: Node[]
+  nodes: GraphNode[]
   graphId: string | undefined
 }
 
@@ -22,7 +19,7 @@ const AddNodeModal: React.FC<AddNodeModalProps> = ({
   graphId,
 }) => {
   const [nodeName, setNodeName] = useState<string>("")
-  const [filteredNodes, setFilteredNodes] = useState<Node[]>(nodes)
+  const [filteredNodes, setFilteredNodes] = useState<GraphNode[]>(nodes)
   const [selectedNodeIndex, setSelectedNodeIndex] = useState<number | null>(
     null
   )
@@ -31,17 +28,24 @@ const AddNodeModal: React.FC<AddNodeModalProps> = ({
   const searchInputRef = useRef<InputRef | null>(null)
 
   useEffect(() => {
+    let relevantNodes = nodes
+
+    // Filter by graphId
+    if (graphId) {
+      relevantNodes = nodes.filter((node) => node.graphId === graphId)
+    }
+
+    // Search filter
     if (nodeName) {
       setFilteredNodes(
-        nodes.filter((node) =>
+        relevantNodes.filter((node) =>
           node.name.toLowerCase().includes(nodeName.toLowerCase())
         )
       )
     } else {
-      setFilteredNodes(nodes)
+      setFilteredNodes(relevantNodes)
     }
-  }, [nodeName, nodes])
-
+  }, [nodeName, nodes, graphId])
   const handleNodeNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNodeName(e.target.value)
     setSelectedNodeIndex(null)

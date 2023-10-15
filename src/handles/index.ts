@@ -127,7 +127,7 @@ export const addNode = async (graphId: string, nodeName: string) => {
     edges: [],
   }
   const docRef = await addDoc(nodesCollection, newNode)
-  const markdownUrl = await uploadMarkdown(docRef.id, `# ${nodeName}`)
+  const markdownUrl = await uploadMarkdown(docRef.id, ``)
   const nodeDoc = doc(db, "nodes", docRef.id)
   await setDoc(nodeDoc, { markdownUrl }, { merge: true })
   return docRef.id
