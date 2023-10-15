@@ -1,11 +1,11 @@
 import React, { useCallback, useState } from "react"
 import {
   RadarChartOutlined,
-  FileAddOutlined,
   ArrowLeftOutlined,
   ArrowRightOutlined,
   HomeOutlined,
   SettingOutlined,
+  FileTextOutlined,
 } from "@ant-design/icons"
 import { Popover, Button, Layout } from "antd"
 import { matchPath, useNavigate, useParams } from "react-router-dom"
@@ -60,8 +60,8 @@ export const BasicLayout = ({ children }: LayoutProps) => {
       onClick: () => navigate("/"),
     },
     {
-      icon: <FileAddOutlined />,
-      text: "Add Node",
+      icon: <FileTextOutlined />,
+      text: "Find or Add New Node",
       onClick: handleAddNode,
     },
     {
@@ -100,7 +100,7 @@ export const BasicLayout = ({ children }: LayoutProps) => {
             <Sider className={styles.sidebar} width={55} style={{}}>
               {ButtonList.map((item, index) => {
                 if (
-                  (item.text === "Add Node" &&
+                  (item.text === "Find or Add New Node" &&
                     (location.pathname === "/settings" ||
                       location.pathname === "/" ||
                       location.pathname === "/login" ||
@@ -114,7 +114,11 @@ export const BasicLayout = ({ children }: LayoutProps) => {
 
                 return (
                   <div key={index} style={{ margin: "0 5px" }}>
-                    <Popover placement="top" title={item.text}>
+                    <Popover
+                      placement="right"
+                      title={item.text}
+                      arrow={{ pointAtCenter: true }}
+                    >
                       <Button
                         type="text"
                         disabled={item.disabled}

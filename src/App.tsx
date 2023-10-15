@@ -18,7 +18,7 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage"
 import SettingsPage from "./pages/SettingsPage"
 
 const { darkAlgorithm } = theme
-
+// const { TabPane } = Tabs
 // ProtectedRoute component to handle route protection
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const { user, loading } = useUser()
@@ -32,7 +32,15 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 
 function App() {
   const { user, loading } = useUser() // Get user and loading state
+  // const navigate = useNavigate()
+  // const onTabChange = (key: string) => {
+  //   navigate(key)
+  // }
 
+  // Function to close a tab (placeholder, can add logic later)
+  // const onTabClose = (targetKey: React.Key) => {
+  //   console.log("Close tab:", targetKey)
+  // }
   // Show loading spinner until Firebase check is complete
   if (loading) {
     return (
@@ -47,7 +55,15 @@ function App() {
   }
 
   return (
-    <ConfigProvider theme={{ algorithm: darkAlgorithm }}>
+    <ConfigProvider
+      theme={{
+        algorithm: darkAlgorithm,
+        token: {
+          colorPrimary: "#353535",
+          colorInfo: "#353535",
+        },
+      }}
+    >
       <Routes>
         <Route
           path="/"

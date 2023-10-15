@@ -23,20 +23,28 @@ const FooterButtonList: React.FC<FooterButtonListProps> = ({ buttonList }) => {
     <ButtonGroup>
       {buttonList.map((item, index) => {
         if (
-          (item.text === "Add Node" &&
+          (item.text === "Find or Add New Node" &&
             (location.pathname === "/settings" ||
               location.pathname === "/" ||
               location.pathname === "/login" ||
               location.pathname === "/signup")) ||
-          (!user && item.text === "Settings" && location.pathname === "/")
+          (!user && item.text === "Settings" && location.pathname === "/") ||
+          (user &&
+            (item.text === "Open Graph View" || item.text === "Home") &&
+            location.pathname === "/")
         ) {
           return null
         }
 
         return (
           <div key={index} style={{ margin: "0 5px" }}>
-            <Popover placement="top" title={item.text}>
+            <Popover
+              placement="top"
+              title={item.text}
+              arrow={{ pointAtCenter: true }}
+            >
               <Button
+                style={{ textAlign: "center" }}
                 type="text"
                 disabled={item.disabled}
                 onClick={() => item.onClick()}

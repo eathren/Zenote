@@ -1,0 +1,13 @@
+/* Custom styling for mobile-fullscreen-modal */
+@media only screen and (max-width: 768px) {
+  .mobile_fullscreen_modal {
+    top: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+  .mobile_fullscreen_modal .ant_modal_body {
+    max-height: calc(100vh - 104px);
+    overflow-y: auto;
+  }
+}
