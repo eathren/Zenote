@@ -1,17 +1,12 @@
 import React, { useState } from "react"
-import {
-  Input,
-  Button,
-  Typography,
-  notification,
-  Space,
-  Card,
-  Divider,
-} from "antd"
+import { Button, Typography, Space, Card, Divider } from "antd"
 import { GraphNode } from "src/types"
-import { deleteNode } from "src/handles"
+import { deleteNode, removeEdgeFromNode } from "src/handles"
 import { useNavigate } from "react-router-dom"
 import styles from "./index.module.css"
+import AddEdgeModal from "../AddEdgeModal"
+import { calculateIncomingAndOutgoingEdges } from "src/utils"
+import EditEdgeModal from "../EditEdgeModal"
 
 type DataTabProps = {
   currentNode: GraphNode | null
@@ -34,42 +29,34 @@ const DataTab: React.FC<DataTabProps> = ({
   nodeId,
   addEdgeToNode,
 }) => {
-  const [nodeNameInput, setNodeNameInput] = useState<string>("")
   const navigate = useNavigate()
+  const [isAddEdgeModalOpen, setIsAddEdgeModalOpen] = useState<boolean>(false)
+  const [isEditEdgeModalOpen, setIsEditEdgeModalOpen] = useState<boolean>(false)
+  const { incomingNodes, outgoingNodes } = calculateIncomingAndOutgoingEdges(
+    nodeId,
+    nodes
+  )
 
-  const showSuccessNotification = () => {
-    notification.success({
-      message: "Edge Added Successfully",
-      duration: 3,
-    })
-    setNodeNameInput("")
+  const openAddEdgeModal = () => {
+    setIsAddEdgeModalOpen(true)
   }
 
-  const showErrorNotification = () => {
-    notification.error({
-      message: "Failed to Add Edge",
-      duration: 3,
-    })
+  const closeAddEdgeModal = () => {
+    setIsAddEdgeModalOpen(false)
   }
 
   const handleDeleteNode = async () => {
     if (!currentNode) return
-    deleteNode(currentNode.id).then(() => {
-      navigate(`/graph/${graphId}`)
-    })
+    await deleteNode(currentNode.id)
+    navigate(`/graphs/${graphId}`)
   }
 
-  const handleAddEdge = async () => {
-    const targetNode = nodes.find((node) => node.name === nodeNameInput)
-    if (targetNode && nodeId && graphId) {
-      try {
-        await addEdgeToNode(graphId, nodeId, targetNode.id)
-        showSuccessNotification()
-      } catch (error) {
-        console.error(error)
-        showErrorNotification()
-      }
-    }
+  const openEditEdgeModal = () => {
+    setIsEditEdgeModalOpen(true)
+  }
+
+  const closeEditEdgeModal = () => {
+    setIsEditEdgeModalOpen(false)
   }
 
   if (!currentNode) return <></>
@@ -84,28 +71,59 @@ const DataTab: React.FC<DataTabProps> = ({
           <Text strong>Node ID: </Text>
           <Text>{currentNode.id}</Text>
           <Divider />
-          <Text strong>Edges: </Text>
-          {Array.isArray(currentNode.edges) ? (
-            currentNode.edges.map((edge) => (
-              <Text key={edge.id}>{edge.id}, </Text>
+          <Text strong>Incoming Edges: </Text>
+          {incomingNodes.length > 0 ? (
+            incomingNodes.map((edge: GraphNode, idx: number) => (
+              <span key={edge.id}>
+                <Text>
+                  {edge.name || edge.id}
+                  {incomingNodes.length > 1 &&
+                    idx !== incomingNodes.length - 1 &&
+                    ","}
+                </Text>
+              </span>
             ))
           ) : (
-            <Text>No Edges</Text>
+            <></>
+          )}
+          <Divider />
+          <Text strong>Outgoing Edges: </Text>
+          {outgoingNodes.length > 0 ? (
+            outgoingNodes.map((edge: GraphNode, idx: number) => (
+              <span key={edge.id}>
+                <Text>
+                  {edge.name || edge.id}{" "}
+                  {incomingNodes.length > 1 &&
+                    idx !== incomingNodes.length - 1 &&
+                    ","}{" "}
+                </Text>
+              </span>
+            ))
+          ) : (
+            <></>
           )}
         </Card>
-        <Card title="Node Actions" bordered={true}>
-          <Input
-            placeholder="Enter Node Name"
-            value={nodeNameInput}
-            onChange={(e) => setNodeNameInput(e.target.value)}
+        <Card title="Edge Actions" bordered={true}>
+          <Button onClick={openAddEdgeModal}>Add Edge</Button>
+          <Button onClick={openEditEdgeModal}>Edit Edges</Button>
+          <EditEdgeModal
+            isOpen={isEditEdgeModalOpen}
+            onClose={closeEditEdgeModal}
+            nodes={[...incomingNodes, ...outgoingNodes]}
+            graphId={graphId}
+            nodeId={nodeId}
+            removeEdgeFromNode={removeEdgeFromNode}
           />
-          <Button
-            type="primary"
-            onClick={handleAddEdge}
-            style={{ margin: "10px 0" }}
-          >
-            Create Edge
-          </Button>
+          <AddEdgeModal
+            isOpen={isAddEdgeModalOpen}
+            onClose={closeAddEdgeModal}
+            nodes={nodes}
+            graphId={graphId}
+            nodeId={nodeId}
+            addEdgeToNode={addEdgeToNode}
+          />
+        </Card>
+        <Card title="Destructive Actions" bordered={true}>
           <Button danger onClick={handleDeleteNode}>
             Delete Node
           </Button>

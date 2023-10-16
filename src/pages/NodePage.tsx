@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react"
 import { useParams } from "react-router-dom"
-import { notification, Tabs, TabsProps } from "antd"
+import { notification, Spin, Tabs, TabsProps } from "antd"
 import { debounce } from "lodash"
 import {
   fetchMarkdown,
@@ -17,18 +17,15 @@ import DataTab from "src/components/DataTab"
 const NodePage: React.FC = () => {
   const { graphId, nodeId } = useParams<{ nodeId: string; graphId: string }>()
   const [markdownContent, setMarkdownContent] = useState<string>("")
-  const [isLoading, setIsLoading] = useState<boolean>(true) // set to true initially
+  const [isLoading, setIsLoading] = useState<boolean>(true)
   const [currentNode, setCurrentNode] = useState<GraphNode | null>(null)
 
   const { nodes } = useNodes(graphId)
 
-  // const truncate = (str: string, length: number): string => {
-  //   return str.length > length ? str.substring(0, length) + "..." : str
-  // }
-
   useEffect(() => {
     if (!nodeId || !graphId) return
 
+    // Asynchronously fetch markdown content and node information
     const fetchMarkdownAsync = async () => {
       const md = await fetchMarkdown(nodeId)
       if (md) setMarkdownContent(md)
@@ -39,6 +36,7 @@ const NodePage: React.FC = () => {
       if (node) setCurrentNode(node)
     }
 
+    // Execute both asynchronous operations and update state
     Promise.all([fetchMarkdownAsync(), fetchNodeAsync()])
       .then(() => {
         setIsLoading(false)
@@ -51,8 +49,8 @@ const NodePage: React.FC = () => {
         setIsLoading(false)
       })
   }, [graphId, nodeId])
-  console.log(currentNode)
 
+  // Debounce the upload operation
   const debounceUpload = useCallback(
     debounce((newValue: string) => {
       if (nodeId && newValue) {
@@ -62,6 +60,7 @@ const NodePage: React.FC = () => {
     [nodeId]
   )
 
+  // Handle editor changes
   const handleEditorChange = (newValue?: string | undefined) => {
     if (newValue !== undefined) {
       setMarkdownContent(newValue)
@@ -69,15 +68,17 @@ const NodePage: React.FC = () => {
     }
   }
 
+  // Debounce the title update operation
   const handleTitleChange = useCallback(
     debounce((newTitle: string) => {
       if (nodeId && newTitle) {
         updateNodeTitle(nodeId, newTitle)
       }
-    }, 1500),
+    }, 400),
     [nodeId]
   )
 
+  // Define tab items
   const items: TabsProps["items"] = [
     {
       key: "1",
@@ -107,7 +108,12 @@ const NodePage: React.FC = () => {
     },
   ]
 
-  return <Tabs defaultActiveKey="1" items={items} />
+  // Conditionally render Tabs if not loading
+  return isLoading ? (
+    <Spin style={{ position: "absolute", left: "50%", top: "50%" }} />
+  ) : (
+    <Tabs defaultActiveKey="1" items={items} />
+  )
 }
 
 export default NodePage

@@ -5,6 +5,10 @@ export const findNodeId = (nodes: GraphNode[], name: string): string | null => {
   const node = nodes.find((node) => node.name === name)
   return node ? node.id : null
 }
+
+export const findNode = (nodes: GraphNode[], id: string) => {
+  return nodes.find((node) => node.id === id)
+}
 /**
  * Check if a node name is unique within a specific graph.
  *
@@ -54,4 +58,34 @@ export const openNotification = (
     message: message,
     description: description,
   })
+}
+
+export const calculateIncomingAndOutgoingEdges = (
+  nodeId: string | undefined,
+  allNodes: GraphNode[]
+): { incomingNodes: GraphNode[]; outgoingNodes: GraphNode[] } => {
+  if (!nodeId) return { incomingNodes: [], outgoingNodes: [] }
+
+  // Using Set to ensure uniqueness
+  const incomingNodeSet: Set<GraphNode> = new Set()
+  const outgoingNodeSet: Set<GraphNode> = new Set()
+
+  allNodes.forEach((node) => {
+    node.edges.forEach((edge) => {
+      if (edge.source === nodeId) {
+        const targetNode = findNode(allNodes, edge.target as string)
+        if (targetNode) outgoingNodeSet.add(targetNode)
+      }
+      if (edge.target === nodeId) {
+        const sourceNode = findNode(allNodes, edge.source as string)
+        if (sourceNode) incomingNodeSet.add(sourceNode)
+      }
+    })
+  })
+
+  // Convert Set back to Array
+  const incomingNodes = Array.from(incomingNodeSet)
+  const outgoingNodes = Array.from(outgoingNodeSet)
+
+  return { incomingNodes, outgoingNodes }
 }

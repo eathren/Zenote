@@ -240,6 +240,7 @@ export const addEdgeToNode = async (
     edges: nodeData.edges,
   })
 }
+
 export const removeEdgeFromNode = async (
   nodeId: string,
   targetNodeId: string
@@ -248,6 +249,7 @@ export const removeEdgeFromNode = async (
   const newEdges = nodeData.edges?.filter(
     (edge) => edge.target !== targetNodeId
   )
+  console.log(nodeData.edges, newEdges)
   const nodeRef = doc(db, "nodes", nodeId)
   await updateDoc(nodeRef, {
     edges: newEdges,

@@ -143,6 +143,34 @@ const ForceGraph = (props: ForceGraphProps) => {
 
     simulation.on("tick", () => {
       link
+        .attr("x1", (d) => {
+          // Ensure the source node exists
+          if ((d.source as GraphNode).x !== undefined) {
+            return (d.source as GraphNode).x!
+          }
+          return 0 // Default value if source node doesn't exist
+        })
+        .attr("y1", (d) => {
+          // Ensure the source node exists
+          if ((d.source as GraphNode).y !== undefined) {
+            return (d.source as GraphNode).y!
+          }
+          return 0 // Default value if source node doesn't exist
+        })
+        .attr("x2", (d) => {
+          // Ensure the target node exists
+          if ((d.target as GraphNode).x !== undefined) {
+            return (d.target as GraphNode).x!
+          }
+          return 0 // Default value if target node doesn't exist
+        })
+        .attr("y2", (d) => {
+          // Ensure the target node exists
+          if ((d.target as GraphNode).y !== undefined) {
+            return (d.target as GraphNode).y!
+          }
+          return 0 // Default value if target node doesn't exist
+        })
         .attr("x1", (d) => (d.source as GraphNode).x!)
         .attr("y1", (d) => (d.source as GraphNode).y!)
         .attr("x2", (d) => (d.target as GraphNode).x!)

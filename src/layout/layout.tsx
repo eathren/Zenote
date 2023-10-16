@@ -8,7 +8,7 @@ import {
   FileTextOutlined,
 } from "@ant-design/icons"
 import { Popover, Button, Layout } from "antd"
-import { matchPath, useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { theme } from "antd"
 import { useNodes } from "src/hooks/useNodes"
 import styles from "./index.module.css"
@@ -30,7 +30,12 @@ export const BasicLayout = ({ children }: LayoutProps) => {
   } = theme.useToken()
   const { user } = useUser()
 
-  const isHome = matchPath(window.location.pathname, "/")
+  const hideSidebarRoutes = ["/", "/login", "/signup"]
+
+  const showSidebar = !hideSidebarRoutes.some(
+    (route) => window.location.pathname === route
+  )
+
   const { graphId } = useParams<{ graphId?: string }>()
   const { nodes } = useNodes(graphId)
   const [modalOpen, setModalOpen] = useState(false)
@@ -96,7 +101,7 @@ export const BasicLayout = ({ children }: LayoutProps) => {
       >
         {!user && <CustomHeader />}
         <Layout className={styles.main__content}>
-          {isHome ? null : (
+          {!showSidebar ? null : (
             <Sider className={styles.sidebar} width={55} style={{}}>
               {ButtonList.map((item, index) => {
                 if (

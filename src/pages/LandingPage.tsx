@@ -61,9 +61,9 @@ const LandingPage = () => {
 
         <Row style={{ marginTop: "40px" }}>
           <Col span={24}>
-            <Button size="large">
-              <Link to="/signup">Get Started with Noteflowy</Link>
-            </Button>
+            <Link to="/signup">
+              <Button size="large">Get Started with Noteflowy</Button>
+            </Link>
           </Col>
         </Row>
       </Typography>
