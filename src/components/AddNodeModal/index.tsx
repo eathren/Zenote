@@ -19,23 +19,37 @@ const AddNodeModal: React.FC<AddNodeModalProps> = ({
   graphId,
 }) => {
   const navigate = useNavigate()
-  const { searchTerm, handleSearchTermChange, filteredNodes } = useNodeModal({
-    isOpen,
-    nodes,
-  })
+  const { searchTerm, handleSearchTermChange, filteredNodes, resetSearchTerm } =
+    useNodeModal({
+      isOpen,
+      nodes,
+    })
 
+  // Function to add new node
   const confirmAddNode = async () => {
-    if (graphId) {
+    if (graphId && searchTerm !== "") {
+      console.log(searchTerm)
       const id = await addNode(graphId, searchTerm)
+
+      resetSearchTerm()
       onClose()
       navigate(`/graphs/${graphId}/node/${id}`)
     }
   }
 
-  const confirmClickNode = async (node: GraphNode) => {
+  // Function to navigate to existing node
+  const confirmClickNode = (node: GraphNode) => {
     if (graphId) {
       onClose()
+      resetSearchTerm()
       navigate(`/graphs/${graphId}/node/${node.id}`)
+    }
+  }
+
+  // Function to handle Enter key press
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      confirmAddNode()
     }
   }
 
@@ -51,6 +65,7 @@ const AddNodeModal: React.FC<AddNodeModalProps> = ({
         placeholder="Node Name..."
         value={searchTerm}
         onChange={handleSearchTermChange}
+        onKeyDown={handleKeyDown}
       />
       <List
         dataSource={filteredNodes}

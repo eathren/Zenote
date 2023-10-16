@@ -45,22 +45,33 @@ const AddEdgeModal: React.FC<AddEdgeModalProps> = ({
   const confirmCreateEdges = async () => {
     if (!graphId || !nodeId) return
 
-    const edgeCreationPromises = selectedNodes.map((targetNode) =>
-      addEdgeToNode(graphId, nodeId, targetNode.id).catch((error) => {
+    // Create an array of promises for adding edges
+    const edgeCreationPromises = selectedNodes.map((targetNode) => {
+      return addEdgeToNode(graphId, nodeId, targetNode.id).catch((error) => {
         console.error(error)
         notification.error({
           message: `Failed to Add Edge to ${targetNode.name}`,
           duration: 3,
         })
       })
-    )
+    })
 
+    // Wait for all edge creation promises to complete
     await Promise.all(edgeCreationPromises)
+
     notification.success({
       message: "Edges Added Successfully",
       duration: 3,
     })
+
     onClose()
+  }
+
+  // Function to handle Enter key press
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      confirmCreateEdges()
+    }
   }
 
   return (
@@ -74,6 +85,7 @@ const AddEdgeModal: React.FC<AddEdgeModalProps> = ({
         placeholder="Search Node..."
         value={searchTerm}
         onChange={handleSearchTermChange}
+        onKeyDown={handleKeyDown}
       />
       <List
         dataSource={filteredNodes}
@@ -83,7 +95,7 @@ const AddEdgeModal: React.FC<AddEdgeModalProps> = ({
             style={{
               cursor: "pointer",
               backgroundColor: selectedNodes.includes(node)
-                ? "red"
+                ? "grey"
                 : "transparent",
             }}
           >

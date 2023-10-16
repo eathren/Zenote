@@ -22,9 +22,14 @@ export const useNodeModal = ({ isOpen, nodes }: UseNodeModalProps) => {
     setSearchTerm(e.target.value)
   }
 
-  useEffect(() => {
+  // Function to reset searchTerm
+  const resetSearchTerm = () => {
     setSearchTerm("")
+  }
+
+  useEffect(() => {
+    resetSearchTerm()
   }, [isOpen])
 
-  return { searchTerm, handleSearchTermChange, filteredNodes }
+  return { searchTerm, handleSearchTermChange, filteredNodes, resetSearchTerm }
 }
