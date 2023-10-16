@@ -32,6 +32,13 @@ const AddNodeModal: React.FC<AddNodeModalProps> = ({
     }
   }
 
+  const confirmClickNode = async (node: GraphNode) => {
+    if (graphId) {
+      onClose()
+      navigate(`/graphs/${graphId}/node/${node.id}`)
+    }
+  }
+
   return (
     <Modal
       title="Find or Add New Node"
@@ -50,7 +57,7 @@ const AddNodeModal: React.FC<AddNodeModalProps> = ({
         style={{ overflowY: "scroll", height: "inherit" }}
         renderItem={(node) => (
           <List.Item
-            onClick={() => navigate(`/graphs/${graphId}/node/${node.id}`)}
+            onClick={() => confirmClickNode(node)}
             style={{
               cursor: "pointer",
               padding: "5px 10px",

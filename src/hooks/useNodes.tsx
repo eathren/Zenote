@@ -48,17 +48,23 @@ export const useNodes = (graphId: string | undefined) => {
               return [...prevNodes, nodeData]
             }
 
+            // Create a new array to store updated nodes
             let newNodes = [...prevNodes]
 
             if (change.type === "added") {
-              newNodes.push(nodeData)
+              // Check if the node already exists to avoid duplicates
+              if (!newNodes.some((node) => node.id === nodeData.id)) {
+                newNodes.push(nodeData)
+              }
             }
+
             if (change.type === "modified") {
               const index = newNodes.findIndex(
                 (node) => node.id === nodeData.id
               )
               newNodes[index] = nodeData
             }
+
             if (change.type === "removed") {
               newNodes = newNodes.filter((node) => node.id !== nodeData.id)
             }
@@ -79,5 +85,6 @@ export const useNodes = (graphId: string | undefined) => {
       unsubscribe()
     }
   }, [graphId])
+
   return { nodes, loading, error }
 }
