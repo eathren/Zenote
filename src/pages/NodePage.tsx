@@ -9,6 +9,7 @@ import DocumentTab from "src/components/DocumentTab"
 import DataTab from "src/components/DataTab"
 import { fetchMarkdown, uploadMarkdown } from "src/handles/markdown"
 import { fetchNode, updateNodeTitle } from "src/handles/nodes"
+import { addEdgeToNode } from "src/handles/edges"
 
 const NodePage: React.FC = () => {
   const { graphId, nodeId } = useParams<{ nodeId: string; graphId: string }>()
@@ -28,7 +29,7 @@ const NodePage: React.FC = () => {
     }
 
     const fetchNodeAsync = async () => {
-      const node = await fetchNode(nodeId)
+      const node = await fetchNode(graphId, nodeId)
       if (node) setCurrentNode(node)
     }
 
@@ -67,8 +68,8 @@ const NodePage: React.FC = () => {
   // Debounce the title update operation
   const handleTitleChange = useCallback(
     debounce((newTitle: string) => {
-      if (nodeId && newTitle) {
-        updateNodeTitle(nodeId, newTitle)
+      if (graphId && nodeId && newTitle) {
+        updateNodeTitle(graphId, nodeId, newTitle)
       }
     }, 400),
     [nodeId]

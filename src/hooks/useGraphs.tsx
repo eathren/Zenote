@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react"
-import { collection, onSnapshot } from "firebase/firestore"
+import { onSnapshot } from "firebase/firestore"
 import { db } from "../firebase" // replace with your actual Firebase config import
 import { useGraphStore } from "src/stores/graphStore"
 import { Graph } from "src/types"
+import { getGraphsCollectionRef } from "src/handles/utils"
 
 export const useGraphs = () => {
   const { graphs, setGraphs, updateGraph } = useGraphStore()
@@ -14,7 +15,7 @@ export const useGraphs = () => {
     setLoading(true)
     // Firebase subscription to listen for changes to the 'graphs' collection
     const unsubscribe = onSnapshot(
-      collection(db, "graphs"),
+      getGraphsCollectionRef(db),
       (snapshot) => {
         const updatedGraphs: Graph[] = []
 

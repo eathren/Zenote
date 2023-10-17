@@ -1,17 +1,14 @@
 import {
   getFirestore,
   collection,
-  addDoc,
   getDocs,
-  deleteDoc,
-  doc,
   updateDoc,
   Firestore,
   getDoc,
 } from "firebase/firestore"
 import { GraphEdge } from "src/types/index" // Update the import path according to your project structure
 import { notification } from "antd"
-import { getCurrentUserId, getNodeDocRef } from "./utils"
+import { getCurrentUserId, getNodeCollectionPath, getNodeDocRef } from "./utils"
 import { v4 as uuidv4 } from "uuid"
 import { GraphNode } from "src/types/index"
 const db = getFirestore()
@@ -76,12 +73,19 @@ export const addEdgeInDB = async (edge: GraphEdge): Promise<boolean> => {
  */
 export const addEdgeToNode = async (
   db: Firestore,
-  ownerId: string,
   graphId: string,
   nodeId: string,
   targetNodeId: string
 ): Promise<boolean> => {
   try {
+    const ownerId = getCurrentUserId()
+    if (!ownerId) {
+      notification.error({
+        message: "Error",
+        description: "User not authenticated",
+      })
+      return false
+    }
     // Get reference to the specific node document
     const nodeDocRef = getNodeDocRef(db, ownerId, graphId, nodeId)
 

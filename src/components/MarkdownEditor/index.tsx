@@ -1,11 +1,10 @@
 import { useState, useEffect, useCallback } from "react"
 import { useParams } from "react-router-dom"
-import { fetchMarkdown, updateNodeTitle, uploadMarkdown } from "src/handles"
 import { Spin, Typography, Button, Drawer } from "antd"
 import { debounce } from "lodash"
-// import { findNodeId } from "src/utils"
-// import { useNodes } from "src/hooks/useNodes"
 import EditorArea from "src/components/Editor"
+import { fetchMarkdown, uploadMarkdown } from "src/handles/markdown"
+import { updateNodeTitle } from "src/handles/nodes"
 
 const NodePage = () => {
   const { graphId, nodeId } = useParams<{ nodeId: string; graphId: string }>()
@@ -33,15 +32,17 @@ const NodePage = () => {
 
   // Update the title of the node
   useEffect(() => {
+    if (!nodeId || !graphId) return
+
     const cleanString = markdownContent
       .split("\n")[0]
       .replace(/[*_#`~]/g, "")
       .trim()
     const truncatedTitle = truncate(cleanString, 50)
     if (nodeId) {
-      updateNodeTitle(nodeId, truncatedTitle)
+      updateNodeTitle(graphId, nodeId, truncatedTitle)
     }
-  }, [markdownContent, nodeId])
+  }, [graphId, markdownContent, nodeId])
 
   // Debounce the upload operation
   const debounceUpload = useCallback(

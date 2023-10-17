@@ -8,6 +8,7 @@ import {
   orderBy,
 } from "firebase/firestore"
 import { GraphNode } from "src/types/index"
+import { getCurrentUserId, getNodeCollectionPath } from "src/handles/utils" // replace 'yourUtilityFile' with the actual path to your utility file
 
 export const useNodes = (graphId: string | undefined) => {
   const [nodes, setNodes] = useState<GraphNode[]>([])
@@ -24,7 +25,15 @@ export const useNodes = (graphId: string | undefined) => {
 
     setLoading(true)
 
-    const nodesCollection = collection(db, "nodes")
+    const ownerId = getCurrentUserId()
+    if (!ownerId) {
+      setError("No owner ID found")
+      setLoading(false)
+      return
+    }
+
+    const nodeCollectionPath = getNodeCollectionPath(ownerId, graphId)
+    const nodesCollection = collection(db, nodeCollectionPath)
     const q = query(
       nodesCollection,
       where("graphId", "==", graphId),

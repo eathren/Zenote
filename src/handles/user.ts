@@ -1,10 +1,4 @@
-import {
-  getFirestore,
-  collection,
-  doc,
-  setDoc,
-  addDoc,
-} from "firebase/firestore"
+import { getFirestore, collection, doc, addDoc } from "firebase/firestore"
 import { User } from "src/types" // Import your User type definition
 
 const db = getFirestore()

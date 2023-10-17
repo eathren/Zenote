@@ -1,11 +1,19 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Match any document within the 'users' collection and any of its sub-collections
-    match /users/{ownerId}/{document=**} {
+
+    match /users/{ownerId} {
       // Allow read, write, update, and delete operations only if the ownerId is the authenticated user's ID
       allow read, write: if request.auth.uid == ownerId;
+
+      match /graphs/{graphId} {
+        allow read, write: if request.auth.uid == ownerId;
+
+        match /nodes/{nodeId} {
+          allow read, write: if request.auth.uid == ownerId;
+        }
+        // Add more nested collections here if needed
+      }
     }
   }
 }

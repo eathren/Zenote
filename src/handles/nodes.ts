@@ -83,8 +83,17 @@ export const addNode = async (graphId: string, nodeName: string) => {
   }
 }
 
-export const fetchNode = async (nodeId: string) => {
-  const nodeRef = doc(db, "nodes", nodeId)
+export const fetchNode = async (graphId: string, nodeId: string) => {
+  const ownerId = getCurrentUserId()
+  if (!ownerId) {
+    notification.error({
+      message: "Error",
+      description: "User not authenticated",
+    })
+    return
+  }
+
+  const nodeRef = doc(db, `users/${ownerId}/graphs/${graphId}/nodes/${nodeId}`)
   const nodeDoc = await getDoc(nodeRef)
   const node = { id: nodeRef.id, ...nodeDoc.data() } as GraphNode
   return node

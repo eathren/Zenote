@@ -16,7 +16,8 @@ export const getCurrentUserId = () => {
  * @param ownerId - The Firestore ID of the user.
  * @returns A collection reference to the graphs collection.
  */
-export const getGraphsCollectionRef = (db: Firestore, ownerId: string) => {
+export const getGraphsCollectionRef = (db: Firestore) => {
+  const ownerId = getCurrentUserId()
   return collection(db, `users/${ownerId}/graphs`)
 }
 
