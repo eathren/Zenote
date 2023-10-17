@@ -1,35 +1,35 @@
-import { Button, Modal, Input } from "antd";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { addGraphInDB } from "src/handles";
+import { Button, Modal, Input } from "antd"
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { addGraphInDB } from "src/handles/graphs"
 
 const AddGraphButton = () => {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [graphName, setGraphName] = useState("");
-  const navigate = useNavigate();
+  const [modalOpen, setModalOpen] = useState(false)
+  const [graphName, setGraphName] = useState("")
+  const navigate = useNavigate()
 
   // Handle changes in the graph name input
   const handleGraphNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setGraphName(e.target.value);
-  };
+    setGraphName(e.target.value)
+  }
 
   // Function to create a new graph
   const createGraph = () => {
     addGraphInDB(graphName).then((docId) => {
       if (docId) {
-        navigate(`/graphs/${docId}`);
+        navigate(`/graphs/${docId}`)
       }
-    });
-    setModalOpen(false);
-    setGraphName("");
-  };
+    })
+    setModalOpen(false)
+    setGraphName("")
+  }
 
   // Handle the onKeyDown event for the input
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      createGraph();
+      createGraph()
     }
-  };
+  }
 
   return (
     <div>
@@ -49,7 +49,7 @@ const AddGraphButton = () => {
         />
       </Modal>
     </div>
-  );
-};
+  )
+}
 
-export default AddGraphButton;
+export default AddGraphButton

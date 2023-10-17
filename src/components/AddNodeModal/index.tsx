@@ -1,9 +1,9 @@
 import React from "react"
 import { Modal, Input, List } from "antd"
 import { useNavigate } from "react-router-dom"
-import { addNode } from "src/handles"
 import { GraphNode } from "src/types"
 import { useNodeModal } from "src/hooks/useNodeModal"
+import { addNode } from "src/handles/nodes"
 
 type AddNodeModalProps = {
   isOpen: boolean

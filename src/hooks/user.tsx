@@ -9,6 +9,7 @@ import {
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { auth } from "src/firebase"
+import { createUserDoc } from "src/handles/user"
 import { openNotification } from "src/utils"
 
 export const useUser = () => {
@@ -69,7 +70,8 @@ export const useUser = () => {
         password
       )
       const user = userCredential.user
-
+      const userId = user?.uid
+      await createUserDoc(userId, email).catch(console.error)
       // Navigate to the home page only if sign-up is successful
       if (user) {
         navigate("/")

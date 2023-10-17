@@ -1,12 +1,12 @@
 import React, { useState } from "react"
 import { Button, Typography, Space, Card, Divider } from "antd"
 import { GraphNode } from "src/types"
-import { deleteNode, removeEdgeFromNode } from "src/handles"
 import { useNavigate } from "react-router-dom"
 import styles from "./index.module.css"
 import AddEdgeModal from "../AddEdgeModal"
 import { calculateIncomingAndOutgoingEdges } from "src/utils"
 import EditEdgeModal from "../EditEdgeModal"
+import { deleteNode, removeEdgeFromNode } from "src/handles/nodes"
 
 type DataTabProps = {
   currentNode: GraphNode | null

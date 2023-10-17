@@ -1,0 +1,19 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "nodes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "graphId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "date_created",
+          "order": "ASCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

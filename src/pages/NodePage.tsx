@@ -2,17 +2,13 @@ import React, { useState, useEffect, useCallback } from "react"
 import { useParams } from "react-router-dom"
 import { notification, Spin, Tabs, TabsProps } from "antd"
 import { debounce } from "lodash"
-import {
-  fetchMarkdown,
-  fetchNode,
-  updateNodeTitle,
-  uploadMarkdown,
-  addEdgeToNode,
-} from "src/handles"
+
 import { GraphNode } from "src/types"
 import { useNodes } from "src/hooks/useNodes"
 import DocumentTab from "src/components/DocumentTab"
 import DataTab from "src/components/DataTab"
+import { fetchMarkdown, uploadMarkdown } from "src/handles/markdown"
+import { fetchNode, updateNodeTitle } from "src/handles/nodes"
 
 const NodePage: React.FC = () => {
   const { graphId, nodeId } = useParams<{ nodeId: string; graphId: string }>()
