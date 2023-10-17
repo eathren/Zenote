@@ -19,6 +19,8 @@ const nodes: GraphNode[] = [
   {
     id: "1",
     graphId: "g1",
+    ownerId: "1",
+
     name: "Node 1",
     date_created: Date.now(),
     edges: [
@@ -38,6 +40,7 @@ const nodes: GraphNode[] = [
       },
       {
         source: "1",
+
         target: "4",
         id: "3",
         graphId: "1",
@@ -47,6 +50,8 @@ const nodes: GraphNode[] = [
   },
   {
     id: "3",
+    ownerId: "1",
+
     graphId: "g1",
     name: "Node 3",
     date_created: Date.now(),
@@ -54,6 +59,8 @@ const nodes: GraphNode[] = [
   },
   {
     id: "4",
+    ownerId: "1",
+
     graphId: "g1",
     name: "Node 4",
     date_created: Date.now(),
@@ -62,6 +69,7 @@ const nodes: GraphNode[] = [
 
   {
     id: "5",
+    ownerId: "1",
     graphId: "g1",
     name: "Node 5",
     date_created: Date.now(),

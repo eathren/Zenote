@@ -17,7 +17,7 @@ type DataTabProps = {
     graphId: string,
     nodeId: string,
     targetNodeId: string
-  ) => Promise<void>
+  ) => Promise<boolean>
 }
 
 const { Text } = Typography
@@ -46,7 +46,7 @@ const DataTab: React.FC<DataTabProps> = ({
   }
 
   const handleDeleteNode = async () => {
-    if (!currentNode) return
+    if (!currentNode || !currentNode.id) return
     await deleteNode(currentNode.id)
     navigate(`/graphs/${graphId}`)
   }

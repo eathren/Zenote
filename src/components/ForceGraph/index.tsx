@@ -54,7 +54,7 @@ const ForceGraph = (props: ForceGraphProps) => {
         "link",
         d3
           .forceLink(edges)
-          .id((d) => (d as GraphNode).id)
+          .id((d) => (d as GraphNode).id!)
           .distance(100)
       )
       .force("charge", d3.forceManyBody())
@@ -179,7 +179,7 @@ const ForceGraph = (props: ForceGraphProps) => {
       nodeGroup.attr("transform", (d) => `translate(${d.x!}, ${d.y!})`)
     })
     nodeGroup.on("contextmenu", (event: MouseEvent, d: GraphNode) => {
-      handleContextMenu(event, d.id)
+      handleContextMenu(event, d.id!)
     })
 
     // Add right-click context menu for links

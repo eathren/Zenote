@@ -3,7 +3,6 @@ import {
   collection,
   getDocs,
   updateDoc,
-  Firestore,
   getDoc,
 } from "firebase/firestore"
 import { GraphEdge } from "src/types/index" // Update the import path according to your project structure
@@ -72,11 +71,10 @@ export const addEdgeInDB = async (edge: GraphEdge): Promise<boolean> => {
  * @returns Promise resolving to a boolean indicating the success of the operation
  */
 export const addEdgeToNode = async (
-  db: Firestore,
   graphId: string,
   nodeId: string,
   targetNodeId: string
-): Promise<boolean> => {
+) => {
   try {
     const ownerId = getCurrentUserId()
     if (!ownerId) {
@@ -114,8 +112,7 @@ export const addEdgeToNode = async (
     await updateDoc(nodeDocRef, {
       edges: nodeData.edges,
     })
-
-    return true // Edge addition successful
+    return true
   } catch (error) {
     console.error("Error adding edge: ", error)
     return false // Edge addition failed

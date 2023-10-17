@@ -13,7 +13,7 @@ type AddEdgeModalProps = {
     graphId: string,
     nodeId: string,
     targetNodeId: string
-  ) => Promise<void>
+  ) => Promise<boolean>
 }
 
 const AddEdgeModal: React.FC<AddEdgeModalProps> = ({
@@ -47,7 +47,7 @@ const AddEdgeModal: React.FC<AddEdgeModalProps> = ({
 
     // Create an array of promises for adding edges
     const edgeCreationPromises = selectedNodes.map((targetNode) => {
-      return addEdgeToNode(graphId, nodeId, targetNode.id).catch((error) => {
+      return addEdgeToNode(graphId, nodeId, targetNode.id!).catch((error) => {
         console.error(error)
         notification.error({
           message: `Failed to Add Edge to ${targetNode.name}`,

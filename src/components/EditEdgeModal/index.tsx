@@ -41,7 +41,7 @@ const EditEdgeModal: React.FC<EditEdgeModalProps> = ({
     if (!nodeId) return
 
     const edgeDeletionPromises = selectedNodes.map((targetNode) =>
-      removeEdgeFromNode(nodeId, targetNode.id).catch((error) => {
+      removeEdgeFromNode(nodeId, targetNode.id!).catch((error) => {
         console.error(error)
         notification.error({
           message: `Failed to Delete Edge to ${targetNode.name}`,

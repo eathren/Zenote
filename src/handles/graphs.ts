@@ -22,7 +22,7 @@ export const addGraphInDB = async (graphName: string) => {
     return
   }
 
-  const graphsCollectionRef = getGraphsCollectionRef(db, ownerId)
+  const graphsCollectionRef = getGraphsCollectionRef(db)
   const graph: Graph = {
     name: graphName,
     ownerId,
@@ -51,7 +51,7 @@ export const getGraphsFromDB = async () => {
     return []
   }
 
-  const graphsCollectionRef = getGraphsCollectionRef(db, ownerId)
+  const graphsCollectionRef = getGraphsCollectionRef(db)
   console.log(graphsCollectionRef)
   const graphsSnapshot = await getDocs(graphsCollectionRef)
   const graphs: Graph[] = []
