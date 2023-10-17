@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react"
 import { Modal, Input, List, notification } from "antd"
 import { GraphNode } from "src/types"
 import { useNodeModal } from "src/hooks/useNodeModal"
+import { removeEdgesFromNodeBatch } from "src/handles/nodes"
+import { useParams } from "react-router-dom"
 
 type EditEdgeModalProps = {
   isOpen: boolean
@@ -9,7 +11,6 @@ type EditEdgeModalProps = {
   nodes: GraphNode[]
   graphId: string | undefined
   nodeId: string | undefined
-  removeEdgeFromNode: (nodeId: string, targetNodeId: string) => Promise<void>
 }
 
 const EditEdgeModal: React.FC<EditEdgeModalProps> = ({
@@ -17,7 +18,6 @@ const EditEdgeModal: React.FC<EditEdgeModalProps> = ({
   onClose,
   nodes,
   nodeId,
-  removeEdgeFromNode,
 }) => {
   const [selectedNodes, setSelectedNodes] = useState<GraphNode[]>([])
   const { searchTerm, handleSearchTermChange, filteredNodes } = useNodeModal({
@@ -25,6 +25,7 @@ const EditEdgeModal: React.FC<EditEdgeModalProps> = ({
     nodes,
   })
 
+  const graphId = useParams<{ graphId: string }>().graphId
   useEffect(() => {
     setSelectedNodes([])
   }, [isOpen])
@@ -40,21 +41,23 @@ const EditEdgeModal: React.FC<EditEdgeModalProps> = ({
   const confirmDeleteEdges = async () => {
     if (!nodeId) return
 
-    const edgeDeletionPromises = selectedNodes.map((targetNode) =>
-      removeEdgeFromNode(nodeId, targetNode.id!).catch((error) => {
-        console.error(error)
-        notification.error({
-          message: `Failed to Delete Edge to ${targetNode.name}`,
-          duration: 3,
-        })
-      })
-    )
+    const targetNodeIds = selectedNodes.map((targetNode) => targetNode.id!)
 
-    await Promise.all(edgeDeletionPromises)
-    notification.success({
-      message: "Edges Deleted Successfully",
-      duration: 3,
-    })
+    try {
+      if (!graphId) return
+      await removeEdgesFromNodeBatch(graphId, nodeId, targetNodeIds) // Call your new batch deletion function
+      notification.success({
+        message: "Edges Deleted Successfully",
+        duration: 3,
+      })
+    } catch (error) {
+      console.error(error)
+      notification.error({
+        message: `Failed to Delete Edges`,
+        duration: 3,
+      })
+    }
+
     onClose()
   }
 

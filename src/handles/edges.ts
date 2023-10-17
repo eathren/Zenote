@@ -118,6 +118,58 @@ export const addEdgeToNode = async (
     return false // Edge addition failed
   }
 }
+
+export const addEdgesToNodeBatch = async (
+  graphId: string,
+  nodeId: string,
+  targetNodeIds: string[]
+): Promise<boolean> => {
+  try {
+    const ownerId = getCurrentUserId()
+    if (!ownerId) {
+      notification.error({
+        message: "Error",
+        description: "User not authenticated",
+      })
+      return false
+    }
+
+    // Get reference to the specific node document
+    const nodeDocRef = getNodeDocRef(db, ownerId, graphId, nodeId)
+
+    // Fetch the node data
+    const nodeDocSnap = await getDoc(nodeDocRef)
+    const nodeData = nodeDocSnap.data() as GraphNode
+
+    // Initialize new edges
+    const newEdges = targetNodeIds.map((targetNodeId) => ({
+      id: uuidv4(),
+      graphId,
+      source: nodeId,
+      target: targetNodeId,
+      date_created: Date.now(),
+    }))
+
+    // If edges field is not an array or not defined, initialize it
+    if (!Array.isArray(nodeData.edges)) {
+      nodeData.edges = []
+    }
+
+    // Add new edges to edges array locally
+    nodeData.edges.push(...newEdges)
+
+    // Perform a single batch update to the database
+    await updateDoc(nodeDocRef, {
+      edges: nodeData.edges,
+    })
+
+    return true
+  } catch (error) {
+    console.error("Error adding edges: ", error)
+    return false
+  }
+}
+
 /**
  * Fetches all edges for a specific graph from the database.
  *

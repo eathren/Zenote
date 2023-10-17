@@ -17,6 +17,7 @@ import {
   fetchSingleDoc,
   getCurrentUserId,
   getNodeCollectionPath,
+  getNodeDocRef,
 } from "./utils"
 import { ref, deleteObject } from "firebase/storage"
 import { storage } from "src/firebase"
@@ -144,6 +145,42 @@ export const removeEdgeFromNode = async (
   await updateDoc(nodeRef, {
     edges: newEdges,
   })
+}
+
+export const removeEdgesFromNodeBatch = async (
+  graphId: string,
+  nodeId: string,
+  targetNodeIds: string[]
+) => {
+  const ownerId = getCurrentUserId()
+  if (!ownerId) {
+    notification.error({
+      message: "Error",
+      description: "User not authenticated",
+    })
+    return
+  }
+
+  const nodeDocRef = getNodeDocRef(db, ownerId, graphId, nodeId)
+  const nodeDocSnap = await getDoc(nodeDocRef)
+  const nodeData = nodeDocSnap.data() as GraphNode
+
+  if (Array.isArray(nodeData.edges)) {
+    nodeData.edges = nodeData.edges.filter(
+      (edge) => !targetNodeIds.includes(edge.target as string)
+    )
+  }
+
+  try {
+    await updateDoc(nodeDocRef, {
+      edges: nodeData.edges,
+    })
+  } catch (error) {
+    notification.error({
+      message: "Error",
+      description: "Failed to delete edges in DB",
+    })
+  }
 }
 
 export const getNodesFromDB = async () => {

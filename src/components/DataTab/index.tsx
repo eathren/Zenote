@@ -6,18 +6,13 @@ import styles from "./index.module.css"
 import AddEdgeModal from "../AddEdgeModal"
 import { calculateIncomingAndOutgoingEdges } from "src/utils"
 import EditEdgeModal from "../EditEdgeModal"
-import { deleteNode, removeEdgeFromNode } from "src/handles/nodes"
+import { deleteNode } from "src/handles/nodes"
 
 type DataTabProps = {
   currentNode: GraphNode | null
   nodes: GraphNode[]
   graphId: string | undefined
   nodeId: string | undefined
-  addEdgeToNode: (
-    graphId: string,
-    nodeId: string,
-    targetNodeId: string
-  ) => Promise<boolean>
 }
 
 const { Text } = Typography
@@ -27,7 +22,6 @@ const DataTab: React.FC<DataTabProps> = ({
   nodes,
   graphId,
   nodeId,
-  addEdgeToNode,
 }) => {
   const navigate = useNavigate()
   const [isAddEdgeModalOpen, setIsAddEdgeModalOpen] = useState<boolean>(false)
@@ -112,7 +106,6 @@ const DataTab: React.FC<DataTabProps> = ({
             nodes={[...incomingNodes, ...outgoingNodes]}
             graphId={graphId}
             nodeId={nodeId}
-            removeEdgeFromNode={removeEdgeFromNode}
           />
           <AddEdgeModal
             isOpen={isAddEdgeModalOpen}
@@ -120,7 +113,6 @@ const DataTab: React.FC<DataTabProps> = ({
             nodes={nodes}
             graphId={graphId}
             nodeId={nodeId}
-            addEdgeToNode={addEdgeToNode}
           />
         </Card>
         <Card title="Destructive Actions" bordered={true}>

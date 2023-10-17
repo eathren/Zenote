@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"
 import { Modal, Input, List, notification } from "antd"
 import { GraphNode } from "src/types"
 import { useNodeModal } from "src/hooks/useNodeModal"
+import { addEdgesToNodeBatch } from "src/handles/edges"
 
 type AddEdgeModalProps = {
   isOpen: boolean
@@ -9,11 +10,6 @@ type AddEdgeModalProps = {
   nodes: GraphNode[]
   graphId: string | undefined
   nodeId: string | undefined
-  addEdgeToNode: (
-    graphId: string,
-    nodeId: string,
-    targetNodeId: string
-  ) => Promise<boolean>
 }
 
 const AddEdgeModal: React.FC<AddEdgeModalProps> = ({
@@ -22,7 +18,6 @@ const AddEdgeModal: React.FC<AddEdgeModalProps> = ({
   nodes,
   graphId,
   nodeId,
-  addEdgeToNode,
 }) => {
   const [selectedNodes, setSelectedNodes] = useState<GraphNode[]>([])
   const { searchTerm, handleSearchTermChange, filteredNodes } = useNodeModal({
@@ -45,24 +40,30 @@ const AddEdgeModal: React.FC<AddEdgeModalProps> = ({
   const confirmCreateEdges = async () => {
     if (!graphId || !nodeId) return
 
-    // Create an array of promises for adding edges
-    const edgeCreationPromises = selectedNodes.map((targetNode) => {
-      return addEdgeToNode(graphId, nodeId, targetNode.id!).catch((error) => {
-        console.error(error)
+    // Collect all target node IDs into an array
+    const targetNodeIds = selectedNodes.map((targetNode) => targetNode.id!)
+
+    try {
+      // Attempt to add edges in a batch
+      const result = await addEdgesToNodeBatch(graphId, nodeId, targetNodeIds)
+      if (!result) {
         notification.error({
-          message: `Failed to Add Edge to ${targetNode.name}`,
+          message: `Failed to Add Edges`,
           duration: 3,
         })
+      } else {
+        notification.success({
+          message: "Edges Added Successfully",
+          duration: 3,
+        })
+      }
+    } catch (error) {
+      console.error(error)
+      notification.error({
+        message: `Failed to Add Edges`,
+        duration: 3,
       })
-    })
-
-    // Wait for all edge creation promises to complete
-    await Promise.all(edgeCreationPromises)
-
-    notification.success({
-      message: "Edges Added Successfully",
-      duration: 3,
-    })
+    }
 
     onClose()
   }

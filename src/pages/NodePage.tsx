@@ -9,7 +9,6 @@ import DocumentTab from "src/components/DocumentTab"
 import DataTab from "src/components/DataTab"
 import { fetchMarkdown, uploadMarkdown } from "src/handles/markdown"
 import { fetchNode, updateNodeTitle } from "src/handles/nodes"
-import { addEdgeToNode } from "src/handles/edges"
 
 const NodePage: React.FC = () => {
   const { graphId, nodeId } = useParams<{ nodeId: string; graphId: string }>()
@@ -99,7 +98,6 @@ const NodePage: React.FC = () => {
           nodes={nodes}
           graphId={graphId}
           nodeId={nodeId}
-          addEdgeToNode={addEdgeToNode}
         />
       ),
     },
