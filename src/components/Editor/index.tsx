@@ -13,10 +13,16 @@ const EditorArea: React.FC<EditorAreaProps> = ({
   markdownContent,
   handleEditorChange,
 }) => {
-  const [isEditing, setIsEditing] = useState(true)
+  const [isEditing, setIsEditing] = useState(false)
   const [cursorPosition, setCursorPosition] = useState<number | null>(null)
   const textAreaRef = useRef<any>(null)
   const lineRefs = useRef<(HTMLDivElement | null)[]>([])
+
+  useEffect(() => {
+    if (markdownContent.length < 1) {
+      setIsEditing(true)
+    }
+  }, [markdownContent.length])
 
   useEffect(() => {
     if (isEditing && textAreaRef.current && cursorPosition !== null) {
@@ -71,7 +77,7 @@ const EditorArea: React.FC<EditorAreaProps> = ({
         />
       ) : (
         <div>
-          {markdownContent.length > 1 ? (
+          {markdownContent.length ? (
             markdownContent.split("\n").map((line, index) => (
               <div
                 ref={(el) => (lineRefs.current[index] = el)}

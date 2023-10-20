@@ -5,6 +5,7 @@ import { GraphNode, GraphEdge } from "src/types" // Update the import path as ne
 import { drag } from "./utils"
 import { Item, Menu, useContextMenu } from "react-contexify"
 import "react-contexify/ReactContexify.css"
+import useGraphControls from "src/hooks/useGraphControls"
 
 type ForceGraphProps = {
   graphId: string
@@ -21,6 +22,9 @@ const ForceGraph = (props: ForceGraphProps) => {
     id: "forceGraphContextMenu",
   })
 
+  const { nodeSize, linkStrength, repelForce, nodeGrowth, GraphControls } =
+    useGraphControls()
+
   // Capture the right click on a node or a link and show the context menu
   const handleContextMenu = useCallback(
     (event: MouseEvent, id: string) => {
@@ -29,6 +33,24 @@ const ForceGraph = (props: ForceGraphProps) => {
       show({ event, props: { id } })
     },
     [show]
+  )
+
+  const calculateNodeSizeHover = useCallback(
+    (d: GraphNode) => {
+      const numOutgoingEdges = edges.filter((edge) => edge.source === d).length
+      if (!nodeGrowth) return nodeSize + numOutgoingEdges
+      return nodeSize + 5 + numOutgoingEdges
+    },
+    [edges, nodeGrowth, nodeSize]
+  )
+
+  const calculateNodeSize = useCallback(
+    (d: GraphNode) => {
+      if (!nodeGrowth) return nodeSize
+      const numOutgoingEdges = edges.filter((edge) => edge.source === d).length
+      return nodeSize + numOutgoingEdges
+    },
+    [edges, nodeGrowth, nodeSize]
   )
 
   useEffect(() => {
@@ -55,7 +77,7 @@ const ForceGraph = (props: ForceGraphProps) => {
         d3
           .forceLink(edges)
           .id((d) => (d as GraphNode).id!)
-          .distance(100)
+          .distance(linkStrength)
       )
       .force("charge", d3.forceManyBody())
       .force("center", d3.forceCenter(width / 2, height / 2))
@@ -81,11 +103,13 @@ const ForceGraph = (props: ForceGraphProps) => {
 
     nodeGroup
       .append("circle")
-      .attr("r", 5)
+      .attr("r", (d) => calculateNodeSize(d))
       .attr("fill", "#AAAAAA")
       .style("transition", "all 0.3s ease-in-out")
       .on("mouseover", function (_event, d) {
-        d3.select(this).attr("r", 10).attr("fill", "#82a8ff")
+        d3.select(this)
+          .attr("r", calculateNodeSizeHover(d))
+          .attr("fill", "#82a8ff")
 
         link
           .filter((l: GraphEdge) => l.source === d || l.target === d)
@@ -110,7 +134,7 @@ const ForceGraph = (props: ForceGraphProps) => {
           .attr("opacity", 0.1)
       })
       .on("mouseout", function (_event, d) {
-        d3.select(this).attr("r", 5).attr("fill", "#AAAAAA")
+        d3.select(this).attr("r", calculateNodeSize(d)).attr("fill", "#AAAAAA")
 
         link
           .filter((l: GraphEdge) => l.source === d || l.target === d)
@@ -144,32 +168,29 @@ const ForceGraph = (props: ForceGraphProps) => {
     simulation.on("tick", () => {
       link
         .attr("x1", (d) => {
-          // Ensure the source node exists
           if ((d.source as GraphNode).x !== undefined) {
             return (d.source as GraphNode).x!
           }
-          return 0 // Default value if source node doesn't exist
+          return 0
         })
         .attr("y1", (d) => {
-          // Ensure the source node exists
           if ((d.source as GraphNode).y !== undefined) {
             return (d.source as GraphNode).y!
           }
-          return 0 // Default value if source node doesn't exist
+          return 0
         })
         .attr("x2", (d) => {
-          // Ensure the target node exists
           if ((d.target as GraphNode).x !== undefined) {
             return (d.target as GraphNode).x!
           }
-          return 0 // Default value if target node doesn't exist
+          return 0
         })
         .attr("y2", (d) => {
           // Ensure the target node exists
           if ((d.target as GraphNode).y !== undefined) {
             return (d.target as GraphNode).y!
           }
-          return 0 // Default value if target node doesn't exist
+          return 0
         })
         .attr("x1", (d) => (d.source as GraphNode).x!)
         .attr("y1", (d) => (d.source as GraphNode).y!)
@@ -186,21 +207,33 @@ const ForceGraph = (props: ForceGraphProps) => {
     link.on("contextmenu", (event: MouseEvent, d: GraphEdge) => {
       handleContextMenu(event, d.id)
     })
-  }, [nodes, edges, navigate, graphId, handleContextMenu])
+  }, [
+    nodes,
+    edges,
+    navigate,
+    graphId,
+    handleContextMenu,
+    calculateNodeSize,
+    repelForce,
+    linkStrength,
+  ])
 
   return (
-    <svg ref={svgRef} width="100%" height="100%">
-      <Menu id="forceGraphContextMenu" style={{ zIndex: "1000000000" }}>
-        <Item
-          onClick={({ props }) => {
-            console.log("Menu item clicked.") // Debugging log
-            console.log(`Clicked node/link with id: ${props.id}`)
-          }}
-        >
-          Do something
-        </Item>
-      </Menu>
-    </svg>
+    <div style={{ height: "100%", position: "relative" }}>
+      <svg ref={svgRef} width="100%" height="100%">
+        <Menu id="forceGraphContextMenu" style={{ zIndex: "1000000000" }}>
+          <Item
+            onClick={({ props }) => {
+              console.log("Menu item clicked.") // Debugging log
+              console.log(`Clicked node/link with id: ${props.id}`)
+            }}
+          >
+            Do something
+          </Item>
+        </Menu>
+      </svg>
+      <GraphControls />
+    </div>
   )
 }
 
