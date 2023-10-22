@@ -12,6 +12,7 @@ const LandingPage = () => {
         </Text>
 
         <Row gutter={[32, 32]} style={{ marginTop: "40px" }}>
+          {/* Existing Cards */}
           <Col xs={24} md={12}>
             <Card hoverable>
               <Title level={4}>Create Nodes</Title>
@@ -34,16 +35,37 @@ const LandingPage = () => {
               </Paragraph>
             </Card>
           </Col>
-        </Row>
 
-        <Row gutter={[32, 32]} style={{ marginTop: "20px" }}>
+          {/* New Cards */}
           <Col xs={24} md={12}>
             <Card hoverable>
-              <Title level={4}>Create Subgraphs</Title>
+              <Title level={4}>Advanced Tables</Title>
               <Paragraph>
-                Structure your notes even further by creating subgraphs. A
-                subgraph can represent a project, a subject, or even a concept.
-                Your notes will be more organized and easier to navigate.
+                Create tables that do more than just hold data. With sorting,
+                filtering, and grouping features, you can make sense of your
+                information effortlessly. Merge cells, add footnotes, and even
+                embed media to make your tables more comprehensive.
+              </Paragraph>
+            </Card>
+          </Col>
+          <Col xs={24} md={12}>
+            <Card hoverable>
+              <Title level={4}>Online-First Database</Title>
+              <Paragraph>
+                Built on an online-first database architecture, Noteflowy
+                ensures you always have the latest version of your notes. Work
+                seamlessly from any device, anywhere.
+              </Paragraph>
+            </Card>
+          </Col>
+          <Col xs={24} md={12}>
+            <Card hoverable>
+              <Title level={4}>Sharing and Collaboration</Title>
+              <Paragraph>
+                Easily share nodes, connections, or entire graphs with team
+                members or friends. Real-time collaboration features enable
+                multiple users to work on the same notes, ensuring everyone is
+                on the same page.
               </Paragraph>
             </Card>
           </Col>
