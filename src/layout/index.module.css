@@ -10,10 +10,10 @@
 }
 
 .main__content {
-  height: 100%;
+  height: inherit;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
+  scrollbar-color: transparent transparent; /* Initially set to transparent */
 }
 
 .footer {
@@ -35,7 +35,7 @@
 }
 
 .main__content::-webkit-scrollbar-thumb {
-  background: transparent;
+  background: transparent; /* Initially set to transparent */
 }
 
 /* Show the scrollbar when user hovers */

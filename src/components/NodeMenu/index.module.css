@@ -9,4 +9,29 @@
   border-radius: 8px;
   overflow: hidden;
   transition: max-height 0.5s ease-in-out;
+
+  /* For Webkit browsers like Chrome, Safari */
+  -webkit-overflow-scrolling: touch;
+  ::-webkit-scrollbar {
+    width: 8px; /* Set the scrollbar width */
+  }
+  ::-webkit-scrollbar-thumb {
+    background: transparent;
+  }
+
+  /* For Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+/* Show scrollbar when user hovers */
+.node__menu__content:hover {
+  scrollbar-color: rgba(0, 0, 0, 0.5) transparent;
+}
+.node__menu__content:hover::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.node__menu__item:hover {
+  cursor: pointer;
 }

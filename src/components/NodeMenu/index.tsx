@@ -3,7 +3,7 @@ import { Button, Drawer, Input, Typography } from "antd"
 import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useNodes } from "src/hooks/useNodes"
-
+import styles from "./index.module.css"
 const NodeMenu = () => {
   const { graphId, nodeId } = useParams<{ graphId?: string; nodeId?: string }>()
   const { nodes } = useNodes(graphId)
@@ -38,6 +38,7 @@ const NodeMenu = () => {
     ?.filter((node) => node.id !== undefined)
     .map((node) => (
       <Typography
+        className={styles.node__menu__item}
         key={node.id}
         onClick={() => {
           navigate(`/graphs/${graphId}/node/${node.id}`)
@@ -60,7 +61,10 @@ const NodeMenu = () => {
         open={open}
         closeIcon={<MenuUnfoldOutlined />}
       >
-        <div style={{ maxHeight: "calc(100vh - 100px)", overflowY: "auto" }}>
+        <div
+          className={styles.node__menu__content}
+          style={{ overflowY: "auto" }}
+        >
           {items}
         </div>
       </Drawer>
