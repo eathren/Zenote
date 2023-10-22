@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Tree, Input, Row, Drawer, Button, Space } from "antd"
+import { Tree, Input, Row, Drawer, Button, Space, Modal } from "antd"
 import { useGraphs } from "src/hooks/useGraphs"
 import { useNavigate } from "react-router-dom"
 import {
@@ -32,6 +32,9 @@ const GraphSelector: React.FC = () => {
 
   const treeData = filteredGraphs
     ?.filter((graph) => graph.id !== undefined)
+    .sort((graphA, graphB) => {
+      return graphB.date_created - graphA.date_created
+    })
     .map((graph) => ({
       title: (
         <Space>
@@ -52,6 +55,7 @@ const GraphSelector: React.FC = () => {
             .filter(([nodeName]) =>
               nodeName.toLowerCase().includes(searchTerm.toLowerCase())
             )
+
             .map(([nodeId, nodeName]) => ({
               title: nodeName,
               key: `node-${nodeId}`,
@@ -76,6 +80,19 @@ const GraphSelector: React.FC = () => {
     }
   }
 
+  const showDeleteConfirm = (graphId: string) => {
+    Modal.confirm({
+      title: "Are you sure you want to delete this graph?",
+      content: "Once deleted, the graph cannot be recovered.",
+      okText: "Yes",
+      okType: "danger",
+      cancelText: "No",
+      onOk() {
+        deleteGraph(graphId)
+      },
+    })
+  }
+
   return (
     <>
       <Row gutter={[16, 16]}>
@@ -90,7 +107,7 @@ const GraphSelector: React.FC = () => {
         title={selectedNode?.name}
         placement="bottom"
         onClose={() => setDrawerVisible(false)}
-        open={drawerVisible}
+        visible={drawerVisible}
         height={200}
       >
         <Button
@@ -116,7 +133,9 @@ const GraphSelector: React.FC = () => {
           icon={<DeleteOutlined />}
           danger
           onClick={() => {
-            if (selectedNode?.id) deleteGraph(selectedNode?.id)
+            if (selectedNode?.id) {
+              showDeleteConfirm(selectedNode.id)
+            }
           }}
         >
           Delete
