@@ -31,17 +31,7 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 }
 
 function App() {
-  const { user, loading } = useUser() // Get user and loading state
-  // const navigate = useNavigate()
-  // const onTabChange = (key: string) => {
-  //   navigate(key)
-  // }
-
-  // Function to close a tab (placeholder, can add logic later)
-  // const onTabClose = (targetKey: React.Key) => {
-  //   console.log("Close tab:", targetKey)
-  // }
-  // Show loading spinner until Firebase check is complete
+  const { user, loading } = useUser()
   if (loading) {
     return (
       <ConfigProvider theme={{ algorithm: darkAlgorithm }}>

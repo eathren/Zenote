@@ -1,5 +1,5 @@
-import AddGraphButton from "src/components/Graphs/AddGraphButton";
-import GraphSelector from "src/components/Graphs/GraphSelector";
+import AddGraphButton from "src/components/Graphs/AddGraphButton"
+import GraphSelector from "src/components/Graphs/GraphSelector"
 
 const HomePage = () => {
   return (
@@ -7,7 +7,7 @@ const HomePage = () => {
       <GraphSelector />
       <AddGraphButton />
     </>
-  );
-};
+  )
+}
 
-export default HomePage;
+export default HomePage

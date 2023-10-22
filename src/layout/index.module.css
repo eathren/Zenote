@@ -10,10 +10,24 @@
 }
 
 .main__content {
-  height: inherit;
+  height: 100%;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
-  scrollbar-color: transparent transparent; /* Initially set to transparent */
+  scrollbar-color: transparent transparent;
+}
+
+.footer {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: var(--footer-height);
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-width: 100vw;
 }
 
 .main__content::-webkit-scrollbar {
@@ -21,7 +35,7 @@
 }
 
 .main__content::-webkit-scrollbar-thumb {
-  background: transparent; /* Initially set to transparent */
+  background: transparent;
 }
 
 /* Show the scrollbar when user hovers */
@@ -40,29 +54,6 @@
     height: 100vh;
   }
 
-  .header {
-    display: none;
-  }
-
-  .footer {
-    flex: 0 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: var(--footer-height);
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    max-width: 100vw;
-  }
-}
-
-@media (min-width: 769px) {
-  .footer {
-    display: none;
-  }
   .header {
     display: none;
   }

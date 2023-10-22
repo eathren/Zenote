@@ -16,13 +16,11 @@ type EditEdgeModalProps = {
 const EditEdgeModal: React.FC<EditEdgeModalProps> = ({
   isOpen,
   onClose,
-  nodes,
   nodeId,
 }) => {
   const [selectedNodes, setSelectedNodes] = useState<GraphNode[]>([])
   const { searchTerm, handleSearchTermChange, filteredNodes } = useNodeModal({
     isOpen,
-    nodes,
   })
 
   const graphId = useParams<{ graphId: string }>().graphId

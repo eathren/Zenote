@@ -8,27 +8,23 @@ import { addNode } from "src/handles/nodes"
 type AddNodeModalProps = {
   isOpen: boolean
   onClose: () => void
-  nodes: GraphNode[]
   graphId: string | undefined
 }
 
 const AddNodeModal: React.FC<AddNodeModalProps> = ({
   isOpen,
   onClose,
-  nodes,
   graphId,
 }) => {
   const navigate = useNavigate()
   const { searchTerm, handleSearchTermChange, filteredNodes, resetSearchTerm } =
     useNodeModal({
       isOpen,
-      nodes,
     })
 
   // Function to add new node
   const confirmAddNode = async () => {
     if (graphId && searchTerm !== "") {
-      console.log(searchTerm)
       const id = await addNode(graphId, searchTerm)
 
       resetSearchTerm()

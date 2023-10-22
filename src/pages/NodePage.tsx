@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { notification, Spin, Tabs, TabsProps } from "antd"
 import { debounce } from "lodash"
@@ -19,6 +19,10 @@ const NodePage: React.FC = () => {
   const { nodes } = useNodes(graphId)
 
   useEffect(() => {
+    setIsLoading(true)
+    setMarkdownContent("")
+    setCurrentNode(null)
+
     if (!nodeId || !graphId) return
 
     // Asynchronously fetch markdown content and node information
@@ -46,17 +50,12 @@ const NodePage: React.FC = () => {
       })
   }, [graphId, nodeId])
 
-  // Debounce the upload operation
-  const debounceUpload = useCallback(
-    debounce((newValue: string) => {
-      if (nodeId && newValue) {
-        uploadMarkdown(nodeId, newValue)
-      }
-    }, 1500),
-    [nodeId]
-  )
+  const debounceUpload = debounce((newValue: string) => {
+    if (nodeId && newValue) {
+      uploadMarkdown(nodeId, newValue)
+    }
+  }, 1500)
 
-  // Handle editor changes
   const handleEditorChange = (newValue?: string | undefined) => {
     if (newValue !== undefined) {
       setMarkdownContent(newValue)
@@ -64,17 +63,12 @@ const NodePage: React.FC = () => {
     }
   }
 
-  // Debounce the title update operation
-  const handleTitleChange = useCallback(
-    debounce((newTitle: string) => {
-      if (graphId && nodeId && newTitle) {
-        updateNodeTitle(graphId, nodeId, newTitle)
-      }
-    }, 400),
-    [nodeId]
-  )
+  const handleTitleChange = debounce((newTitle: string) => {
+    if (graphId && nodeId && newTitle) {
+      updateNodeTitle(graphId, nodeId, newTitle)
+    }
+  }, 400)
 
-  // Define tab items
   const items: TabsProps["items"] = [
     {
       key: "1",
@@ -103,7 +97,6 @@ const NodePage: React.FC = () => {
     },
   ]
 
-  // Conditionally render Tabs if not loading
   return isLoading ? (
     <Spin style={{ position: "absolute", left: "50%", top: "50%" }} />
   ) : (

@@ -22,6 +22,7 @@ import {
 import { ref, deleteObject } from "firebase/storage"
 import { storage } from "src/firebase"
 import { deleteMarkdown, uploadMarkdown } from "./markdown"
+import { updateGraphNodes } from "./graphs"
 
 const db = getFirestore()
 
@@ -63,7 +64,7 @@ export const addNode = async (graphId: string, nodeName: string) => {
 
     // Step 3: Update the node to include markdownUrl
     await setDoc(nodeDocRef, { markdownUrl }, { merge: true })
-
+    await updateGraphNodes(graphId, nodeDocRef.id, nodeName, "add")
     return nodeDocRef.id
   } catch (error) {
     // If any of the above operations fail, delete the created resources to maintain atomicity
@@ -140,7 +141,6 @@ export const removeEdgeFromNode = async (
   const newEdges = nodeData.edges?.filter(
     (edge) => edge.target !== targetNodeId
   )
-  console.log(nodeData.edges, newEdges)
   const nodeRef = doc(db, "nodes", nodeId)
   await updateDoc(nodeRef, {
     edges: newEdges,
@@ -225,6 +225,7 @@ export const updateNodeTitle = async (
     await updateDoc(nodeRef, {
       name: newTitle,
     })
+    await updateGraphNodes(graphId, nodeId, newTitle, "update")
   } catch (error) {
     notification.error({
       message: "Error",
@@ -265,6 +266,8 @@ export const deleteNodeInDB = async (graphId: string, nodeId: string) => {
   )
   try {
     await deleteDoc(nodeRef)
+    await updateGraphNodes(graphId, nodeId, "", "delete")
+    await deleteMarkdown(nodeId)
   } catch (error) {
     notification.error({
       message: "Error",

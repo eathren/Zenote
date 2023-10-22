@@ -1,14 +1,21 @@
 import { useState, useEffect } from "react"
+import { useParams } from "react-router-dom"
 import { GraphNode } from "src/types"
+import { useNodes } from "./useNodes"
 
 type UseNodeModalProps = {
   isOpen: boolean
-  nodes: GraphNode[]
 }
 
-export const useNodeModal = ({ isOpen, nodes }: UseNodeModalProps) => {
+export const useNodeModal = ({ isOpen }: UseNodeModalProps) => {
   const [searchTerm, setSearchTerm] = useState<string>("")
+  const { graphId } = useParams<{ graphId?: string }>()
+  const { nodes } = useNodes(graphId)
   const [filteredNodes, setFilteredNodes] = useState<GraphNode[]>(nodes)
+
+  useEffect(() => {
+    setFilteredNodes(nodes)
+  }, [graphId, nodes])
 
   useEffect(() => {
     setFilteredNodes(

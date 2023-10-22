@@ -2,13 +2,21 @@ import {
   getFirestore,
   addDoc,
   getDocs,
-  deleteDoc,
   doc,
   updateDoc,
+  getDoc,
+  writeBatch,
+  query,
+  collection,
 } from "firebase/firestore"
 import { Graph } from "src/types/index"
 import { notification } from "antd"
-import { getCurrentUserId, getGraphsCollectionRef } from "./utils"
+import {
+  getCurrentUserId,
+  getGraphsCollectionRef,
+  getNodeCollectionPath,
+} from "./utils"
+import { deleteMarkdown } from "./markdown"
 
 const db = getFirestore()
 
@@ -28,6 +36,7 @@ export const addGraphInDB = async (graphName: string) => {
     name: graphName,
     ownerId,
     date_created: Date.now(),
+    nodes: {},
   }
 
   try {
@@ -53,7 +62,6 @@ export const getGraphsFromDB = async () => {
   }
 
   const graphsCollectionRef = getGraphsCollectionRef(db)
-  console.log(graphsCollectionRef)
   const graphsSnapshot = await getDocs(graphsCollectionRef)
   const graphs: Graph[] = []
   graphsSnapshot.forEach((doc) => {
@@ -62,7 +70,6 @@ export const getGraphsFromDB = async () => {
   return graphs
 }
 
-// Function to delete a graph from the database
 export const deleteGraph = async (graphId: string) => {
   const ownerId = getCurrentUserId()
   if (!ownerId) {
@@ -73,45 +80,71 @@ export const deleteGraph = async (graphId: string) => {
     return
   }
 
+  const batch = writeBatch(db)
+  const graphRef = doc(db, `users/${ownerId}/graphs`, graphId)
+  batch.delete(graphRef)
+
+  // Fetch and delete all nodes associated with this graph
+  const nodeQuery = query(
+    collection(db, getNodeCollectionPath(ownerId, graphId))
+  )
+  const nodeSnapshot = await getDocs(nodeQuery)
+  nodeSnapshot.forEach((doc) => {
+    // Delete the markdown files
+    deleteMarkdown(doc.id)
+
+    // Delete the node document
+    batch.delete(doc.ref)
+  })
+
   try {
-    const graphRef = doc(db, `users/${ownerId}/graphs`, graphId)
-    await deleteDoc(graphRef)
+    await batch.commit()
+    notification.success({
+      message: "Success",
+      description: "Graph and associated nodes deleted successfully",
+    })
   } catch (error) {
     notification.error({
       message: "Error",
-      description: "Failed to delete graph",
+      description: "Failed to delete graph and associated nodes",
     })
   }
 }
+// Function to update node summary in the graph
+export const updateGraphNodes = async (
+  graphId: string,
+  nodeId: string,
+  nodeName: string,
+  operation: "add" | "delete" | "update"
+) => {
+  const ownerId = getCurrentUserId()
+  if (!ownerId) {
+    return
+  }
 
-export const toggleFavoriteStatus = async (
-  graphId: string | undefined,
-  currentStatus: boolean | undefined
-): Promise<void> => {
-  return new Promise(async (resolve, reject) => {
-    const ownerId = getCurrentUserId()
-    if (!graphId || !ownerId) {
-      notification.error({
-        message: "Error",
-        description: !graphId
-          ? "Graph ID is missing"
-          : "User not authenticated",
-      })
-      return reject()
+  const graphRef = doc(db, `users/${ownerId}/graphs`, graphId)
+  const graphDoc = await getDoc(graphRef)
+
+  if (graphDoc.exists()) {
+    let graphData = graphDoc.data() as Graph
+
+    // Initialize if nodes doesn't exist
+    if (!graphData.nodes) {
+      graphData = { ...graphData, nodes: {} }
     }
 
-    const newStatus = currentStatus === undefined ? true : !currentStatus
+    const nodes = graphData.nodes ?? {}
 
-    try {
-      const graphRef = doc(db, `users/${ownerId}/graphs`, graphId)
-      await updateDoc(graphRef, { favorited: newStatus })
-      resolve()
-    } catch (error) {
-      notification.error({
-        message: "Error",
-        description: "Failed to update favorite status",
-      })
-      reject()
+    // Perform the update based on the operation
+    if (operation === "add" || operation === "update") {
+      nodes[nodeId] = nodeName
+    } else if (operation === "delete") {
+      delete nodes[nodeId]
     }
-  })
+
+    // Update the graph
+    await updateDoc(graphRef, {
+      nodes: graphData.nodes,
+    })
+  }
 }

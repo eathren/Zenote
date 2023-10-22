@@ -7,7 +7,6 @@ import { addEdgesToNodeBatch } from "src/handles/edges"
 type AddEdgeModalProps = {
   isOpen: boolean
   onClose: () => void
-  nodes: GraphNode[]
   graphId: string | undefined
   nodeId: string | undefined
 }
@@ -15,14 +14,12 @@ type AddEdgeModalProps = {
 const AddEdgeModal: React.FC<AddEdgeModalProps> = ({
   isOpen,
   onClose,
-  nodes,
   graphId,
   nodeId,
 }) => {
   const [selectedNodes, setSelectedNodes] = useState<GraphNode[]>([])
   const { searchTerm, handleSearchTermChange, filteredNodes } = useNodeModal({
     isOpen,
-    nodes,
   })
 
   useEffect(() => {

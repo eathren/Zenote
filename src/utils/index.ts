@@ -71,7 +71,7 @@ export const calculateIncomingAndOutgoingEdges = (
   const outgoingNodeSet: Set<GraphNode> = new Set()
 
   allNodes.forEach((node) => {
-    node.edges.forEach((edge) => {
+    node?.edges?.forEach((edge) => {
       if (edge.source === nodeId) {
         const targetNode = findNode(allNodes, edge.target as string)
         if (targetNode) outgoingNodeSet.add(targetNode)

@@ -7,6 +7,7 @@ export interface Graph {
   date_created: number
   ownerId: string
   favorited?: boolean
+  nodes?: Record<string, string>
 }
 
 export interface GraphNode extends d3.SimulationNodeDatum {
@@ -21,7 +22,7 @@ export interface GraphNode extends d3.SimulationNodeDatum {
   markdownUrl?: string
   tags?: string[]
   groups?: string[]
-  edges: GraphEdge[]
+  edges?: GraphEdge[]
 }
 
 export interface GraphEdge extends d3.SimulationLinkDatum<GraphNode> {
@@ -31,8 +32,6 @@ export interface GraphEdge extends d3.SimulationLinkDatum<GraphNode> {
   label?: string
   // source and target are already included in d3.SimulationLinkDatum
 }
-
-// src/types/index.ts
 
 export interface User {
   email: string

@@ -24,7 +24,6 @@ export const useGraphSettingsStore = create<GraphControlsState>()(
     settings: {},
     updateSetting: (graphId, key, value) =>
       set((state) => {
-        console.log("Updating setting", graphId, key, value)
         if (!graphId) return state
         const existingSettings = state.settings[graphId] || {}
         return {
@@ -53,7 +52,7 @@ export const useGraphSettingsStore = create<GraphControlsState>()(
       set((state) => ({
         settings: {
           ...state.settings,
-          [graphId]: defaultSettings,
+          [graphId as string]: defaultSettings,
         },
       })),
   })

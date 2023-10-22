@@ -1,0 +1,8 @@
+.graph__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 20px;
+  color: #dadce1;
+  position: sticky;
+}

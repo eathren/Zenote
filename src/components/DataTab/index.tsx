@@ -110,7 +110,6 @@ const DataTab: React.FC<DataTabProps> = ({
           <AddEdgeModal
             isOpen={isAddEdgeModalOpen}
             onClose={closeAddEdgeModal}
-            nodes={nodes}
             graphId={graphId}
             nodeId={nodeId}
           />

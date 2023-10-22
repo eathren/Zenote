@@ -3,9 +3,8 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { GraphNode, GraphEdge } from "src/types" // Update the import path as needed
 import { drag } from "./utils"
-import { Item, Menu, useContextMenu } from "react-contexify"
+import { useContextMenu } from "react-contexify"
 import "react-contexify/ReactContexify.css"
-import GraphControls from "src/components/GraphControls"
 import useGraphSettingsStore from "src/stores/graphSettingsStore"
 
 type ForceGraphProps = {
@@ -24,7 +23,7 @@ const ForceGraph = (props: ForceGraphProps) => {
   })
 
   const { getOrInitializeSettings } = useGraphSettingsStore()
-  const { nodeSize, nodeGrowth, repelForce, linkStrength, nodeStrength } =
+  const { nodeSize, nodeGrowth, repelForce, linkStrength } =
     getOrInitializeSettings(graphId)
 
   // Capture the right click on a node or a link and show the context menu
@@ -222,9 +221,8 @@ const ForceGraph = (props: ForceGraphProps) => {
   ])
 
   return (
-    <div style={{ height: "100%", position: "relative" }}>
+    <div style={{ height: "100vh", maxHeight: "100%", position: "relative" }}>
       <svg ref={svgRef} width="100%" height="100%"></svg>
-      <GraphControls />
     </div>
   )
 }

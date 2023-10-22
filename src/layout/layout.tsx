@@ -7,18 +7,18 @@ import {
   SettingOutlined,
   FileTextOutlined,
 } from "@ant-design/icons"
-import { Popover, Button, Layout } from "antd"
+import { Layout } from "antd"
 import { useNavigate, useParams } from "react-router-dom"
 import { theme } from "antd"
-import { useNodes } from "src/hooks/useNodes"
 import styles from "./index.module.css"
 import FooterButtonList from "src/components/FooterButtonList"
 import { useForwardHistory } from "src/hooks/useForwardHistory"
 import AddNodeModal from "src/components/AddNodeModal"
 import { Header as CustomHeader } from "src/components/UI/Header"
 import { useUser } from "src/hooks/user"
+import GraphHeader from "src/components/GraphHeader"
 
-const { Content, Sider, Footer } = Layout
+const { Content, Footer } = Layout
 
 type LayoutProps = {
   children: React.ReactNode
@@ -30,14 +30,7 @@ export const BasicLayout = ({ children }: LayoutProps) => {
   } = theme.useToken()
   const { user } = useUser()
 
-  const hideSidebarRoutes = ["/", "/login", "/signup"]
-
-  const showSidebar = !hideSidebarRoutes.some(
-    (route) => window.location.pathname === route
-  )
-
   const { graphId } = useParams<{ graphId?: string }>()
-  const { nodes } = useNodes(graphId)
   const [modalOpen, setModalOpen] = useState(false)
   const { hasForwardHistory } = useForwardHistory()
   const navigate = useNavigate()
@@ -101,48 +94,12 @@ export const BasicLayout = ({ children }: LayoutProps) => {
       >
         {!user && <CustomHeader />}
         <Layout className={styles.main__content}>
-          {!showSidebar ? null : (
-            <Sider className={styles.sidebar} width={55} style={{}}>
-              {ButtonList.map((item, index) => {
-                if (
-                  (item.text === "Find or Add New Node" &&
-                    (location.pathname === "/settings" ||
-                      location.pathname === "/" ||
-                      location.pathname === "/login" ||
-                      location.pathname === "/signup")) ||
-                  (!user &&
-                    item.text === "Settings" &&
-                    location.pathname === "/")
-                ) {
-                  return null
-                }
-
-                return (
-                  <div key={index} style={{ margin: "0 5px" }}>
-                    <Popover
-                      placement="right"
-                      title={item.text}
-                      arrow={{ pointAtCenter: true }}
-                    >
-                      <Button
-                        type="text"
-                        disabled={item.disabled}
-                        onClick={() => item.onClick()}
-                      >
-                        {item.icon}
-                      </Button>
-                    </Popover>
-                  </div>
-                )
-              })}
-            </Sider>
-          )}
-          <Layout style={{ padding: 0 }}>
+          {user && graphId && <GraphHeader />}
+          <Layout>
             <Content
               style={{
                 padding: 24,
                 margin: 0,
-                minHeight: 280,
                 background: colorBgContainer,
               }}
             >
@@ -158,7 +115,6 @@ export const BasicLayout = ({ children }: LayoutProps) => {
         <AddNodeModal
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
-          nodes={nodes}
           graphId={graphId}
         />
       </Layout>

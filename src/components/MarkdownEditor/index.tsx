@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
-import { Spin, Typography, Button, Drawer } from "antd"
+import { Spin, Typography } from "antd"
 import { debounce } from "lodash"
 import EditorArea from "src/components/Editor"
 import { fetchMarkdown, uploadMarkdown } from "src/handles/markdown"
@@ -10,9 +10,6 @@ const NodePage = () => {
   const { graphId, nodeId } = useParams<{ nodeId: string; graphId: string }>()
   const [markdownContent, setMarkdownContent] = useState<string>("")
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [showSidebar, setShowSidebar] = useState<boolean>(false) // New state for showing or hiding the sidebar
-
-  // const { nodes } = useNodes(graphId)
 
   const truncate = (str: string, length: number) => {
     return str.length > length ? str.substring(0, length) + "..." : str
@@ -45,15 +42,11 @@ const NodePage = () => {
   }, [graphId, markdownContent, nodeId])
 
   // Debounce the upload operation
-  const debounceUpload = useCallback(
-    debounce((newValue: string) => {
-      if (nodeId && newValue) {
-        console.log("uploading")
-        uploadMarkdown(nodeId, newValue)
-      }
-    }, 1500),
-    []
-  )
+  const debounceUpload = debounce((newValue: string) => {
+    if (nodeId && newValue) {
+      uploadMarkdown(nodeId, newValue)
+    }
+  }, 1500)
 
   const handleEditorChange = (newValue?: string | undefined) => {
     if (newValue !== undefined) {
@@ -62,15 +55,9 @@ const NodePage = () => {
     }
   }
 
-  // Function to toggle sidebar
-  const toggleSidebar = () => {
-    setShowSidebar(!showSidebar)
-  }
-
   return (
     <div>
       <Typography>
-        <Button onClick={toggleSidebar}>Toggle Sidebar</Button>{" "}
         {/* New Button to toggle sidebar */}
         {isLoading ? (
           <Spin
@@ -83,16 +70,6 @@ const NodePage = () => {
           />
         )}
       </Typography>
-      {/* Sidebar Drawer */}
-      <Drawer
-        title="Node Details"
-        placement="right"
-        closable={true}
-        onClose={toggleSidebar}
-        open={showSidebar}
-      >
-        {/* Your tags, edges, and other metadata can go here */}
-      </Drawer>
     </div>
   )
 }

@@ -16,6 +16,10 @@ export const useNodes = (graphId: string | undefined) => {
   const [error, setError] = useState<any>(null)
 
   useEffect(() => {
+    setNodes([])
+  }, [graphId])
+
+  useEffect(() => {
     let initialLoad = true
 
     if (!graphId) {
