@@ -5,7 +5,8 @@ import { GraphNode, GraphEdge } from "src/types" // Update the import path as ne
 import { drag } from "./utils"
 import { Item, Menu, useContextMenu } from "react-contexify"
 import "react-contexify/ReactContexify.css"
-import useGraphControls from "src/hooks/useGraphControls"
+import GraphControls from "src/components/GraphControls"
+import useGraphSettingsStore from "src/stores/graphSettingsStore"
 
 type ForceGraphProps = {
   graphId: string
@@ -22,8 +23,9 @@ const ForceGraph = (props: ForceGraphProps) => {
     id: "forceGraphContextMenu",
   })
 
-  const { nodeSize, linkStrength, repelForce, nodeGrowth, GraphControls } =
-    useGraphControls()
+  const { getOrInitializeSettings } = useGraphSettingsStore()
+  const { nodeSize, nodeGrowth, repelForce, linkStrength, nodeStrength } =
+    getOrInitializeSettings(graphId)
 
   // Capture the right click on a node or a link and show the context menu
   const handleContextMenu = useCallback(
@@ -216,22 +218,12 @@ const ForceGraph = (props: ForceGraphProps) => {
     calculateNodeSize,
     repelForce,
     linkStrength,
+    calculateNodeSizeHover,
   ])
 
   return (
     <div style={{ height: "100%", position: "relative" }}>
-      <svg ref={svgRef} width="100%" height="100%">
-        <Menu id="forceGraphContextMenu" style={{ zIndex: "1000000000" }}>
-          <Item
-            onClick={({ props }) => {
-              console.log("Menu item clicked.") // Debugging log
-              console.log(`Clicked node/link with id: ${props.id}`)
-            }}
-          >
-            Do something
-          </Item>
-        </Menu>
-      </svg>
+      <svg ref={svgRef} width="100%" height="100%"></svg>
       <GraphControls />
     </div>
   )

@@ -4,6 +4,7 @@ import {
   getDocs,
   deleteDoc,
   doc,
+  updateDoc,
 } from "firebase/firestore"
 import { Graph } from "src/types/index"
 import { notification } from "antd"
@@ -81,4 +82,36 @@ export const deleteGraph = async (graphId: string) => {
       description: "Failed to delete graph",
     })
   }
+}
+
+export const toggleFavoriteStatus = async (
+  graphId: string | undefined,
+  currentStatus: boolean | undefined
+): Promise<void> => {
+  return new Promise(async (resolve, reject) => {
+    const ownerId = getCurrentUserId()
+    if (!graphId || !ownerId) {
+      notification.error({
+        message: "Error",
+        description: !graphId
+          ? "Graph ID is missing"
+          : "User not authenticated",
+      })
+      return reject()
+    }
+
+    const newStatus = currentStatus === undefined ? true : !currentStatus
+
+    try {
+      const graphRef = doc(db, `users/${ownerId}/graphs`, graphId)
+      await updateDoc(graphRef, { favorited: newStatus })
+      resolve()
+    } catch (error) {
+      notification.error({
+        message: "Error",
+        description: "Failed to update favorite status",
+      })
+      reject()
+    }
+  })
 }

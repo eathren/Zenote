@@ -1,3 +1,4 @@
+import { Color } from "antd/es/color-picker"
 import * as d3 from "d3"
 
 export interface Graph {
@@ -5,6 +6,7 @@ export interface Graph {
   name: string
   date_created: number
   ownerId: string
+  favorited?: boolean
 }
 
 export interface GraphNode extends d3.SimulationNodeDatum {
@@ -57,4 +59,15 @@ export interface User {
   privacyPolicyAccepted: string // Using ISO string to represent date
   gdprConsent: boolean
   connectedAccounts: Record<string, unknown> // Or define a more specific type
+}
+
+export interface GraphSettings {
+  nodeSize: number
+  linkStrength: number
+  nodeStrength: number
+  repelForce: number
+  nodeGrowth: boolean
+  searchText: string
+  color: Color | string
+  lineThickness: number
 }
