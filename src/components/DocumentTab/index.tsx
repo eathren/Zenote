@@ -120,6 +120,7 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
       ) : (
         <>
           <NodeHeader
+            editMode={isEditing}
             editableTitle={editableTitle}
             onTitleChange={onTitleChange}
             toggleEditMode={toggleEditMode}
