@@ -3,7 +3,6 @@ import NodeControls from "../../NodeControls"
 import BasicHeader from "./BasicHeader"
 import { Button, Col, Input, Row } from "antd"
 import { EditOutlined, BookOutlined } from "@ant-design/icons"
-import { useState } from "react"
 
 type NodeHeaderProps = {
   editableTitle: string | undefined
@@ -19,8 +18,7 @@ const commonStyle = {
 }
 
 const NodeHeader = (props: NodeHeaderProps) => {
-  const [isTitleEditable] = useState<boolean>(false)
-  const { editableTitle, onTitleChange, toggleEditMode } = props
+  const { editableTitle, onTitleChange } = props
 
   return (
     <>
@@ -52,8 +50,8 @@ const NodeHeader = (props: NodeHeaderProps) => {
             <Row justify="end" align="middle" gutter={16}>
               <Col>
                 <Button
-                  onClick={toggleEditMode}
-                  icon={isTitleEditable ? <EditOutlined /> : <BookOutlined />}
+                  onClick={() => props.toggleEditMode()}
+                  icon={props.editMode ? <EditOutlined /> : <BookOutlined />}
                 />
               </Col>
               <Col>

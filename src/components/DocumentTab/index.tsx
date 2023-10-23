@@ -21,7 +21,9 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
   const [editableTitle, setEditableTitle] = useState<string>(nodeTitle || "")
   const [isTitleEditable, setIsTitleEditable] = useState<boolean>(false)
   const titleRef = useRef<HTMLDivElement | null>(null)
-  const [isEditing, setIsEditing] = useState(true)
+  const [isEditing, setIsEditing] = useState(
+    markdownContent.length > 0 ? false : true
+  )
   const [cursorPosition, setCursorPosition] = useState<number | null>(null)
   const textAreaRef = useRef<any>(null)
 

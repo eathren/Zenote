@@ -75,7 +75,7 @@ const NodeControls = () => {
         title="Node Controls"
         placement="right"
         onClose={() => setOpen(false)}
-        visible={open}
+        open={open}
         width={300}
         closeIcon={<CloseOutlined />}
       >
