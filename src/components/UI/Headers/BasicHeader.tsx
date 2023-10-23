@@ -2,12 +2,14 @@ import { Layout } from "antd"
 import { theme } from "antd"
 
 import styles from "./index.module.css"
-import NodeMenu from "../NodeMenu"
-import GraphControls from "../GraphControls"
 
 const { Header } = Layout
 
-const GraphHeader = () => {
+type HeaderProps = {
+  children: React.ReactNode
+}
+
+const BasicHeader = (props: HeaderProps) => {
   const {
     token: { colorBgContainer },
   } = theme.useToken()
@@ -16,14 +18,12 @@ const GraphHeader = () => {
     <>
       <Header
         style={{ background: colorBgContainer }}
-        className={styles.graph__header}
+        className={styles.header}
       >
-        <NodeMenu />
-
-        <GraphControls />
+        {props.children}
       </Header>
     </>
   )
 }
 
-export default GraphHeader
+export default BasicHeader

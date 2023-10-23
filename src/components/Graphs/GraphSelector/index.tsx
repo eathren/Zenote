@@ -107,7 +107,7 @@ const GraphSelector: React.FC = () => {
         title={selectedNode?.name}
         placement="bottom"
         onClose={() => setDrawerVisible(false)}
-        visible={drawerVisible}
+        open={drawerVisible}
         height={200}
       >
         <Button

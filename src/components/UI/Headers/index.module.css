@@ -1,8 +1,12 @@
-.graph__header {
+.header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 20px;
+  height: 40px;
   color: #dadce1;
   position: sticky;
+  top: 0;
+  z-index: 200;
+  margin-bottom: 1.5rem;
+  padding: 0;
 }

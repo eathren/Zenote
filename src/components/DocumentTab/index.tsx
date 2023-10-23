@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react"
-import { Spin, Input } from "antd"
+import { Spin, Input, Drawer } from "antd"
 import Markdown from "react-markdown"
+import NodeHeader from "src/components/UI/Headers/NodeHeader"
 
 type DocumentTabProps = {
   markdownContent: string
@@ -20,10 +21,11 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
   const [editableTitle, setEditableTitle] = useState<string>(nodeTitle || "")
   const [isTitleEditable, setIsTitleEditable] = useState<boolean>(false)
   const titleRef = useRef<HTMLDivElement | null>(null)
-
   const [isEditing, setIsEditing] = useState(true)
   const [cursorPosition, setCursorPosition] = useState<number | null>(null)
   const textAreaRef = useRef<any>(null)
+
+  const [showDrawer, setShowDrawer] = useState(false)
 
   const commonStyle = {
     border: "none",
@@ -98,12 +100,30 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
     setIsEditing(true)
   }
 
+  // const handleContextMenuClick = (lineIndex: number) => {
+  //   setSelectedLineIndex(lineIndex)
+  //   setShowDrawer(true)
+  // }
+
+  const handleCloseDrawer = () => {
+    setShowDrawer(false)
+  }
+
+  const toggleEditMode = () => {
+    setIsEditing(!isEditing)
+  }
+
   return (
     <div>
       {isLoading ? (
         <Spin style={{ position: "absolute", left: "50%", top: "50%" }} />
       ) : (
         <>
+          <NodeHeader
+            editableTitle={editableTitle}
+            onTitleChange={onTitleChange}
+            toggleEditMode={toggleEditMode}
+          />
           <div ref={titleRef} onClick={toggleTitleEdit}>
             {isTitleEditable ? (
               <Input
@@ -131,8 +151,17 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
             <div>
               {markdownContent.length > 1 ? (
                 markdownContent.split("\n").map((line, index) => (
-                  <div key={index} onClick={() => handleLineClick(index)}>
-                    <Markdown>{line}</Markdown>
+                  <div
+                    key={index}
+                    style={{ display: "flex", alignItems: "center" }}
+                  >
+                    <div
+                      onClick={() => handleLineClick(index)}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <Markdown>{line}</Markdown>
+                    </div>
                   </div>
                 ))
               ) : (
@@ -145,6 +174,15 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
               )}
             </div>
           )}
+          <Drawer
+            title="Context Menu"
+            placement="bottom"
+            onClose={handleCloseDrawer}
+            open={showDrawer}
+            height={200}
+          >
+            {/* Your context menu content here */}
+          </Drawer>
         </>
       )}
     </div>

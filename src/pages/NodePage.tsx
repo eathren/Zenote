@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
-import { notification, Spin, Tabs, TabsProps } from "antd"
+import { notification, Spin, Typography } from "antd"
 import { debounce } from "lodash"
 
 import { GraphNode } from "src/types"
-import { useNodes } from "src/hooks/useNodes"
 import DocumentTab from "src/components/DocumentTab"
-import DataTab from "src/components/DataTab"
 import { fetchMarkdown, uploadMarkdown } from "src/handles/markdown"
 import { fetchNode, updateNodeTitle } from "src/handles/nodes"
 
@@ -15,8 +13,6 @@ const NodePage: React.FC = () => {
   const [markdownContent, setMarkdownContent] = useState<string>("")
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [currentNode, setCurrentNode] = useState<GraphNode | null>(null)
-
-  const { nodes } = useNodes(graphId)
 
   useEffect(() => {
     setIsLoading(true)
@@ -27,11 +23,14 @@ const NodePage: React.FC = () => {
 
     // Asynchronously fetch markdown content and node information
     const fetchMarkdownAsync = async () => {
+      console.log("fetching md")
+
       const md = await fetchMarkdown(nodeId)
       if (md) setMarkdownContent(md)
     }
 
     const fetchNodeAsync = async () => {
+      console.log("fetching node")
       const node = await fetchNode(graphId, nodeId)
       if (node) setCurrentNode(node)
     }
@@ -69,38 +68,18 @@ const NodePage: React.FC = () => {
     }
   }, 400)
 
-  const items: TabsProps["items"] = [
-    {
-      key: "1",
-      label: "Document",
-      children: (
-        <DocumentTab
-          markdownContent={markdownContent}
-          isLoading={isLoading}
-          nodeTitle={currentNode ? currentNode.name : ""}
-          handleEditorChange={handleEditorChange}
-          handleTitleChange={handleTitleChange}
-        />
-      ),
-    },
-    {
-      key: "2",
-      label: "Data",
-      children: (
-        <DataTab
-          currentNode={currentNode}
-          nodes={nodes}
-          graphId={graphId}
-          nodeId={nodeId}
-        />
-      ),
-    },
-  ]
-
   return isLoading ? (
     <Spin style={{ position: "absolute", left: "50%", top: "50%" }} />
   ) : (
-    <Tabs defaultActiveKey="1" items={items} />
+    <Typography>
+      <DocumentTab
+        markdownContent={markdownContent}
+        isLoading={isLoading}
+        nodeTitle={currentNode ? currentNode.name : ""}
+        handleEditorChange={handleEditorChange}
+        handleTitleChange={handleTitleChange}
+      />
+    </Typography>
   )
 }
 

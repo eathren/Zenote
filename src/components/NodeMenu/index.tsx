@@ -71,7 +71,6 @@ const NodeMenu = () => {
       <Button
         icon={open ? <MenuFoldOutlined /> : <MenuUnfoldOutlined />}
         onClick={showDrawer}
-        style={{ position: "absolute", top: 5, left: 5, zIndex: 201 }}
       />
     </>
   )

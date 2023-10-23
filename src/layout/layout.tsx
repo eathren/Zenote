@@ -14,9 +14,8 @@ import styles from "./index.module.css"
 import FooterButtonList from "src/components/FooterButtonList"
 import { useForwardHistory } from "src/hooks/useForwardHistory"
 import AddNodeModal from "src/components/AddNodeModal"
-import { Header as CustomHeader } from "src/components/UI/Header"
+import { Header as CustomHeader } from "src/components/UI/NonAuth/Header"
 import { useUser } from "src/hooks/user"
-import GraphHeader from "src/components/GraphHeader"
 
 const { Content, Footer } = Layout
 
@@ -94,7 +93,6 @@ export const BasicLayout = ({ children }: LayoutProps) => {
       >
         {!user && <CustomHeader />}
         <Layout className={styles.main__content}>
-          {user && graphId && <GraphHeader />}
           <Layout>
             <Content
               style={{
