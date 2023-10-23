@@ -1,6 +1,7 @@
 import { Spin } from "antd"
 import { useParams } from "react-router-dom"
 import ForceGraph from "src/components/ForceGraph"
+import GraphHeader from "src/components/UI/Headers/GraphHeader"
 import { useNodes } from "src/hooks/useNodes"
 
 const GraphPage = () => {
@@ -13,7 +14,10 @@ const GraphPage = () => {
       {loading ? (
         <Spin style={{ position: "absolute", left: "50%", top: "50%" }} />
       ) : (
-        <ForceGraph graphId={graphId} nodes={nodes} />
+        <>
+          <GraphHeader />
+          <ForceGraph graphId={graphId} nodes={nodes} />
+        </>
       )}
     </>
   )
