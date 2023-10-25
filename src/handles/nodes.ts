@@ -277,36 +277,6 @@ export const deleteNodeInDB = async (graphId: string, nodeId: string) => {
 }
 
 /**
- * Update the tags of a specific node.
- *
- * @param graphId - The Firestore ID of the graph to which the node belongs.
- * @param nodeId - The Firestore ID of the node whose tags need to be updated.
- * @param tags - The new set of tags.
- */
-export const updateNodeTags = async (
-  graphId: string,
-  nodeId: string,
-  tags: string[]
-) => {
-  const ownerId = getCurrentUserId()
-  if (!ownerId) {
-    notification.error({
-      message: "Error",
-      description: "User not authenticated",
-    })
-    return
-  }
-
-  const nodeRef = doc(
-    db,
-    `${getNodeCollectionPath(ownerId, graphId)}/${nodeId}`
-  )
-  await updateDoc(nodeRef, {
-    tags,
-  })
-}
-
-/**
  * Update the groups of a specific node.
  *
  * @param graphId - The Firestore ID of the graph to which the node belongs.
@@ -334,4 +304,69 @@ export const updateNodeGroups = async (
   await updateDoc(nodeRef, {
     groups,
   })
+}
+
+export const addTagToNode = async (
+  graphId: string | undefined,
+  nodeId: string,
+  newTag: string
+) => {
+  const ownerId = getCurrentUserId()
+  if (!ownerId) {
+    notification.error({
+      message: "Error",
+      description: "User not authenticated",
+    })
+    return
+  }
+
+  if (!graphId) return
+
+  const nodeRef = doc(
+    db,
+    `${getNodeCollectionPath(ownerId, graphId)}/${nodeId}`
+  )
+
+  const nodeDocSnap = await getDoc(nodeRef)
+  const nodeData = nodeDocSnap.data() as GraphNode
+  const existingTags = nodeData.tags || []
+
+  if (!existingTags.includes(newTag)) {
+    existingTags.push(newTag)
+    await updateDoc(nodeRef, {
+      tags: existingTags,
+    })
+  }
+}
+export const removeTagFromNode = async (
+  graphId: string | undefined,
+  nodeId: string,
+  tagToRemove: string
+) => {
+  const ownerId = getCurrentUserId()
+  if (!ownerId) {
+    notification.error({
+      message: "Error",
+      description: "User not authenticated",
+    })
+    return
+  }
+
+  if (!graphId) return
+
+  const nodeRef = doc(
+    db,
+    `${getNodeCollectionPath(ownerId, graphId)}/${nodeId}`
+  )
+
+  const nodeDocSnap = await getDoc(nodeRef)
+  const nodeData = nodeDocSnap.data() as GraphNode
+  const existingTags = nodeData.tags || []
+
+  if (existingTags.includes(tagToRemove)) {
+    const updatedTags = existingTags.filter((tag) => tag !== tagToRemove)
+    await updateDoc(nodeRef, {
+      tags: updatedTags,
+    })
+  }
 }

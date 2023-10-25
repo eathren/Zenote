@@ -169,6 +169,73 @@ export const addEdgesToNodeBatch = async (
     return false
   }
 }
+export const batchUpdateNodeEdges = async (
+  graphId: string | undefined,
+  nodeId: string,
+  edgesToAdd: string[],
+  edgesToRemove: string[]
+) => {
+  try {
+    const ownerId = getCurrentUserId()
+    if (!ownerId) {
+      notification.error({
+        message: "Error",
+        description: "User not authenticated",
+      })
+      return false
+    }
+    if (!graphId) return
+
+    // Get reference to the specific node document
+    const nodeDocRef = getNodeDocRef(db, ownerId, graphId, nodeId)
+
+    // Fetch the node data
+    const nodeDocSnap = await getDoc(nodeDocRef)
+    const nodeData = nodeDocSnap.data() as GraphNode
+
+    // Initialize new edges to be added
+    const newEdges: GraphEdge[] = edgesToAdd.map((targetNodeId) => ({
+      id: uuidv4(),
+      graphId,
+      date_created: Date.now(),
+      source: nodeId,
+      target: targetNodeId,
+    }))
+
+    // If edges field is not an array or not defined, initialize it
+    if (!Array.isArray(nodeData.edges)) {
+      nodeData.edges = []
+    }
+
+    // Add new edges to edges array locally, only if they do not already exist
+    newEdges.forEach((newEdge) => {
+      if (
+        !nodeData.edges?.some(
+          (existingEdge) => existingEdge.target === newEdge.target
+        )
+      ) {
+        nodeData.edges?.push(newEdge)
+      }
+    })
+
+    // Remove old edges
+    if (Array.isArray(nodeData.edges)) {
+      nodeData.edges = nodeData.edges.filter(
+        (edge) => !edgesToRemove.includes(edge.target as string)
+      )
+    }
+
+    // Perform a single batch update to the database
+    await updateDoc(nodeDocRef, {
+      edges: nodeData.edges,
+    })
+
+    return true
+  } catch (error) {
+    console.error("Error updating edges: ", error)
+    return false
+  }
+}
 
 /**
  * Fetches all edges for a specific graph from the database.

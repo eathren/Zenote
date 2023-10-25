@@ -42,6 +42,7 @@ const AddGraphButton = () => {
         onCancel={() => setModalOpen(false)}
       >
         <Input
+          autoFocus
           placeholder="Graph Name..."
           value={graphName}
           onChange={handleGraphNameChange}

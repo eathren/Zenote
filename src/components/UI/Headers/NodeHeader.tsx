@@ -36,7 +36,6 @@ const NodeHeader = (props: NodeHeaderProps) => {
             <Input
               value={editableTitle}
               onChange={onTitleChange}
-              autoFocus
               style={{
                 ...commonStyle,
                 maxWidth: "100%",

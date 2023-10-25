@@ -92,6 +92,7 @@ const AddEdgeModal: React.FC<AddEdgeModalProps> = ({
             onClick={() => toggleNodeSelection(node)}
             style={{
               cursor: "pointer",
+              paddingLeft: "5px",
               backgroundColor: selectedNodes.includes(node)
                 ? "grey"
                 : "transparent",

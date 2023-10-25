@@ -2,6 +2,12 @@ import React, { useState, useEffect, useRef } from "react"
 import { Spin, Input, Drawer } from "antd"
 import Markdown from "react-markdown"
 import NodeHeader from "src/components/UI/Headers/NodeHeader"
+import { useParams } from "react-router-dom"
+import AddEdgeModal from "../AddEdgeModal"
+import { useNodes } from "src/hooks/useNodes"
+import { findNode } from "src/utils"
+import { addTagToNode, removeTagFromNode } from "src/handles/nodes"
+import { debounce } from "lodash"
 
 type DocumentTabProps = {
   markdownContent: string
@@ -11,6 +17,22 @@ type DocumentTabProps = {
   handleTitleChange: (newTitle: string) => void
 }
 
+const commonStyle = {
+  border: "none",
+  outline: "none",
+  fontFamily: "inherit",
+  fontSize: "inherit",
+  margin: 0,
+  padding: 0,
+}
+
+const headerStyle = {
+  ...commonStyle,
+  fontWeight: 600,
+  fontSize: "1.5rem",
+  marginBottom: "1rem",
+}
+
 const DocumentTab: React.FC<DocumentTabProps> = ({
   markdownContent,
   isLoading,
@@ -18,31 +40,29 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
   handleEditorChange,
   handleTitleChange,
 }) => {
+  const { graphId, nodeId } = useParams<{ graphId: string; nodeId: string }>()
   const [editableTitle, setEditableTitle] = useState<string>(nodeTitle || "")
   const [isTitleEditable, setIsTitleEditable] = useState<boolean>(false)
+  const [bracketCount, setBracketCount] = useState(0)
   const titleRef = useRef<HTMLDivElement | null>(null)
   const [isEditing, setIsEditing] = useState(
     markdownContent.length > 0 ? false : true
   )
+  const { nodes } = useNodes(graphId)
   const [cursorPosition, setCursorPosition] = useState<number | null>(null)
   const textAreaRef = useRef<any>(null)
-
+  const [showAddEdgeModal, setShowAddEdgeModal] = useState<boolean>(false)
   const [showDrawer, setShowDrawer] = useState(false)
+  // const [detectedNodeNames, setDetectedNodeNames] = useState<string[]>([])
+  const [prevMarkdownContent, setPrevMarkdownContent] =
+    useState(markdownContent)
 
-  const commonStyle = {
-    border: "none",
-    outline: "none",
-    fontFamily: "inherit",
-    fontSize: "inherit",
-    margin: 0,
-    padding: 0,
-  }
-
-  const headerStyle = {
-    ...commonStyle,
-    fontWeight: 600,
-    fontSize: "1.5rem",
-    marginBottom: "1rem",
+  // const { edges, addEdge, deleteEdge } = useEdges(graphId, nodeId)
+  const handleEditorChangeWithCheck = (newValue: string | undefined) => {
+    if (newValue !== prevMarkdownContent) {
+      handleEditorChange(newValue)
+      setPrevMarkdownContent(newValue || "")
+    }
   }
 
   useEffect(() => {
@@ -115,6 +135,138 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
     setIsEditing(!isEditing)
   }
 
+  useEffect(() => {
+    // Debounce function to delay the tag extraction
+    const handleTagUpdate = async () => {
+      const tagPattern = /#[a-zA-Z0-9_]+(?=\s|$)/g // Updated regex pattern to match tags only if followed by space or end of string
+      const matches = markdownContent.match(tagPattern)
+      const newDetectedTags = matches
+        ? matches.map((m) => m.replace(/#/g, ""))
+        : []
+
+      if (!nodeId) return
+      const n = findNode(nodes, nodeId)
+      const existingTags = n?.tags ?? []
+
+      // Add new tags
+      const tagsToAdd = newDetectedTags.filter(
+        (tag) => !existingTags.includes(tag)
+      )
+      tagsToAdd.forEach(async (newTag) => {
+        await addTagToNode(graphId, nodeId, newTag)
+      })
+
+      // Remove old tags
+      const tagsToRemove = existingTags.filter(
+        (tag) => !newDetectedTags.includes(tag)
+      )
+      tagsToRemove.forEach(async (tagToRemove) => {
+        await removeTagFromNode(graphId, nodeId, tagToRemove)
+      })
+    }
+
+    const debouncedHandleTagUpdate = debounce(handleTagUpdate, 500)
+
+    debouncedHandleTagUpdate()
+
+    // Cleanup
+    return () => {
+      debouncedHandleTagUpdate.cancel()
+    }
+  }, [markdownContent, nodes, nodeId, graphId])
+
+  // const debouncedBatchUpdate = debounce(async (markdownContent: string, ) => {
+  //   const edgePattern = /\[\[(.*?)\]\]/g;
+  //   const matches = markdownContent.match(edgePattern);
+  //   const newDetectedNodeTargetIds = matches ? matches.map((m: string) => m.replace(/\[\[|\]\]/g, "")) : [];
+
+  //   if (!nodeId) return;
+
+  //   const n = findNode(nodes, nodeId);
+  //   const existingEdges: GraphEdge[] = n?.edges ?? [];
+  //   // Add new edges
+  //   const edgesToAdd = newDetectedNodeTargetIds.filter(
+  //     (nodeTargetId) => !existingEdges.some((existingEdge) => existingEdge.target === nodeTargetId)
+  //   );
+
+  //   // Remove old edges
+  //   const edgesToRemove = existingEdges.filter(
+  //     (existingEdge) => !newDetectedNodeTargetIds.includes(existingEdge.target as string)
+  //   ).map((existingEdge) => existingEdge.target as string);
+
+  //   if (edgesToAdd.length > 0 || edgesToRemove.length > 0) {
+  //     await batchUpdateNodeEdges(graphId, nodeId, edgesToAdd, edgesToRemove);
+  //   }
+  // }, 500);
+
+  // useEffect(() => {
+  //   debouncedBatchUpdate(markdownContent)
+  // }, [markdownContent, nodes, nodeId, graphId, debouncedBatchUpdate])
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "[") {
+      setBracketCount(bracketCount + 1)
+
+      if (bracketCount === 1) {
+        e.preventDefault()
+        const value = markdownContent
+        const start =
+          textAreaRef.current.resizableTextArea.textArea.selectionStart
+        const end = textAreaRef.current.resizableTextArea.textArea.selectionEnd
+
+        const newValue = `${value.substring(0, start)}[[${value.substring(
+          start,
+          end
+        )}]]${value.substring(end)}`
+
+        handleEditorChange(newValue)
+        setCursorPosition(start + 2)
+
+        // Reset bracketCount
+        setBracketCount(0)
+
+        // Trigger the AddEdgeModal with the dropdown for node names
+        setShowAddEdgeModal(true)
+      }
+    } else {
+      setBracketCount(0)
+    }
+  }
+
+  // useEffect(() => {
+  //   const nodeNamePattern = /\[\[(.*?)\]\]/g
+  //   const matches = markdownContent.match(nodeNamePattern)
+  //   const newDetectedNodeNames = matches
+  //     ? matches.map((m) => m.replace(/\[\[|\]\]/g, ""))
+  //     : []
+
+  //   if (!nodeId) return
+  //   const n = findNode(nodes, nodeId)
+  //   const edgeIds = n?.edges?.map((edge) => edge.target) ?? []
+  //   const edgenames = edgeIds.map((edgeId) => {
+  //     findNode(nodes, edgeId as string)?.name
+  //   })
+
+  //   newDetectedNodeNames.forEach(async (newNodeName) => {
+  //     // if the node doesn't have an edge, create the edge
+  //     // if it does and no longer finds the name, delete it
+  //     if (!edgenames.includes(newNodeName)) {
+  //       await addEdgeToNode(graphId, nodeId, targetNodeId)
+  //     }
+  //     if (edgenames.includes(newNodeName)) return
+  //   })
+
+  //   // Delete edges for removed node names
+  // }, [markdownContent, nodes, edges, detectedNodeNames, nodeId, graphId])
+
+  // const handleNodeNameClick = async (targetNodeName: string) => {
+  //   const targetNodeId = findNodeId(nodes, targetNodeName)
+  //   if (!targetNodeId || !graphId || !nodeId) return
+  //   await addEdgeToNode(graphId, nodeId, targetNodeId)
+  //   // Logic to create an edge between `nodeId` and `targetNodeId`
+  //   // based on the `targetNodeName` clicked.
+  // }
+
   return (
     <div>
       {isLoading ? (
@@ -146,8 +298,9 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
               ref={textAreaRef}
               autoSize={{ minRows: 10 }}
               value={markdownContent}
+              onKeyDown={handleKeyPress}
               autoFocus
-              onChange={(e) => handleEditorChange(e.target.value)}
+              onChange={(e) => handleEditorChangeWithCheck(e.target.value)}
               onBlur={() => setIsEditing(false)}
             />
           ) : (
@@ -177,6 +330,13 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
               )}
             </div>
           )}
+          <AddEdgeModal
+            isOpen={showAddEdgeModal}
+            onClose={() => setShowAddEdgeModal(false)}
+            graphId={graphId}
+            nodeId={nodeId}
+          />
+
           <Drawer
             title="Context Menu"
             placement="bottom"
