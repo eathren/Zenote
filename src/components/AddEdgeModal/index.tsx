@@ -3,12 +3,15 @@ import { Modal, Input, List, notification } from "antd"
 import { GraphNode } from "src/types"
 import { useNodeModal } from "src/hooks/useNodeModal"
 import { addEdgesToNodeBatch } from "src/handles/edges"
+import { useNodes } from "src/hooks/useNodes"
+import { findNode } from "src/utils"
 
 type AddEdgeModalProps = {
   isOpen: boolean
   onClose: () => void
   graphId: string | undefined
   nodeId: string | undefined
+  onConfirm?: (result: any) => void
 }
 
 const AddEdgeModal: React.FC<AddEdgeModalProps> = ({
@@ -16,12 +19,13 @@ const AddEdgeModal: React.FC<AddEdgeModalProps> = ({
   onClose,
   graphId,
   nodeId,
+  onConfirm,
 }) => {
   const [selectedNodes, setSelectedNodes] = useState<GraphNode[]>([])
   const { searchTerm, handleSearchTermChange, filteredNodes } = useNodeModal({
     isOpen,
   })
-
+  const { nodes } = useNodes(graphId)
   useEffect(() => {
     setSelectedNodes([])
   }, [isOpen])
@@ -39,27 +43,41 @@ const AddEdgeModal: React.FC<AddEdgeModalProps> = ({
 
     // Collect all target node IDs into an array
     const targetNodeIds = selectedNodes.map((targetNode) => targetNode.id!)
+    const returnObj = targetNodeIds.map((targetNodeId) => {
+      return {
+        targetNodeId: targetNodeId,
+        name: findNode(nodes, targetNodeId)?.name,
+      }
+    })
+    let message = ""
 
     try {
       // Attempt to add edges in a batch
       const result = await addEdgesToNodeBatch(graphId, nodeId, targetNodeIds)
       if (!result) {
+        message = "Failed to add edges"
         notification.error({
-          message: `Failed to Add Edges`,
+          message: message,
           duration: 3,
         })
       } else {
+        message = "Edges added successfully"
         notification.success({
-          message: "Edges Added Successfully",
+          message: message,
           duration: 3,
         })
       }
     } catch (error) {
       console.error(error)
+      message = "Error occurred"
       notification.error({
-        message: `Failed to Add Edges`,
+        message: message,
         duration: 3,
       })
+    }
+    console.log(returnObj)
+    if (onConfirm) {
+      onConfirm(returnObj)
     }
 
     onClose()

@@ -3,7 +3,6 @@ import { Modal, Input, List, notification } from "antd"
 import { GraphNode } from "src/types"
 import { useNodeModal } from "src/hooks/useNodeModal"
 import { removeEdgesFromNodeBatch } from "src/handles/nodes"
-import { useParams } from "react-router-dom"
 
 type EditEdgeModalProps = {
   isOpen: boolean
@@ -16,14 +15,19 @@ type EditEdgeModalProps = {
 const EditEdgeModal: React.FC<EditEdgeModalProps> = ({
   isOpen,
   onClose,
+  graphId,
   nodeId,
+  nodes,
 }) => {
   const [selectedNodes, setSelectedNodes] = useState<GraphNode[]>([])
   const { searchTerm, handleSearchTermChange, filteredNodes } = useNodeModal({
     isOpen,
   })
 
-  const graphId = useParams<{ graphId: string }>().graphId
+  // Assuming findNode function returns a node by its ID from the nodes array
+  const currentNode = nodes?.find((node) => node.id === nodeId)
+  const existingEdges = currentNode?.edges || []
+
   useEffect(() => {
     setSelectedNodes([])
   }, [isOpen])
@@ -43,7 +47,7 @@ const EditEdgeModal: React.FC<EditEdgeModalProps> = ({
 
     try {
       if (!graphId) return
-      await removeEdgesFromNodeBatch(graphId, nodeId, targetNodeIds) // Call your new batch deletion function
+      await removeEdgesFromNodeBatch(graphId, nodeId, targetNodeIds)
       notification.success({
         message: "Edges Deleted Successfully",
         duration: 3,
@@ -59,6 +63,8 @@ const EditEdgeModal: React.FC<EditEdgeModalProps> = ({
     onClose()
   }
 
+  const existingEdgeNodeIds = existingEdges.map((edge) => edge.target as string)
+
   return (
     <Modal
       title="Select Nodes to Delete Edge(s)"
@@ -72,7 +78,9 @@ const EditEdgeModal: React.FC<EditEdgeModalProps> = ({
         onChange={handleSearchTermChange}
       />
       <List
-        dataSource={filteredNodes}
+        dataSource={filteredNodes.filter((node) =>
+          existingEdgeNodeIds.includes(node.id!)
+        )}
         renderItem={(node) => (
           <List.Item
             onClick={() => toggleNodeSelection(node)}
@@ -80,6 +88,8 @@ const EditEdgeModal: React.FC<EditEdgeModalProps> = ({
               cursor: "pointer",
               backgroundColor: selectedNodes.includes(node)
                 ? "#f5222d"
+                : existingEdgeNodeIds.includes(node.id!)
+                ? "#d9d9d9"
                 : "transparent",
             }}
           >

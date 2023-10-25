@@ -15,7 +15,6 @@ import { useNavigate, useParams } from "react-router-dom"
 import { useNodes } from "src/hooks/useNodes"
 import { calculateIncomingAndOutgoingEdges } from "src/utils"
 import { deleteNode } from "src/handles/nodes"
-import AddEdgeModal from "../AddEdgeModal"
 import EditEdgeModal from "../EditEdgeModal"
 
 const NodeControls = () => {
@@ -38,7 +37,6 @@ const NodeControls = () => {
   )
 
   const [open, setOpen] = useState(false)
-  const [isAddEdgeModalOpen, setIsAddEdgeModalOpen] = useState<boolean>(false)
   const [isEditEdgeModalOpen, setIsEditEdgeModalOpen] = useState<boolean>(false)
 
   const showDeleteConfirm = (nodeId: string) => {
@@ -53,14 +51,6 @@ const NodeControls = () => {
         navigate(`/graphs/${graphId}`)
       },
     })
-  }
-
-  const openAddEdgeModal = () => {
-    setIsAddEdgeModalOpen(true)
-  }
-
-  const closeAddEdgeModal = () => {
-    setIsAddEdgeModalOpen(false)
   }
 
   const closeEditEdgeModal = () => {
@@ -96,9 +86,9 @@ const NodeControls = () => {
           <Button
             type="text"
             icon={<LinkOutlined />}
-            onClick={openAddEdgeModal}
+            onClick={() => setIsEditEdgeModalOpen(true)} // open EditEdgeModal when clicked
           >
-            Add Connections
+            Edit Connections
           </Button>
           <Divider />
           <Button type="text" icon={<FileWordOutlined />}>
@@ -110,12 +100,6 @@ const NodeControls = () => {
             isOpen={isEditEdgeModalOpen}
             onClose={closeEditEdgeModal}
             nodes={[...incomingNodes, ...outgoingNodes]}
-            graphId={graphId}
-            nodeId={nodeId}
-          />
-          <AddEdgeModal
-            isOpen={isAddEdgeModalOpen}
-            onClose={closeAddEdgeModal}
             graphId={graphId}
             nodeId={nodeId}
           />
