@@ -171,11 +171,13 @@ export const addEdgesToNodeBatch = async (
 }
 export const batchUpdateNodeEdges = async (
   graphId: string | undefined,
-  nodeId: string,
+  nodeId: string | undefined,
   edgesToAdd: string[],
   edgesToRemove: string[]
 ) => {
   try {
+    if (!graphId || !nodeId) return
+
     const ownerId = getCurrentUserId()
     if (!ownerId) {
       notification.error({
@@ -184,7 +186,6 @@ export const batchUpdateNodeEdges = async (
       })
       return false
     }
-    if (!graphId) return
 
     // Get reference to the specific node document
     const nodeDocRef = getNodeDocRef(db, ownerId, graphId, nodeId)

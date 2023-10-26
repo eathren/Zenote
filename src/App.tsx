@@ -34,7 +34,14 @@ function App() {
   const { user, loading } = useUser()
   if (loading) {
     return (
-      <ConfigProvider theme={{ algorithm: darkAlgorithm }}>
+      <ConfigProvider
+        theme={{
+          algorithm: darkAlgorithm,
+          token: {
+            colorLink: "#ffffff",
+          },
+        }}
+      >
         <BasicLayout>
           <Spin
             style={{ position: "absolute", left: "50%", top: "50%" }}

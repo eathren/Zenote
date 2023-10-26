@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react"
-import { Spin, Input, Drawer } from "antd"
+import { Spin, Input, Drawer, Typography } from "antd"
 import Markdown from "react-markdown"
 import NodeHeader from "src/components/UI/Headers/NodeHeader"
 import { useParams } from "react-router-dom"
@@ -39,7 +39,6 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
   const { graphId, nodeId } = useParams<{ graphId: string; nodeId: string }>()
   const [editableTitle, setEditableTitle] = useState<string>(nodeTitle || "")
   const [isTitleEditable, setIsTitleEditable] = useState<boolean>(false)
-  const [bracketCount, setBracketCount] = useState(0)
   const titleRef = useRef<HTMLDivElement | null>(null)
   const [isEditing, setIsEditing] = useState(
     markdownContent.length > 0 ? false : true
@@ -125,33 +124,45 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
     setIsEditing(!isEditing)
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    console.log("press")
-    if (e.key === "[") {
-      setBracketCount(bracketCount + 1)
+  useEffect(() => {
+    try {
+      const regex = /\[\[/g
+      const match = regex.exec(markdownContent)
 
-      if (bracketCount === 1) {
-        e.preventDefault()
+      if (match && textAreaRef.current?.resizableTextArea?.textArea) {
         const capturedCaretPosition =
           textAreaRef.current.resizableTextArea.textArea.selectionStart
-        setCaretPosition(capturedCaretPosition)
-        const currentContent = markdownContent
-        const newContent =
-          currentContent.slice(0, capturedCaretPosition) +
-          currentContent.slice(capturedCaretPosition + 1)
-        handleEditorChange(newContent)
-        setShowAddEdgeModal(true)
-      }
-    } else {
-      setBracketCount(0)
-    }
-  }
 
-  const generateMarkdownLinks = (selectedNodes: any[]) => {
+        if (capturedCaretPosition !== null) {
+          setCaretPosition(capturedCaretPosition)
+
+          const positionOfFirstBracket = markdownContent.indexOf("[[")
+          if (positionOfFirstBracket !== -1) {
+            // Remove both brackets
+            const newContent =
+              markdownContent.slice(0, positionOfFirstBracket) +
+              markdownContent.slice(positionOfFirstBracket + 2)
+
+            // Debug log to check the slice positions
+            console.log(`Before: ${markdownContent}`)
+            console.log(`After: ${newContent}`)
+
+            handleEditorChange(newContent)
+            setCaretPosition(positionOfFirstBracket) // Update caret position after removing brackets
+            setShowAddEdgeModal(true)
+          }
+        }
+      }
+    } catch (e) {
+      console.error("An error occurred:", e)
+    }
+  }, [handleEditorChange, markdownContent])
+
+  const generateMarkdownLinks = (selectedNodes: Record<string, string>[]) => {
     const markdownLinks = selectedNodes
       .map(
         ({ targetNodeId, name }) =>
-          `[${name}](${import.meta.env.VITE_APP_HTTP}://${
+          `[${name}](${
             import.meta.env.VITE_APP_DOMAIN
           }/graphs/${graphId}/node/${targetNodeId})`
       )
@@ -162,95 +173,123 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
       const textAfterCaret = markdownContent.substring(caretPosition)
       const newText = `${textBeforeCaret}${markdownLinks}${textAfterCaret}`
 
-      // Remove the extra bracket at the caret position
-      const finalText =
-        newText.slice(0, caretPosition) + newText.slice(caretPosition + 1)
-
-      handleEditorChange(finalText)
+      handleEditorChange(newText)
+      setCaretPosition(caretPosition + markdownLinks.length) // Update caret position after inserting the link
     }
-    setCaretPosition(null)
   }
+  // const [edgesUpdated, setEdgesUpdated] = useState(false)
+  // const debouncedUpdate = debounce(
+  //   async (oldContent: string, newContent: string) => {
+  //     const extractNodeIds = (content: string) => {
+  //       const regex = /\[.*?\]\(.*?\/node\/(.*?)\)/g
+  //       const matches = []
+  //       let match
+  //       while ((match = regex.exec(content)) !== null) {
+  //         matches.push(match[1])
+  //       }
+  //       return matches
+  //     }
 
+  //     const oldNodeIds = extractNodeIds(oldContent)
+  //     const newNodeIds = extractNodeIds(newContent)
+  //     const edgesToRemove = oldNodeIds.filter((id) => !newNodeIds.includes(id))
+
+  //     if (edgesToRemove.length > 0) {
+  //       await batchUpdateNodeEdges(graphId, nodeId, [], edgesToRemove)
+  //       setEdgesUpdated(true)
+  //     }
+  //   },
+  //   800
+  // )
+
+  // useEffect(() => {
+  //   if (!edgesUpdated) {
+  //     debouncedUpdate(prevMarkdownContent, markdownContent)
+  //   }
+  //   setEdgesUpdated(false)
+  //   setPrevMarkdownContent(markdownContent)
+  // }, [markdownContent, debouncedUpdate])
   return (
     <div>
       {isLoading ? (
         <Spin style={{ position: "absolute", left: "50%", top: "50%" }} />
       ) : (
         <>
-          <NodeHeader
-            editMode={isEditing}
-            editableTitle={editableTitle}
-            onTitleChange={onTitleChange}
-            toggleEditMode={toggleEditMode}
-          />
-          <div ref={titleRef} onClick={toggleTitleEdit}>
-            {isTitleEditable ? (
-              <Input
-                value={editableTitle}
-                onChange={onTitleChange}
-                onKeyDown={onTitleKeyDown}
-                autoFocus
-                style={headerStyle}
-              />
-            ) : (
-              <h1 style={headerStyle}>{editableTitle}</h1>
-            )}
-          </div>
-          {isEditing ? (
-            <Input.TextArea
-              style={commonStyle}
-              ref={textAreaRef}
-              autoSize={{ minRows: 10 }}
-              value={markdownContent}
-              onKeyDown={handleKeyPress}
-              autoFocus
-              onChange={(e) => handleEditorChangeWithCheck(e.target.value)}
-              onBlur={() => setIsEditing(false)}
+          <Typography>
+            <NodeHeader
+              editMode={isEditing}
+              editableTitle={editableTitle}
+              onTitleChange={onTitleChange}
+              toggleEditMode={toggleEditMode}
             />
-          ) : (
-            <div>
-              {markdownContent.length > 1 ? (
-                markdownContent.split("\n").map((line, index) => (
-                  <div
-                    key={index}
-                    style={{ display: "flex", alignItems: "center" }}
-                  >
-                    <div
-                      onClick={() => handleLineClick(index)}
-                      role="button"
-                      tabIndex={0}
-                    >
-                      <Markdown>{line}</Markdown>
-                    </div>
-                  </div>
-                ))
+            <div ref={titleRef} onClick={toggleTitleEdit}>
+              {isTitleEditable ? (
+                <Input
+                  value={editableTitle}
+                  onChange={onTitleChange}
+                  onKeyDown={onTitleKeyDown}
+                  autoFocus
+                  style={headerStyle}
+                />
               ) : (
-                <div
-                  style={{ height: "50vh", cursor: "pointer" }}
-                  onClick={() => setIsEditing(true)}
-                >
-                  Click to start editing.
-                </div>
+                <h1 style={headerStyle}>{editableTitle}</h1>
               )}
             </div>
-          )}
-          <AddEdgeModal
-            isOpen={showAddEdgeModal}
-            onClose={() => setShowAddEdgeModal(false)}
-            graphId={graphId}
-            nodeId={nodeId}
-            onConfirm={generateMarkdownLinks}
-          />
+            {isEditing ? (
+              <Input.TextArea
+                style={commonStyle}
+                ref={textAreaRef}
+                autoSize={{ minRows: 10 }}
+                value={markdownContent}
+                autoFocus
+                onChange={(e) => handleEditorChangeWithCheck(e.target.value)}
+                onBlur={() => setIsEditing(false)}
+              />
+            ) : (
+              <div>
+                {markdownContent.length > 1 ? (
+                  markdownContent.split("\n").map((line, index) => (
+                    <div
+                      key={index}
+                      style={{ display: "flex", alignItems: "center" }}
+                    >
+                      <div
+                        onClick={() => handleLineClick(index)}
+                        role="button"
+                        tabIndex={0}
+                      >
+                        <Markdown>{line}</Markdown>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div
+                    style={{ height: "50vh", cursor: "pointer" }}
+                    onClick={() => setIsEditing(true)}
+                  >
+                    Click to start editing.
+                  </div>
+                )}
+              </div>
+            )}
+            <AddEdgeModal
+              isOpen={showAddEdgeModal}
+              onClose={() => setShowAddEdgeModal(false)}
+              graphId={graphId}
+              nodeId={nodeId}
+              onConfirm={generateMarkdownLinks}
+            />
 
-          <Drawer
-            title="Context Menu"
-            placement="bottom"
-            onClose={handleCloseDrawer}
-            open={showDrawer}
-            height={200}
-          >
-            {/* Your context menu content here */}
-          </Drawer>
+            <Drawer
+              title="Context Menu"
+              placement="bottom"
+              onClose={handleCloseDrawer}
+              open={showDrawer}
+              height={200}
+            >
+              {/* Your context menu content here */}
+            </Drawer>
+          </Typography>
         </>
       )}
     </div>

@@ -58,3 +58,17 @@
     display: none;
   }
 }
+
+a {
+  color: #dedede !important;
+  &:hover {
+    color: #bb86fc !important;
+  }
+  &:visited {
+    color: #757575 !important;
+  }
+
+  &:visited:hover {
+    color: #bb86fc !important;
+  }
+}
