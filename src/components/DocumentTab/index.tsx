@@ -1,9 +1,13 @@
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef, useCallback } from "react"
 import { Spin, Input, Drawer, Typography } from "antd"
 import Markdown from "react-markdown"
 import NodeHeader from "src/components/UI/Headers/NodeHeader"
 import { useParams } from "react-router-dom"
 import AddEdgeModal from "../AddEdgeModal"
+import { useNodes } from "src/hooks/useNodes"
+import { batchUpdateNodeEdges } from "src/handles/edges"
+import { GraphEdge } from "src/types"
+import { batchUpdateNodeTags } from "src/handles/nodes"
 
 type DocumentTabProps = {
   markdownContent: string
@@ -47,17 +51,20 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
   const textAreaRef = useRef<any>(null)
   const [showAddEdgeModal, setShowAddEdgeModal] = useState<boolean>(false)
   const [showDrawer, setShowDrawer] = useState(false)
-  const [caretPosition, setCaretPosition] = useState<number | null>(null) // New state variable for the caret position
-
+  const [caretPosition, setCaretPosition] = useState<number | null>(null)
+  const { nodes } = useNodes(graphId)
   const [prevMarkdownContent, setPrevMarkdownContent] =
     useState(markdownContent)
 
-  const handleEditorChangeWithCheck = (newValue: string | undefined) => {
-    if (newValue !== prevMarkdownContent) {
-      handleEditorChange(newValue)
-      setPrevMarkdownContent(newValue || "")
-    }
-  }
+  const handleEditorChangeWithCheck = useCallback(
+    (newValue: string | undefined) => {
+      if (newValue !== prevMarkdownContent) {
+        handleEditorChange(newValue)
+        setPrevMarkdownContent(newValue || "")
+      }
+    },
+    [handleEditorChange, prevMarkdownContent]
+  )
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -100,12 +107,15 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
     setEditableTitle(e.target.value)
   }
 
-  const onTitleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      setIsTitleEditable(false)
-      handleTitleChange(editableTitle)
-    }
-  }
+  const onTitleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") {
+        setIsTitleEditable(false)
+        handleTitleChange(editableTitle)
+      }
+    },
+    [editableTitle, handleTitleChange]
+  )
 
   const handleLineClick = (lineIndex: number) => {
     const linesBeforeClicked = markdownContent
@@ -123,6 +133,76 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
   const toggleEditMode = () => {
     setIsEditing(!isEditing)
   }
+
+  const extractLinks = (content: string): string[] => {
+    const links = content.match(/\/graphs\/[^/]+\/node\/([^)]+)/g) || []
+    return links.map((link) => link.split("node/")[1])
+  }
+
+  const extractTags = (content: string): string[] => {
+    const regex = /(?:\s|^)#[A-Za-z0-9_]+/g
+    const matches = content.match(regex) || []
+    return Array.from(new Set(matches.map((match) => match.trim().slice(1))))
+  }
+
+  const updateDynamicContent = useCallback(async () => {
+    if (!graphId || !nodeId) return
+    const node = nodes.find((node) => node.id === nodeId)
+    if (!node) return
+    const allTargetIds = extractLinks(markdownContent)
+    const addedLinks = allTargetIds.filter(
+      (localEdge) =>
+        !node.edges?.some(
+          (edge: GraphEdge) => (edge.target as string) === localEdge
+        )
+    )
+
+    const deletedLinks = (
+      node.edges?.map((edge: GraphEdge) => edge.target as string) || []
+    ).filter((remoteEdge) => !allTargetIds.includes(remoteEdge))
+
+    console.log("Added links:", addedLinks, "Deleted links:", deletedLinks)
+
+    if (addedLinks.length || deletedLinks.length) {
+      const result = await batchUpdateNodeEdges(
+        graphId,
+        nodeId,
+        addedLinks,
+        deletedLinks
+      )
+      if (!result) {
+        console.error("Error updating edges.")
+      }
+    }
+
+    const tagsInMarkdown = extractTags(markdownContent)
+    const tagsInFirebase = node.tags || []
+
+    const addedTags = tagsInMarkdown.filter(
+      (tag) => !tagsInFirebase.includes(tag)
+    )
+    const deletedTags = tagsInFirebase.filter(
+      (tag) => !tagsInMarkdown.includes(tag)
+    )
+
+    console.log("Added tags:", addedTags, "Deleted tags:", deletedTags)
+
+    if (addedTags.length || deletedTags.length) {
+      const result = await batchUpdateNodeTags(
+        graphId,
+        nodeId,
+        addedTags,
+        deletedTags
+      )
+      if (!result) {
+        console.error("Error updating tags.")
+      }
+    }
+  }, [graphId, markdownContent, nodeId, nodes])
+
+  useEffect(() => {
+    updateDynamicContent()
+  }, [updateDynamicContent, markdownContent])
 
   useEffect(() => {
     try {
@@ -144,9 +224,6 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
               markdownContent.slice(positionOfFirstBracket + 2)
 
             // Debug log to check the slice positions
-            console.log(`Before: ${markdownContent}`)
-            console.log(`After: ${newContent}`)
-
             handleEditorChange(newContent)
             setCaretPosition(positionOfFirstBracket) // Update caret position after removing brackets
             setShowAddEdgeModal(true)
@@ -174,41 +251,10 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
       const newText = `${textBeforeCaret}${markdownLinks}${textAfterCaret}`
 
       handleEditorChange(newText)
-      setCaretPosition(caretPosition + markdownLinks.length) // Update caret position after inserting the link
+      setCaretPosition(caretPosition + markdownLinks.length)
     }
   }
-  // const [edgesUpdated, setEdgesUpdated] = useState(false)
-  // const debouncedUpdate = debounce(
-  //   async (oldContent: string, newContent: string) => {
-  //     const extractNodeIds = (content: string) => {
-  //       const regex = /\[.*?\]\(.*?\/node\/(.*?)\)/g
-  //       const matches = []
-  //       let match
-  //       while ((match = regex.exec(content)) !== null) {
-  //         matches.push(match[1])
-  //       }
-  //       return matches
-  //     }
 
-  //     const oldNodeIds = extractNodeIds(oldContent)
-  //     const newNodeIds = extractNodeIds(newContent)
-  //     const edgesToRemove = oldNodeIds.filter((id) => !newNodeIds.includes(id))
-
-  //     if (edgesToRemove.length > 0) {
-  //       await batchUpdateNodeEdges(graphId, nodeId, [], edgesToRemove)
-  //       setEdgesUpdated(true)
-  //     }
-  //   },
-  //   800
-  // )
-
-  // useEffect(() => {
-  //   if (!edgesUpdated) {
-  //     debouncedUpdate(prevMarkdownContent, markdownContent)
-  //   }
-  //   setEdgesUpdated(false)
-  //   setPrevMarkdownContent(markdownContent)
-  // }, [markdownContent, debouncedUpdate])
   return (
     <div>
       {isLoading ? (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import { useParams } from "react-router-dom"
 import { notification, Spin, Typography } from "antd"
 import { debounce } from "lodash"
@@ -49,11 +49,15 @@ const NodePage: React.FC = () => {
       })
   }, [graphId, nodeId])
 
-  const debounceUpload = debounce((newValue: string) => {
-    if (nodeId && newValue) {
-      uploadMarkdown(nodeId, newValue)
-    }
-  }, 1500)
+  const debounceUpload = useCallback(
+    debounce((newValue: string) => {
+      if (nodeId && newValue) {
+        console.log("uploading")
+        uploadMarkdown(nodeId, newValue)
+      }
+    }, 1500),
+    [nodeId]
+  )
 
   const handleEditorChange = (newValue?: string | undefined) => {
     if (newValue !== undefined) {

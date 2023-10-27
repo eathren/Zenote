@@ -10,6 +10,8 @@ import {
   query,
   where,
   getDoc,
+  arrayUnion,
+  arrayRemove,
 } from "firebase/firestore"
 import { GraphNode } from "src/types/index" // Update the import path according to your project structure
 import { notification } from "antd"
@@ -368,5 +370,97 @@ export const removeTagFromNode = async (
     await updateDoc(nodeRef, {
       tags: updatedTags,
     })
+  }
+}
+export const updateNodeFavoriteStatus = async (
+  graphId: string | undefined,
+  nodeId: string | undefined
+) => {
+  const ownerId = getCurrentUserId()
+  if (!ownerId) {
+    notification.error({
+      message: "Error",
+      description: "User not authenticated",
+    })
+    return
+  }
+
+  if (!graphId) return
+
+  const nodeRef = doc(
+    db,
+    `${getNodeCollectionPath(ownerId, graphId)}/${nodeId}`
+  )
+
+  const nodeDocSnap = await getDoc(nodeRef)
+  if (!nodeDocSnap.exists()) {
+    notification.error({
+      message: "Error",
+      description: "Node does not exist",
+    })
+    return
+  }
+
+  const nodeData = nodeDocSnap.data() as GraphNode
+  let newStatus: boolean
+
+  // Check if isFavorite is undefined, if so set it to true
+  if (nodeData.isFavorite === undefined) {
+    newStatus = true
+  } else {
+    // Toggle the status otherwise
+    newStatus = !nodeData.isFavorite
+  }
+
+  await updateDoc(nodeRef, {
+    isFavorite: newStatus,
+  })
+}
+
+export const batchUpdateNodeTags = async (
+  graphId: string,
+  nodeId: string,
+  addedTags: string[],
+  deletedTags: string[]
+): Promise<boolean> => {
+  try {
+    const ownerId = getCurrentUserId()
+    if (!ownerId) {
+      notification.error({
+        message: "Error",
+        description: "User not authenticated",
+      })
+      return false
+    }
+    const nodeRef = doc(
+      db,
+      `${getNodeCollectionPath(ownerId, graphId)}/${nodeId}`
+    )
+
+    const nodeSnapshot = await getDoc(nodeRef)
+
+    if (!nodeSnapshot.exists()) {
+      console.error("Node does not exist")
+      return false
+    }
+
+    // If there are tags to be added
+    if (addedTags.length > 0) {
+      await updateDoc(nodeRef, {
+        tags: arrayUnion(...addedTags),
+      })
+    }
+
+    // If there are tags to be deleted
+    if (deletedTags.length > 0) {
+      await updateDoc(nodeRef, {
+        tags: arrayRemove(...deletedTags),
+      })
+    }
+
+    return true
+  } catch (error) {
+    console.error("Error updating tags:", error)
+    return false
   }
 }

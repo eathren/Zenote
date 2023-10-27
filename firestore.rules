@@ -4,15 +4,14 @@ service cloud.firestore {
 
     match /users/{ownerId} {
       // Allow read, write, update, and delete operations only if the ownerId is the authenticated user's ID
-      allow read, write: if request.auth.uid == ownerId;
+      allow read, write, update: if request.auth.uid == ownerId;
 
       match /graphs/{graphId} {
-        allow read, write: if request.auth.uid == ownerId;
+        allow read, update, create, delete: if request.auth.uid == ownerId;
 
         match /nodes/{nodeId} {
-          allow read, write: if request.auth.uid == ownerId;
+          allow read, update, create, delete: if request.auth.uid == ownerId;
         }
-        // Add more nested collections here if needed
       }
     }
   }

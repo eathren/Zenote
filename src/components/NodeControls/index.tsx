@@ -1,28 +1,25 @@
 import { useEffect, useState } from "react"
-import { Button, Divider, Drawer, Modal } from "antd"
+import { Button, Divider, Drawer, Modal, notification } from "antd"
 import {
   EllipsisOutlined,
   CloseOutlined,
   CopyOutlined,
   DeleteOutlined,
   ExportOutlined,
-  FileWordOutlined,
-  LinkOutlined,
   StarOutlined,
+  StarFilled,
 } from "@ant-design/icons"
 import { GraphNode } from "src/types"
 import { useNavigate, useParams } from "react-router-dom"
 import { useNodes } from "src/hooks/useNodes"
-import { calculateIncomingAndOutgoingEdges } from "src/utils"
-import { deleteNode } from "src/handles/nodes"
-import EditEdgeModal from "../EditEdgeModal"
+import { deleteNode, updateNodeFavoriteStatus } from "src/handles/nodes"
+import { fetchMarkdown } from "src/handles/markdown"
 
 const NodeControls = () => {
   const { graphId, nodeId } = useParams()
   const [currentNode, setCurrentNode] = useState<GraphNode | undefined>(
     undefined
   )
-
   const { nodes } = useNodes(graphId)
 
   useEffect(() => {
@@ -31,13 +28,7 @@ const NodeControls = () => {
     setCurrentNode(node)
   }, [nodeId, nodes])
 
-  const { incomingNodes, outgoingNodes } = calculateIncomingAndOutgoingEdges(
-    nodeId,
-    nodes
-  )
-
   const [open, setOpen] = useState(false)
-  const [isEditEdgeModalOpen, setIsEditEdgeModalOpen] = useState<boolean>(false)
 
   const showDeleteConfirm = (nodeId: string) => {
     Modal.confirm({
@@ -53,8 +44,48 @@ const NodeControls = () => {
     })
   }
 
-  const closeEditEdgeModal = () => {
-    setIsEditEdgeModalOpen(false)
+  const handleUpdateFavoriteStatus = async () => {
+    if (!currentNode) return
+
+    try {
+      // Update the favorite status in the backend or state management system
+      await updateNodeFavoriteStatus(graphId, nodeId)
+    } catch (error) {
+      // Handle any errors here
+      console.error("Could not update favorite status", error)
+    }
+  }
+
+  const fetchAndExportMarkdown = async (nodeId?: string) => {
+    if (!nodeId) return
+    if (!currentNode) return
+    const md = await fetchMarkdown(nodeId)
+    if (md) {
+      const mdWithNodeTitle = `# ${currentNode.name}\n\n${md}`
+      const blob = new Blob([mdWithNodeTitle], { type: "text/plain" })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `${currentNode.name}_${nodeId}.md`
+      a.click()
+      URL.revokeObjectURL(url)
+    }
+  }
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(window.location.href).then(
+      () => {
+        notification.success({
+          message: "Copied!",
+          description: "Link copied to clipboard.",
+          duration: 2,
+        })
+        console.log("Link copied to clipboard")
+      },
+      (err) => {
+        console.error("Could not copy link", err)
+      }
+    )
   }
 
   const navigate = useNavigate()
@@ -70,52 +101,42 @@ const NodeControls = () => {
         closeIcon={<CloseOutlined />}
       >
         <div style={{ textAlign: "left" }}>
-          <Button type="text" icon={<StarOutlined />}>
+          <Button
+            type="text"
+            icon={currentNode?.isFavorite ? <StarFilled /> : <StarOutlined />}
+            onClick={() => handleUpdateFavoriteStatus()}
+          >
             Favorite
           </Button>
           <Divider />
 
-          <Button type="text" icon={<CopyOutlined />}>
+          <Button type="text" icon={<CopyOutlined />} onClick={copyLink}>
             Copy Link
-          </Button>
-          <Divider />
-          <Button type="text" icon={<ExportOutlined />}>
-            Export
           </Button>
           <Divider />
           <Button
             type="text"
-            icon={<LinkOutlined />}
-            onClick={() => setIsEditEdgeModalOpen(true)} // open EditEdgeModal when clicked
+            icon={<ExportOutlined />}
+            onClick={() => fetchAndExportMarkdown(nodeId)}
           >
-            Edit Connections
+            Export
           </Button>
           <Divider />
-          <Button type="text" icon={<FileWordOutlined />}>
-            Word Count
-          </Button>
-          <Divider />
-
-          <EditEdgeModal
-            isOpen={isEditEdgeModalOpen}
-            onClose={closeEditEdgeModal}
-            nodes={[...incomingNodes, ...outgoingNodes]}
-            graphId={graphId}
-            nodeId={nodeId}
-          />
         </div>
-        <Button
-          type="text"
-          icon={<DeleteOutlined />}
-          danger
-          onClick={() => {
-            if (currentNode && currentNode.id) {
-              showDeleteConfirm(currentNode.id)
-            }
-          }}
-        >
-          Delete Node
-        </Button>
+        <div style={{ flexGrow: 1 }}>
+          <Button
+            type="text"
+            icon={<DeleteOutlined />}
+            danger
+            onClick={() => {
+              if (currentNode && currentNode.id) {
+                showDeleteConfirm(currentNode.id)
+              }
+            }}
+          >
+            Delete Node
+          </Button>
+        </div>
         <Divider />
       </Drawer>
       <Button

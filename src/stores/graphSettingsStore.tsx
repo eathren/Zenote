@@ -13,7 +13,7 @@ const defaultSettings: GraphSettings = {
   linkStrength: 100,
   nodeStrength: -30,
   repelForce: 100,
-  nodeGrowth: true,
+  nodeGrowth: false,
   searchText: "",
   color: "#000000",
   lineThickness: 1,

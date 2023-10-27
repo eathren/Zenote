@@ -23,6 +23,7 @@ export interface GraphNode extends d3.SimulationNodeDatum {
   tags?: string[]
   groups?: string[]
   edges?: GraphEdge[]
+  isFavorite?: boolean
 }
 
 export interface GraphEdge extends d3.SimulationLinkDatum<GraphNode> {
