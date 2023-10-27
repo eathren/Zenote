@@ -6,7 +6,7 @@ const LandingPage = () => {
   return (
     <>
       <Typography>
-        <Title level={1}>Welcome to Noteflowy</Title>
+        <Title level={1}>Welcome to Zenote</Title>
         <Text strong style={{ fontSize: "18px" }}>
           A Note-Taking App Designed to Mimic How Your Brain Works.
         </Text>
@@ -17,7 +17,7 @@ const LandingPage = () => {
             <Card hoverable>
               <Title level={4}>Create Nodes</Title>
               <Paragraph>
-                With Noteflowy, your notes are not just static text; they're
+                With Zenote, your notes are not just static text; they're
                 dynamic nodes that can evolve, just like your ideas. Create
                 nodes for every important piece of information and organize them
                 as you would in your mind.
@@ -52,8 +52,8 @@ const LandingPage = () => {
             <Card hoverable>
               <Title level={4}>Online-First Database</Title>
               <Paragraph>
-                Built on an online-first database architecture, Noteflowy
-                ensures you always have the latest version of your notes. Work
+                Built on an online-first database architecture, Zenote ensures
+                you always have the latest version of your notes. Work
                 seamlessly from any device, anywhere.
               </Paragraph>
             </Card>
@@ -84,7 +84,7 @@ const LandingPage = () => {
         <Row style={{ marginTop: "40px" }}>
           <Col span={24}>
             <Link to="/signup">
-              <Button size="large">Get Started with Noteflowy</Button>
+              <Button size="large">Get Started with Zenote</Button>
             </Link>
           </Col>
         </Row>

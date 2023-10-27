@@ -2,9 +2,14 @@
   {
     "origin": [
       "http://localhost:5173",
-      "https://flourishing-begonia-519625.netlify.app"
+      "https://zenote-net.netlify.app",
+      "https://zenote.net",
+      "https://www.zenote.net",
+      "https://zenote-net.netlify.app/",
+      "https://zenote.net/",
+      "https://www.zenote.net/"
     ],
-    "method": ["GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    "method": ["*"],
     "maxAgeSeconds": 3600
   }
 ]
