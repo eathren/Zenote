@@ -8,7 +8,6 @@ import { useNodes } from "src/hooks/useNodes"
 import { batchUpdateNodeEdges } from "src/handles/edges"
 import { GraphEdge } from "src/types"
 import { batchUpdateNodeTags } from "src/handles/nodes"
-import { useLocation } from "react-router-dom"
 
 type DocumentTabProps = {
   markdownContent: string
