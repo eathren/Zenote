@@ -96,6 +96,7 @@ const AddEdgeModal: React.FC<AddEdgeModalProps> = ({
       open={isOpen}
       onOk={confirmCreateEdges}
       onCancel={onClose}
+      bodyStyle={{ height: "65vh", maxHeight: "65vh" }}
     >
       <Input
         placeholder="Search Node..."
@@ -105,6 +106,7 @@ const AddEdgeModal: React.FC<AddEdgeModalProps> = ({
       />
       <List
         dataSource={filteredNodes}
+        style={{ height: "inherit", overflowY: "scroll" }}
         renderItem={(node) => (
           <List.Item
             onClick={() => toggleNodeSelection(node)}

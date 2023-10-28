@@ -55,7 +55,7 @@ const AddNodeModal: React.FC<AddNodeModalProps> = ({
       open={isOpen}
       onOk={confirmAddNode}
       onCancel={onClose}
-      bodyStyle={{ height: "50vh" }}
+      bodyStyle={{ height: "65vh", maxHeight: "65vh" }}
     >
       <Input
         placeholder="Node Name..."

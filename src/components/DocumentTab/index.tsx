@@ -8,6 +8,7 @@ import { useNodes } from "src/hooks/useNodes"
 import { batchUpdateNodeEdges } from "src/handles/edges"
 import { GraphEdge } from "src/types"
 import { batchUpdateNodeTags } from "src/handles/nodes"
+import { useLocation } from "react-router-dom"
 
 type DocumentTabProps = {
   markdownContent: string
@@ -31,6 +32,33 @@ const headerStyle = {
   fontWeight: 600,
   fontSize: "1.5rem",
   marginBottom: "1rem",
+}
+
+const generateNewNodeURL = (nodeId: string | number) => {
+  // Get the current URL
+  const currentURL = window.location.href
+
+  // Find the index of "graphs/"
+  const graphsIndex = currentURL.indexOf("graphs/")
+
+  if (graphsIndex === -1) {
+    return null // 'graphs/' not found in the URL
+  }
+
+  // Extract the part of the URL up to and including the graph ID
+  const graphIDEndIndex = currentURL.indexOf(
+    "/",
+    graphsIndex + "graphs/".length
+  )
+
+  if (graphIDEndIndex === -1) {
+    return null // No slash found after 'graphs/'
+  }
+
+  const baseUrl = currentURL.slice(0, graphIDEndIndex)
+
+  // Add your own part to the URL
+  return `${baseUrl}/node/${nodeId}`
 }
 
 const DocumentTab: React.FC<DocumentTabProps> = ({
@@ -239,9 +267,7 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
     const markdownLinks = selectedNodes
       .map(
         ({ targetNodeId, name }) =>
-          `[${name}](${
-            import.meta.env.VITE_APP_DOMAIN
-          }/graphs/${graphId}/node/${targetNodeId})`
+          `[${name}](${generateNewNodeURL(targetNodeId)})`
       )
       .join(" ")
 
@@ -285,7 +311,7 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
               <Input.TextArea
                 style={commonStyle}
                 ref={textAreaRef}
-                autoSize={{ minRows: 10 }}
+                autoSize={{ minRows: 30 }}
                 value={markdownContent}
                 autoFocus
                 onChange={(e) => handleEditorChangeWithCheck(e.target.value)}
