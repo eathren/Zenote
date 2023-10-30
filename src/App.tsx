@@ -11,6 +11,7 @@ import PlaygroundPage from "./pages/PlaygroundPage"
 import { useUser } from "src/hooks/user"
 import { ConfigProvider, theme } from "antd"
 import { BasicLayout } from "src/layout/layout"
+import { Helmet } from "react-helmet"
 import "./App.css"
 
 import { ReactNode } from "react"
@@ -61,6 +62,52 @@ function App() {
         },
       }}
     >
+      <Helmet>
+        <meta charSet="utf-8" />
+        <Helmet>
+          <title>
+            Zenote - A Note-Taking App Designed to Mimic How Your Brain Works
+          </title>
+          <meta
+            name="description"
+            content="Welcome to Zenote, your one-stop solution for note-taking and knowledge management. Capture ideas as nodes, make connections, and collaborate in real-time."
+          />
+          <meta
+            name="keywords"
+            content="Zenote, Note-taking, Brain, Nodes, Connections, Obsidian, Notion, Collaboration, Online-First, Tables, Sharing, Knowledge Management"
+          />
+          <meta name="author" content="Zenote Team" />
+
+          {/* Open Graph / Facebook */}
+          <meta property="og:type" content="website" />
+          <meta property="og:url" content="https://zenote.com/" />
+          <meta
+            property="og:title"
+            content="Zenote - A Note-Taking App Designed to Mimic How Your Brain Works"
+          />
+          <meta
+            property="og:description"
+            content="Welcome to Zenote, your one-stop solution for note-taking and knowledge management. Capture ideas as nodes, make connections, and collaborate in real-time."
+          />
+          <meta property="og:image" content="https://zenote.com/og-image.jpg" />
+
+          {/* Twitter */}
+          <meta property="twitter:card" content="summary_large_image" />
+          <meta property="twitter:url" content="https://zenote.com/" />
+          <meta
+            property="twitter:title"
+            content="Zenote - A Note-Taking App Designed to Mimic How Your Brain Works"
+          />
+          <meta
+            property="twitter:description"
+            content="Welcome to Zenote, your one-stop solution for note-taking and knowledge management. Capture ideas as nodes, make connections, and collaborate in real-time."
+          />
+          <meta
+            property="twitter:image"
+            content="https://zenote.com/twitter-image.jpg"
+          />
+        </Helmet>
+      </Helmet>
       <Routes>
         <Route
           path="/"
