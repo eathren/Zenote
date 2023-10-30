@@ -12,7 +12,7 @@ import {
 import { GraphNode } from "src/types"
 import { useNavigate, useParams } from "react-router-dom"
 import { useNodes } from "src/hooks/useNodes"
-import { deleteNode, updateNodeFavoriteStatus } from "src/handles/nodes"
+import { deleteNodeInDB, updateNodeFavoriteStatus } from "src/handles/nodes"
 import { fetchMarkdown } from "src/handles/markdown"
 
 const NodeControls = () => {
@@ -32,13 +32,13 @@ const NodeControls = () => {
 
   const showDeleteConfirm = (nodeId: string) => {
     Modal.confirm({
-      title: "Are you sure you want to delete this graph?",
-      content: "Once deleted, the graph cannot be recovered.",
+      title: "Are you sure you want to delete this Node?",
+      content: "Once deleted, the Node cannot be recovered.",
       okText: "Yes",
       okType: "danger",
       cancelText: "No",
-      onOk() {
-        deleteNode(nodeId)
+      async onOk() {
+        await deleteNodeInDB(graphId, nodeId)
         navigate(`/graphs/${graphId}`)
       },
     })

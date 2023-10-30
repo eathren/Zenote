@@ -61,7 +61,13 @@ export interface User {
   connectedAccounts: Record<string, unknown> // Or define a more specific type
 }
 
+export interface Group {
+  name: string
+  color?: Color | string
+}
+
 export interface GraphSettings {
+  showOrphans: boolean
   nodeSize: number
   linkStrength: number
   nodeStrength: number
@@ -70,4 +76,5 @@ export interface GraphSettings {
   searchText: string
   color: Color | string
   lineThickness: number
+  groups: Group[]
 }
