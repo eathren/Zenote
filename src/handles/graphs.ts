@@ -9,7 +9,7 @@ import {
   query,
   collection,
 } from "firebase/firestore"
-import { Graph } from "src/types/index"
+import { Graph, GraphPermission, GraphPrivacySetting } from "src/types/index"
 import { notification } from "antd"
 import {
   getCurrentUserId,
@@ -20,7 +20,7 @@ import { deleteMarkdown } from "./markdown"
 
 const db = getFirestore()
 
-// Function to add a new graph to the database
+// Updated Function to add a new personal graph to the database
 export const addGraphInDB = async (graphName: string) => {
   const ownerId = getCurrentUserId()
   if (!ownerId) {
@@ -37,6 +37,79 @@ export const addGraphInDB = async (graphName: string) => {
     ownerId,
     date_created: Date.now(),
     nodes: {},
+    type: GraphPrivacySetting.Private, // Graph is private by default
+  }
+
+  try {
+    const docRef = await addDoc(graphsCollectionRef, graph)
+    return docRef.id
+  } catch (error) {
+    notification.error({
+      message: "Error",
+      description: "Failed to add graph in DB",
+    })
+  }
+}
+
+// Function to add a new team graph to the database
+export const addTeamGraphInDB = async (
+  graphName: string,
+  teamId: string
+  // teamPermissions: Record<string, GraphPermission>
+) => {
+  const ownerId = getCurrentUserId()
+  if (!ownerId) {
+    notification.error({
+      message: "Error",
+      description: "User not authenticated",
+    })
+    return
+  }
+
+  const graphsCollectionRef = getGraphsCollectionRef(db)
+  const graph: Graph = {
+    name: graphName,
+    ownerId,
+    date_created: Date.now(),
+    type: GraphPrivacySetting.Team,
+    teamId,
+    teamPermissions: {
+      [ownerId]: GraphPermission.Owner,
+    },
+  }
+
+  try {
+    const docRef = await addDoc(graphsCollectionRef, graph)
+    return docRef.id
+  } catch (error) {
+    notification.error({
+      message: "Error",
+      description: "Failed to add graph in DB",
+    })
+  }
+}
+
+// Function to add a new global graph to the database
+export const addGlobalGraphInDB = async (
+  graphName: string,
+  globalPermissions: Record<string, GraphPermission>
+) => {
+  const ownerId = getCurrentUserId()
+  if (!ownerId) {
+    notification.error({
+      message: "Error",
+      description: "User not authenticated",
+    })
+    return
+  }
+
+  const graphsCollectionRef = getGraphsCollectionRef(db)
+  const graph: Graph = {
+    name: graphName,
+    ownerId,
+    date_created: Date.now(),
+    type: GraphPrivacySetting.Global,
+    globalPermissions,
   }
 
   try {
