@@ -1,4 +1,4 @@
-import { PlusCircleFilled } from "@ant-design/icons"
+import { PlusCircleOutlined } from "@ant-design/icons"
 import { Button, Modal, Input } from "antd"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
@@ -49,7 +49,7 @@ const AddGraphButton = (props: AddGraphButtonProps) => {
   return (
     <div>
       <Button
-        icon={<PlusCircleFilled />}
+        icon={<PlusCircleOutlined />}
         type="text"
         onClick={() => setModalOpen(true)}
       ></Button>

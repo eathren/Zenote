@@ -7,8 +7,11 @@ import {
   CopyOutlined,
   StarOutlined,
   DeleteOutlined,
+  StarFilled,
 } from "@ant-design/icons"
-import { Graph } from "src/types"
+import { Graph, GraphPrivacySetting } from "src/types"
+import AddGraphButton from "../AddGraphButton"
+import { updateGraphFavoriteStatus } from "src/handles/graphs"
 
 const GraphSelector = () => {
   const { graphs, loading } = useGraphs()
@@ -20,13 +23,18 @@ const GraphSelector = () => {
   const filterGraphs = useCallback(
     (type: "private" | "team" | "favorites") => {
       return graphs?.filter((graph) => {
-        if (graph.type !== type) return false
-        return (
-          graph.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          Object.values(graph.nodes || {}).some((nodeName) =>
-            nodeName.toLowerCase().includes(searchTerm.toLowerCase())
-          )
+        const nameMatches = graph.name
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+        const nodeMatches = Object.values(graph.nodes || {}).some((nodeName) =>
+          nodeName.toLowerCase().includes(searchTerm.toLowerCase())
         )
+
+        if (type === "favorites") {
+          return graph.isFavorite && (nameMatches || nodeMatches)
+        }
+
+        return graph.type === type && (nameMatches || nodeMatches)
       })
     },
     [graphs, searchTerm]
@@ -37,13 +45,9 @@ const GraphSelector = () => {
       return (
         filterGraphs(type)?.map((graph) => {
           const children = graph.nodes
-            ? Object.entries(graph.nodes)
-                .filter(([_, nodeName]) =>
-                  nodeName.toLowerCase().includes(searchTerm.toLowerCase())
-                )
-                .map(([nodeId, nodeName]) => {
-                  return { title: nodeName, key: `node-${nodeId}` }
-                })
+            ? Object.entries(graph.nodes).map(([nodeId, nodeName]) => {
+                return { title: nodeName, key: `node-${nodeName}-${nodeId}` }
+              })
             : []
 
           return {
@@ -66,7 +70,7 @@ const GraphSelector = () => {
         }) || []
       )
     },
-    [filterGraphs, searchTerm]
+    [filterGraphs]
   )
 
   const onSelect = useCallback(
@@ -76,7 +80,8 @@ const GraphSelector = () => {
         const graphId = key.substring("graph-".length)
         navigate(`/graphs/${graphId}`)
       } else if (key.startsWith("node-")) {
-        const nodeId = key.substring("node-".length)
+        const parts = key.split("-")
+        const nodeId = parts[2]
         const parentGraph = graphs?.find(
           (graph) =>
             graph.nodes && Object.hasOwnProperty.call(graph.nodes, nodeId)
@@ -111,38 +116,38 @@ const GraphSelector = () => {
           />
         </Row>
         <div>
-          <Typography.Title level={4}>Private Graphs</Typography.Title>
-          <Tree
-            showLine
-            defaultExpandAll
-            treeData={privateTreeData}
-            onSelect={onSelect}
-          />
+          <Row gutter={[16, 16]} align={"middle"}>
+            <Typography.Title style={{ margin: "0px 5px" }} level={4}>
+              Private
+            </Typography.Title>
+            <AddGraphButton type={GraphPrivacySetting.Private} />
+          </Row>
+          <Tree showLine treeData={privateTreeData} onSelect={onSelect} />
         </div>
         <div>
-          <Typography.Title level={4}>Team Graphs</Typography.Title>
-          <Tree
-            showLine
-            defaultExpandAll
-            treeData={teamTreeData}
-            onSelect={onSelect}
-          />
+          <Row gutter={[16, 16]} align={"middle"}>
+            <Typography.Title style={{ margin: "0px 5px" }} level={4}>
+              Teams
+            </Typography.Title>
+            <AddGraphButton type={GraphPrivacySetting.Team} />
+          </Row>
+          <Tree showLine treeData={teamTreeData} onSelect={onSelect} />
         </div>
         <div>
-          <Typography.Title level={4}>Favorite Graphs</Typography.Title>
-          <Tree
-            showLine
-            defaultExpandAll
-            treeData={favoriteTreeData}
-            onSelect={onSelect}
-          />
+          <Row gutter={[16, 16]} align={"middle"}>
+            <Typography.Title style={{ margin: "0px 5px" }} level={4}>
+              Favorites
+            </Typography.Title>
+            <AddGraphButton type={GraphPrivacySetting.Team} />
+          </Row>
+          <Tree showLine treeData={favoriteTreeData} onSelect={onSelect} />
         </div>
       </Typography>
       <Drawer
         title={selectedNode?.name}
         placement="bottom"
         onClose={() => setDrawerVisible(false)}
-        visible={drawerVisible}
+        open={drawerVisible}
         height={200}
       >
         <Button
@@ -156,12 +161,15 @@ const GraphSelector = () => {
         </Button>
         <Button
           type="text"
-          icon={<StarOutlined />}
+          icon={selectedNode?.isFavorite ? <StarFilled /> : <StarOutlined />}
           onClick={() => {
+            updateGraphFavoriteStatus(selectedNode?.id)
             /* Add to Favorites logic */
           }}
         >
-          Add to Favorites
+          {selectedNode?.isFavorite
+            ? "Remove from Favorites"
+            : "Add to Favorites"}
         </Button>
         <Button
           type="text"
@@ -169,7 +177,7 @@ const GraphSelector = () => {
           danger
           onClick={() => {
             if (selectedNode?.id) {
-              showDeleteConfirm(selectedNode.id)
+              // showDeleteConfirm(selectedNode.id)
             }
           }}
         >

@@ -21,7 +21,7 @@ export interface Graph {
   name: string
   date_created: number
   ownerId: string // Firebase User ID
-  favorited?: boolean
+  isFavorite?: boolean
   nodes?: Record<string, string>
   type: GraphPrivacySetting
   teamId?: string // Team ID

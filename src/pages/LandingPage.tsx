@@ -1,196 +1,96 @@
-import React, { useState, useMemo, useCallback } from "react"
-import { Tree, Input, Row, Drawer, Button, Space, Typography } from "antd"
-import { useGraphs } from "src/hooks/useGraphs"
-import { useNavigate } from "react-router-dom"
-import {
-  EllipsisOutlined,
-  CopyOutlined,
-  StarOutlined,
-  DeleteOutlined,
-} from "@ant-design/icons"
-import { Graph, GraphPrivacySetting } from "src/types"
-import AddGraphButton from "src/components/Graphs/AddGraphButton"
+import { Typography, Button, Row, Col, Card } from "antd"
+import { Link } from "react-router-dom"
+const { Title, Paragraph, Text } = Typography
 
-const GraphSelector = () => {
-  const { graphs, loading } = useGraphs()
-  const navigate = useNavigate()
-  const [searchTerm, setSearchTerm] = useState("")
-  const [drawerVisible, setDrawerVisible] = useState(false)
-  const [selectedNode, setSelectedNode] = useState<Graph | null>(null)
-  const [expandedKeys, setExpandedKeys] = useState<string[]>([])
-
-  const filterGraphs = useCallback(
-    (type: "private" | "team" | "favorites") => {
-      return graphs?.filter((graph) => {
-        if (graph.type !== type) return false
-        return (
-          graph.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          Object.values(graph.nodes || {}).some((nodeName) =>
-            nodeName.toLowerCase().includes(searchTerm.toLowerCase())
-          )
-        )
-      })
-    },
-    [graphs, searchTerm]
-  )
-
-  const buildTreeData = useCallback(
-    (type: "private" | "team" | "favorites") => {
-      const newExpandedKeys: string[] = []
-      console.log("triggering")
-      const treeData = filterGraphs(type)?.map((graph) => {
-        const children = graph.nodes
-          ? Object.entries(graph.nodes)
-              .filter(([_, nodeName]) =>
-                nodeName.toLowerCase().includes(searchTerm.toLowerCase())
-              )
-              .map(([nodeId, nodeName]) => {
-                if (searchTerm) newExpandedKeys.push(`graph-${graph.id}`)
-                return { title: nodeName, key: `node-${nodeId}` }
-              })
-          : []
-
-        return {
-          title: (
-            <Space>
-              {graph.name}
-              <EllipsisOutlined
-                style={{ float: "right" }}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setSelectedNode(graph)
-                  setDrawerVisible(true)
-                }}
-              />
-            </Space>
-          ),
-          key: `graph-${graph.id}`,
-          children,
-        }
-      })
-      setExpandedKeys((prevKeys) => [
-        ...new Set([...prevKeys, ...newExpandedKeys]),
-      ])
-      return treeData || []
-    },
-    [filterGraphs, searchTerm]
-  )
-
-  const onSelect = useCallback(
-    (selectedKeys: React.Key[]) => {
-      const key: string = selectedKeys[0] as string
-      if (key.startsWith("graph-")) {
-        const graphId = key.substring("graph-".length)
-        navigate(`/graphs/${graphId}`)
-      } else if (key.startsWith("node-")) {
-        const nodeId = key.substring("node-".length)
-        const parentGraph = graphs?.find(
-          (graph) =>
-            graph.nodes && Object.hasOwnProperty.call(graph.nodes, nodeId)
-        )
-        if (parentGraph?.id) {
-          navigate(`/graphs/${parentGraph.id}/node/${nodeId}`)
-        }
-      }
-    },
-    [graphs, navigate]
-  )
-
-  const privateTreeData = useMemo(
-    () => buildTreeData("private"),
-    [buildTreeData]
-  )
-  const teamTreeData = useMemo(() => buildTreeData("team"), [buildTreeData])
-  const favoriteTreeData = useMemo(
-    () => buildTreeData("favorites"),
-    [buildTreeData]
-  )
-
-  if (loading) return <span>Loading...</span>
-
+const LandingPage = () => {
   return (
     <>
       <Typography>
-        <Row gutter={[16, 16]} style={{ marginBottom: "1rem" }}>
-          <Input.Search
-            placeholder="Search for graphs and nodes"
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+        <Title level={1}>Welcome to Zenote</Title>
+        <Text strong style={{ fontSize: "18px" }}>
+          A Note-Taking App Designed to Mimic How Your Brain Works.
+        </Text>
+
+        <Row gutter={[32, 32]} style={{ marginTop: "40px" }}>
+          {/* Existing Cards */}
+          <Col xs={24} md={12}>
+            <Card hoverable>
+              <Title level={4}>Create Nodes</Title>
+              <Paragraph>
+                With Zenote, your notes are not just static text; they're
+                dynamic nodes that can evolve, just like your ideas. Create
+                nodes for every important piece of information and organize them
+                as you would in your mind.
+              </Paragraph>
+            </Card>
+          </Col>
+          <Col xs={24} md={12}>
+            <Card hoverable>
+              <Title level={4}>Make Connections</Title>
+              <Paragraph>
+                Don't let your notes exist in isolation. Create meaningful
+                connections between nodes to build a robust knowledge network.
+                This interlinking mimics the natural way our brains work to help
+                you understand better.
+              </Paragraph>
+            </Card>
+          </Col>
+
+          {/* New Cards */}
+          <Col xs={24} md={12}>
+            <Card hoverable>
+              <Title level={4}>Advanced Tables</Title>
+              <Paragraph>
+                Create tables that do more than just hold data. With sorting,
+                filtering, and grouping features, you can make sense of your
+                information effortlessly. Merge cells, add footnotes, and even
+                embed media to make your tables more comprehensive.
+              </Paragraph>
+            </Card>
+          </Col>
+          <Col xs={24} md={12}>
+            <Card hoverable>
+              <Title level={4}>Online-First Database</Title>
+              <Paragraph>
+                Built on an online-first database architecture, Zenote ensures
+                you always have the latest version of your notes. Work
+                seamlessly from any device, anywhere.
+              </Paragraph>
+            </Card>
+          </Col>
+          <Col xs={24} md={12}>
+            <Card hoverable>
+              <Title level={4}>Sharing and Collaboration</Title>
+              <Paragraph>
+                Easily share nodes, connections, or entire graphs with team
+                members or friends. Real-time collaboration features enable
+                multiple users to work on the same notes, ensuring everyone is
+                on the same page.
+              </Paragraph>
+            </Card>
+          </Col>
+          <Col xs={24} md={12}>
+            <Card hoverable>
+              <Title level={4}>Fill Out Notes</Title>
+              <Paragraph>
+                Give your nodes and connections more context by filling them out
+                with detailed notes. Add references, files, or just your
+                thoughts to make each node a treasure trove of information.
+              </Paragraph>
+            </Card>
+          </Col>
         </Row>
-        <div>
-          <Row align={"middle"}>
-            <Typography.Title level={4}>Private Graphs test</Typography.Title>
-            <AddGraphButton type={GraphPrivacySetting.Private} />
-          </Row>
-          <Tree
-            showLine
-            expandedKeys={expandedKeys}
-            treeData={privateTreeData}
-            onSelect={onSelect}
-          />
-        </div>
-        <div>
-          <Row align={"middle"}>
-            <Typography.Title level={4}>Team Graphs</Typography.Title>
-            <AddGraphButton type={GraphPrivacySetting.Team} />
-          </Row>
-          <Tree
-            showLine
-            expandedKeys={expandedKeys}
-            treeData={teamTreeData}
-            onSelect={onSelect}
-          />
-        </div>
-        <div>
-          <Typography.Title level={4}>Favorite Graphs</Typography.Title>
-          <Tree
-            showLine
-            expandedKeys={expandedKeys}
-            treeData={favoriteTreeData}
-            onSelect={onSelect}
-          />
-        </div>
+
+        <Row style={{ marginTop: "40px" }}>
+          <Col span={24}>
+            <Link to="/signup">
+              <Button size="large">Get Started with Zenote</Button>
+            </Link>
+          </Col>
+        </Row>
       </Typography>
-      <Drawer
-        title={selectedNode?.name}
-        placement="bottom"
-        onClose={() => setDrawerVisible(false)}
-        open={drawerVisible}
-        height={200}
-      >
-        <Button
-          type="text"
-          icon={<CopyOutlined />}
-          onClick={() => {
-            /* Copy Link logic */
-          }}
-        >
-          Copy Link
-        </Button>
-        <Button
-          type="text"
-          icon={<StarOutlined />}
-          onClick={() => {
-            /* Add to Favorites logic */
-          }}
-        >
-          Add to Favorites
-        </Button>
-        <Button
-          type="text"
-          icon={<DeleteOutlined />}
-          danger
-          onClick={() => {
-            if (selectedNode?.id) {
-              // Call delete function here
-            }
-          }}
-        >
-          Delete
-        </Button>
-      </Drawer>
     </>
   )
 }
 
-export default GraphSelector
+export default LandingPage

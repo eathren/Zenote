@@ -221,3 +221,38 @@ export const updateGraphNodes = async (
     })
   }
 }
+
+export const updateGraphFavoriteStatus = async (
+  graphId: string | undefined
+) => {
+  const ownerId = getCurrentUserId()
+  if (!ownerId) {
+    notification.error({
+      message: "Error",
+      description: "User not authenticated",
+    })
+    return
+  }
+
+  if (!graphId) return
+
+  const graphRef = doc(db, `users/${ownerId}/graphs`, graphId)
+  const graphDoc = await getDoc(graphRef)
+
+  if (!graphDoc.exists()) return
+
+  const graphData = graphDoc.data() as Graph
+  let newStatus: boolean
+
+  // Check if isFavorite is undefined, if so set it to true
+  if (graphData.isFavorite === undefined) {
+    newStatus = true
+  } else {
+    // Toggle the status otherwise
+    newStatus = !graphData.isFavorite
+  }
+
+  await updateDoc(graphRef, {
+    isFavorite: newStatus,
+  })
+}
