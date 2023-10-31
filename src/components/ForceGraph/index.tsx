@@ -6,7 +6,6 @@ import { drag } from "./utils"
 import { useContextMenu } from "react-contexify"
 import "react-contexify/ReactContexify.css"
 import useGraphSettingsStore from "src/stores/graphSettingsStore"
-
 type ForceGraphProps = {
   graphId: string
   nodes: GraphNode[]
@@ -23,8 +22,38 @@ const ForceGraph = (props: ForceGraphProps) => {
   })
 
   const { getOrInitializeSettings } = useGraphSettingsStore()
-  const { nodeSize, nodeGrowth, repelForce, linkStrength } =
+  const { nodeSize, nodeGrowth, repelForce, linkStrength, groups } =
     getOrInitializeSettings(graphId)
+
+  // const validEdges = edges.filter((edge) => {
+  //   const sourceExists = nodes.some((node) => node.id === edge.source)
+  //   const targetExists = nodes.some((node) => node.id === edge.target)
+  //   return sourceExists && targetExists
+  // })
+
+  const getNodeColor = useCallback(
+    (nodeName: string, tags: string[] = []) => {
+      let color = "#ffffff"
+
+      groups?.forEach((group) => {
+        // Case-insensitive check for group name in node name
+        if (nodeName.toLowerCase().includes(group.name.toLowerCase())) {
+          color = group.color as string
+        }
+
+        tags.forEach((tag) => {
+          // Remove "tag:" prefix and make it case-insensitive
+          const tagWithoutPrefix = tag.replace(/^tag:/i, "").toLowerCase()
+          if (tagWithoutPrefix === group.name.toLowerCase()) {
+            color = group.color as string
+          }
+        })
+      })
+
+      return color
+    },
+    [groups]
+  )
 
   // Capture the right click on a node or a link and show the context menu
   const handleContextMenu = useCallback(
@@ -105,7 +134,7 @@ const ForceGraph = (props: ForceGraphProps) => {
     nodeGroup
       .append("circle")
       .attr("r", (d) => calculateNodeSize(d))
-      .attr("fill", "#AAAAAA")
+      .attr("fill", (d) => getNodeColor(d.name, d.tags))
       .style("transition", "all 0.3s ease-in-out")
       .on("mouseover", function (_event, d) {
         d3.select(this)
@@ -218,6 +247,7 @@ const ForceGraph = (props: ForceGraphProps) => {
     repelForce,
     linkStrength,
     calculateNodeSizeHover,
+    getNodeColor,
   ])
 
   return (

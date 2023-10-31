@@ -1,9 +1,16 @@
+import { PlusCircleOutlined } from "@ant-design/icons"
 import { Button, Modal, Input } from "antd"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { addGraphInDB } from "src/handles/graphs"
+import { addGraphInDB, addTeamGraphInDB } from "src/handles/graphs"
+import { GraphPrivacySetting } from "src/types"
 
-const AddGraphButton = () => {
+type AddGraphButtonProps = {
+  type: GraphPrivacySetting
+}
+
+const AddGraphButton = (props: AddGraphButtonProps) => {
+  const { type } = props
   const [modalOpen, setModalOpen] = useState(false)
   const [graphName, setGraphName] = useState("")
   const navigate = useNavigate()
@@ -14,12 +21,20 @@ const AddGraphButton = () => {
   }
 
   // Function to create a new graph
-  const createGraph = () => {
-    addGraphInDB(graphName).then((docId) => {
-      if (docId) {
-        navigate(`/graphs/${docId}`)
-      }
-    })
+  const createGraph = async () => {
+    if (type === GraphPrivacySetting.Private) {
+      await addGraphInDB(graphName).then((docId) => {
+        if (docId) {
+          navigate(`/graphs/${docId}`)
+        }
+      })
+    } else if (type === GraphPrivacySetting.Team) {
+      await addTeamGraphInDB(graphName, "test-team").then((docId) => {
+        if (docId) {
+          navigate(`/graphs/${docId}`)
+        }
+      })
+    }
     setModalOpen(false)
     setGraphName("")
   }
@@ -33,7 +48,11 @@ const AddGraphButton = () => {
 
   return (
     <div>
-      <Button onClick={() => setModalOpen(true)}>Add Graph</Button>
+      <Button
+        icon={<PlusCircleOutlined />}
+        type="text"
+        onClick={() => setModalOpen(true)}
+      ></Button>
       <Modal
         title="Create a new graph"
         centered

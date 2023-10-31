@@ -252,8 +252,12 @@ export const updateNodeTitle = async (
  * @param graphId - The Firestore ID of the graph to which the node belongs.
  * @param nodeId - The Firestore ID of the node to be deleted.
  */
-export const deleteNodeInDB = async (graphId: string, nodeId: string) => {
+export const deleteNodeInDB = async (
+  graphId: string | undefined,
+  nodeId: string | undefined
+) => {
   const ownerId = getCurrentUserId()
+  if (!graphId || !nodeId) return
   if (!ownerId) {
     notification.error({
       message: "Error",

@@ -19,7 +19,7 @@ export const createUserDoc = async (
     email,
     username: "",
     profilePictureUrl: "",
-    roles: ["regular"],
+    uid: userId,
     phoneNumber: "",
     secondaryEmail: "",
     lastLogin: new Date().toISOString(),

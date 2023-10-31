@@ -5,9 +5,9 @@ import {
   Collapse,
   Button,
   Input,
-  ColorPicker,
-  Tag,
   Drawer,
+  Row,
+  ColorPicker,
 } from "antd"
 import {
   EllipsisOutlined,
@@ -28,6 +28,13 @@ const GraphControls = () => {
   const resetToDefaults = useGraphSettingsStore(
     (state) => state.resetToDefaults
   )
+
+  const handleCreateGroup = () => {
+    updateSetting(graphId, "groups", [
+      ...(settings.groups || []),
+      { name: "", color: "#FFFFFF" },
+    ])
+  }
 
   return (
     <>
@@ -54,18 +61,58 @@ const GraphControls = () => {
               }
               placeholder="Search"
             />
-            <Tag color="blue">Orphans</Tag>
-          </Panel>
-          <Panel header="Group Tabs" key="2">
-            <Button>New Group</Button>
-            <Input placeholder="Group Name" />
-            <div>
-              <label>Group Color: </label>
-              <ColorPicker
-                value={settings.color}
-                onChange={(color) => updateSetting(graphId, "color", color)}
+            <Row justify={"space-between"}>
+              <label>Show Orphans: </label>
+              <Switch
+                checked={settings.showOrphans}
+                onChange={(checked) =>
+                  updateSetting(graphId, "showOrphans", checked)
+                }
               />
-            </div>
+            </Row>
+          </Panel>
+          <Panel header="Groups " key="2">
+            {settings?.groups?.map((group, idx) => (
+              <Row justify={"space-between"}>
+                <Input
+                  value={group?.name}
+                  placeholder="Query"
+                  style={{ width: "70%" }}
+                  onChange={(e) => {
+                    const newName = e.target.value
+                    const newGroups = [...(settings.groups || [])]
+                    newGroups[idx].name = newName
+                    updateSetting(graphId, "groups", newGroups)
+                  }}
+                />
+                <ColorPicker
+                  value={group?.color}
+                  defaultFormat="hex"
+                  format="hex"
+                  onChange={(color) => {
+                    const newGroups = [...(settings.groups || [])]
+                    newGroups[idx].color = color.toHexString()
+                    updateSetting(graphId, "groups", newGroups)
+                  }}
+                />
+                <Button
+                  icon={<CloseOutlined />}
+                  onClick={() => {
+                    const newGroups = [...(settings.groups || [])]
+                    newGroups.splice(idx, 1)
+                    updateSetting(graphId, "groups", newGroups)
+                  }}
+                />
+              </Row>
+            ))}
+            <Button block onClick={handleCreateGroup}>
+              New Group
+            </Button>
+            {/* <Input placeholder="Group Name" /> */}
+            {/* <div>
+              <label>Group Color: </label>
+            
+            </div> */}
           </Panel>
           <Panel header="Display" key="3">
             <label>Line Thickness: </label>
@@ -76,6 +123,13 @@ const GraphControls = () => {
               onChange={(value) =>
                 updateSetting(graphId, "lineThickness", value)
               }
+            />
+            <label>Node Size: </label>
+            <Slider
+              min={1}
+              max={20}
+              value={settings.nodeSize}
+              onChange={(value) => updateSetting(graphId, "nodeSize", value)}
             />
           </Panel>
           <Panel header="Forces" key="4">
@@ -88,13 +142,7 @@ const GraphControls = () => {
               }
             />
             <br />
-            <label>Node Size: </label>
-            <Slider
-              min={1}
-              max={20}
-              value={settings.nodeSize}
-              onChange={(value) => updateSetting(graphId, "nodeSize", value)}
-            />
+
             <label>Link Strength: </label>
             <Slider
               min={0}

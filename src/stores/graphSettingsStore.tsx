@@ -1,5 +1,6 @@
 import { create } from "zustand"
 import { GraphSettings } from "src/types"
+import { createJSONStorage, persist } from "zustand/middleware"
 
 type GraphControlsState = {
   settings: Record<string, GraphSettings>
@@ -9,6 +10,7 @@ type GraphControlsState = {
 }
 
 const defaultSettings: GraphSettings = {
+  showOrphans: true,
   nodeSize: 5,
   linkStrength: 100,
   nodeStrength: -30,
@@ -17,45 +19,52 @@ const defaultSettings: GraphSettings = {
   searchText: "",
   color: "#000000",
   lineThickness: 1,
+  groups: [],
 }
 
 export const useGraphSettingsStore = create<GraphControlsState>()(
-  (set, get) => ({
-    settings: {},
-    updateSetting: (graphId, key, value) =>
-      set((state) => {
-        if (!graphId) return state
-        const existingSettings = state.settings[graphId] || {}
-        return {
+  persist<GraphControlsState>(
+    (set, get) => ({
+      settings: {},
+      updateSetting: (graphId, key, value) =>
+        set((state) => {
+          if (!graphId) return state
+          const existingSettings = state.settings[graphId] || {}
+          return {
+            settings: {
+              ...state.settings,
+              [graphId]: {
+                ...existingSettings,
+                [key]: value,
+              },
+            },
+          }
+        }),
+      getOrInitializeSettings: (graphId: string) => {
+        const currentSettings = get().settings
+        if (!currentSettings[graphId]) {
+          const updatedSettings = {
+            ...currentSettings,
+            [graphId]: defaultSettings,
+          }
+          set({ settings: updatedSettings })
+          return defaultSettings
+        }
+        return currentSettings[graphId]
+      },
+      resetToDefaults: (graphId) =>
+        set((state) => ({
           settings: {
             ...state.settings,
-            [graphId]: {
-              ...existingSettings,
-              [key]: value,
-            },
+            [graphId as string]: defaultSettings,
           },
-        }
-      }),
-    getOrInitializeSettings: (graphId: string) => {
-      const currentSettings = get().settings
-      if (!currentSettings[graphId]) {
-        const updatedSettings = {
-          ...currentSettings,
-          [graphId]: defaultSettings,
-        }
-        set({ settings: updatedSettings })
-        return defaultSettings
-      }
-      return currentSettings[graphId]
-    },
-    resetToDefaults: (graphId) =>
-      set((state) => ({
-        settings: {
-          ...state.settings,
-          [graphId as string]: defaultSettings,
-        },
-      })),
-  })
+        })),
+    }),
+    {
+      name: "settings-storage",
+      storage: createJSONStorage(() => sessionStorage),
+    }
+  )
 )
 
 export default useGraphSettingsStore

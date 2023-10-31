@@ -1,24 +1,40 @@
 import { Color } from "antd/es/color-picker"
 import * as d3 from "d3"
 
+// Graph Privacy Settings
+export enum GraphPrivacySetting {
+  Private = "private",
+  Team = "team",
+  Global = "global",
+}
+
+// Permissions for Graph
+export enum GraphPermission {
+  Read = "read",
+  Write = "write",
+  Delete = "delete",
+  Owner = "owner",
+}
+
 export interface Graph {
   id?: string
   name: string
   date_created: number
-  ownerId: string
-  favorited?: boolean
+  ownerId: string // Firebase User ID
+  isFavorite?: boolean
   nodes?: Record<string, string>
+  type: GraphPrivacySetting
+  teamId?: string // Team ID
+  teamPermissions?: Record<string, GraphPermission>
+  globalPermissions?: Record<string, GraphPermission> // Key: Firebase User ID, Value: Permission
 }
 
 export interface GraphNode extends d3.SimulationNodeDatum {
-  // Required Properties
   id?: string
-  ownerId: string
+  ownerId: string // Firebase User ID
   name: string
   graphId: string
   date_created: number
-
-  // Optional Properties
   markdownUrl?: string
   tags?: string[]
   groups?: string[]
@@ -31,37 +47,42 @@ export interface GraphEdge extends d3.SimulationLinkDatum<GraphNode> {
   graphId: string
   date_created: number
   label?: string
-  // source and target are already included in d3.SimulationLinkDatum
 }
 
 export interface User {
+  uid: string
   email: string
   username: string
   profilePictureUrl: string
-  roles: string[]
   phoneNumber: string
   secondaryEmail: string
-  lastLogin: string // Using ISO string to represent date
-  accountCreationDate: string // Using ISO string to represent date
-  lastActivity: string // Using ISO string to represent date
+  lastLogin: string
+  accountCreationDate: string
+  lastActivity: string
   loginSource: string
   language: string
   timezone: string
   newsletterSubscription: boolean
-  savedItems: string[] // Type depending on what kind of items are saved
-  searchHistory: string[] // Type depending on what the search string represents
-  userSettings: Record<string, unknown> // Or define a more specific type
+  savedItems: string[]
+  searchHistory: string[]
+  userSettings: Record<string, unknown>
   subscriptionType: string
-  subscriptionExpiry: string | null // Using ISO string to represent date or null
+  subscriptionExpiry: string | null
   twoFactorAuthenticationEnabled: boolean
-  accountRecoveryOptions: Record<string, unknown> // Or define a more specific type
-  termsAndConditionsAccepted: string // Using ISO string to represent date
-  privacyPolicyAccepted: string // Using ISO string to represent date
+  accountRecoveryOptions: Record<string, unknown>
+  termsAndConditionsAccepted: string
+  privacyPolicyAccepted: string
   gdprConsent: boolean
-  connectedAccounts: Record<string, unknown> // Or define a more specific type
+  connectedAccounts: Record<string, unknown>
+}
+
+export interface Group {
+  name: string
+  color?: Color | string
 }
 
 export interface GraphSettings {
+  showOrphans: boolean
   nodeSize: number
   linkStrength: number
   nodeStrength: number
@@ -70,4 +91,5 @@ export interface GraphSettings {
   searchText: string
   color: Color | string
   lineThickness: number
+  groups: Group[]
 }

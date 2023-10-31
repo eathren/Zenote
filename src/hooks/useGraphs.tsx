@@ -12,7 +12,6 @@ export const useGraphs = () => {
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
-    console.log("graph loading")
     setLoading(true)
     // Firebase subscription to listen for changes to the 'graphs' collection
     const unsubscribe = onSnapshot(
