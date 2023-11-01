@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react"
 import { Modal, Input, List, notification } from "antd"
 import { GraphNode } from "src/types"
 import { useNodeModal } from "src/hooks/useNodeModal"
-import { addEdgesToNodeBatch } from "src/handles/edges"
+import { batchUpdateNodeEdges } from "src/handles/edges"
 import { useNodes } from "src/hooks/useNodes"
 import { findNode } from "src/utils"
 
@@ -53,7 +53,12 @@ const AddEdgeModal: React.FC<AddEdgeModalProps> = ({
 
     try {
       // Attempt to add edges in a batch
-      const result = await addEdgesToNodeBatch(graphId, nodeId, targetNodeIds)
+      const result = await batchUpdateNodeEdges(
+        graphId,
+        nodeId,
+        targetNodeIds,
+        []
+      )
       if (!result) {
         message = "Failed to add edges"
         notification.error({

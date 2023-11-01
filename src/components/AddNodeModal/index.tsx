@@ -62,6 +62,7 @@ const AddNodeModal: React.FC<AddNodeModalProps> = ({
         value={searchTerm}
         onChange={handleSearchTermChange}
         onKeyDown={handleKeyDown}
+        autoFocus
       />
       <List
         dataSource={filteredNodes}
