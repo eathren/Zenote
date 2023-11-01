@@ -36,7 +36,7 @@ export const useNodes = (graphId: string | undefined) => {
       return
     }
 
-    const nodeCollectionPath = getNodeCollectionPath(ownerId, graphId)
+    const nodeCollectionPath = getNodeCollectionPath(graphId)
     const nodesCollection = collection(db, nodeCollectionPath)
     const q = query(
       nodesCollection,

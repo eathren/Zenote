@@ -210,7 +210,7 @@ export const getEdgesFromDB = async (graphId: string): Promise<GraphEdge[]> => {
   }
 
   // Define the path to the nodes collection for this graph
-  const nodesCollectionPath = getNodeCollectionPath(ownerId, graphId)
+  const nodesCollectionPath = getNodeCollectionPath(graphId)
 
   // Fetch all node documents in the graph
   const nodesSnapshot = await getDocs(collection(db, nodesCollectionPath))

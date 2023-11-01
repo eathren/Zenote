@@ -23,7 +23,7 @@ export enum GraphPermission {
 }
 
 export interface Graph {
-  id?: string
+  id: string
   name: string
   date_created: number
   ownerId: string // Firebase User ID
@@ -34,7 +34,7 @@ export interface Graph {
 }
 
 export interface GraphNode extends d3.SimulationNodeDatum {
-  id?: string
+  id: string
   ownerId: string // Firebase User ID
   name: string
   graphId: string

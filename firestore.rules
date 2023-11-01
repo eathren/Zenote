@@ -23,9 +23,15 @@ service cloud.firestore {
               get(/databases/$(database)/documents/memberships/$(graphId)).data.permission == 'owner');
     }
 
+    function canUpdate(userId, graphId) {
+      return exists(/databases/$(database)/documents/memberships/$(graphId)) &&
+             get(/databases/$(database)/documents/memberships/$(graphId)).data.userId == userId &&
+             (get(/databases/$(database)/documents/memberships/$(graphId)).data.permission != 'read');
+    }
+
     // Rules for memberships
     match /memberships/{membershipId} {
-     allow read: if request.auth.uid == resource.data.userId;
+      allow read: if request.auth.uid == resource.data.userId;
       allow create: if request.auth.uid == request.resource.data.userId;
       allow update, delete: if canWrite(request.auth.uid, membershipId) || isOwner(request.auth.uid, membershipId);
     }
@@ -34,12 +40,24 @@ service cloud.firestore {
     match /graphs/{graphId} {
       allow read: if canRead(request.auth.uid, graphId);
       allow create: if request.auth.uid != null;
-      allow update, delete: if canWrite(request.auth.uid, graphId) || isOwner(request.auth.uid, graphId);
+      allow update, delete: if canUpdate(request.auth.uid, graphId) || isOwner(request.auth.uid, graphId);
     }
 
-   match /users/{userId} {
+        // Rules for nodes
+    match /graphs/{graphId}/nodes/{nodeId} {
+      allow read: if canRead(request.auth.uid, graphId);
+      allow create: if request.auth.uid != null;
+      allow update, delete: if canUpdate(request.auth.uid, graphId) || isOwner(request.auth.uid, graphId);
+    }
+
+    // Rules for users
+    match /users/{userId} {
       allow create: if request.auth != null && request.auth.uid == userId;
       allow read, write: if request.auth != null && request.auth.uid == userId;
+    } 
+
+    match /{document=**} {
+      allow read, write: if true;
     } 
   }
 }

@@ -62,11 +62,8 @@ export const getGraphsCollectionRef = (db: Firestore) => {
  * @param graphId - The Firestore ID of the graph.
  * @returns The Firestore path as a string.
  */
-export const getNodeCollectionPath = (
-  ownerId: string,
-  graphId: string
-): string => {
-  return `users/${ownerId}/graphs/${graphId}/nodes`
+export const getNodeCollectionPath = (graphId: string): string => {
+  return `/graphs/${graphId}/nodes`
 }
 
 /**

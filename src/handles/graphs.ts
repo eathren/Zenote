@@ -9,6 +9,7 @@ import {
   collection,
   runTransaction,
   where,
+  setDoc,
 } from "firebase/firestore"
 import {
   Graph,
@@ -31,7 +32,7 @@ export const addGraphInDB = async (graphName: string) => {
   return await handleOperation(async () => {
     const ownerId = getCurrentUserId() as string
     const graphsCollectionRef = collection(db, "graphs")
-    const graph: Graph = {
+    const graph = {
       name: graphName,
       ownerId,
       date_created: Date.now(),
@@ -39,6 +40,7 @@ export const addGraphInDB = async (graphName: string) => {
       type: GraphPrivacySetting.Private,
     }
     const docRef = await addDoc(graphsCollectionRef, graph)
+
     const graphId = docRef.id
     const membership: GraphMembership = {
       graphId,
@@ -46,36 +48,12 @@ export const addGraphInDB = async (graphName: string) => {
       permission: GraphPermission.Owner,
     }
     await addGraphMembership(graphId, membership)
+    await setDoc(
+      doc(db, "graphs", docRef.id),
+      { id: docRef.id },
+      { merge: true }
+    )
     return docRef.id
-  })
-}
-
-export const addTeamGraphInDB = async (graphName: string, teamId: string) => {
-  await handleOperation(async () => {
-    const ownerId = getCurrentUserId() as string
-    const graphsCollectionRef = getGraphsCollectionRef(db)
-    const graph: Graph = {
-      name: graphName,
-      ownerId,
-      date_created: Date.now(),
-      type: GraphPrivacySetting.Team,
-      teamId,
-    }
-    await addDoc(graphsCollectionRef, graph)
-  })
-}
-
-export const addGlobalGraphInDB = async (graphName: string) => {
-  await handleOperation(async () => {
-    const ownerId = getCurrentUserId() as string
-    const graphsCollectionRef = getGraphsCollectionRef(db)
-    const graph: Graph = {
-      name: graphName,
-      ownerId,
-      date_created: Date.now(),
-      type: GraphPrivacySetting.Global,
-    }
-    await addDoc(graphsCollectionRef, graph)
   })
 }
 
@@ -115,22 +93,18 @@ export const getGraphsFromDB = async () => {
 }
 
 export const deleteGraph = async (graphId: string) => {
-  await handleOperation(async () => {
-    const ownerId = getCurrentUserId() as string
+  return await handleOperation(async () => {
     await runTransaction(db, async (transaction) => {
       const graphRef = doc(db, `graphs`, graphId)
       transaction.delete(graphRef)
 
-      const nodeQuery = query(
-        collection(db, getNodeCollectionPath(ownerId, graphId))
-      )
+      const nodeQuery = query(collection(db, getNodeCollectionPath(graphId)))
       const nodeSnapshot = await getDocs(nodeQuery)
       nodeSnapshot.forEach((doc) => {
         deleteMarkdown(doc.id)
         transaction.delete(doc.ref)
       })
 
-      // this is passing something wrong
       await deleteGraphMembership(graphId)
     })
   })
@@ -142,8 +116,7 @@ export const updateGraphNodes = async (
   nodeName: string,
   operation: "add" | "delete" | "update"
 ) => {
-  await handleOperation(async () => {
-    const ownerId = getCurrentUserId() as string
+  return await handleOperation(async () => {
     const graphRef = doc(db, `graphs`, graphId)
     const graphDoc = await getDoc(graphRef)
 
@@ -167,13 +140,13 @@ export const updateGraphNodes = async (
 export const updateGraphFavoriteStatus = async (
   graphId: string | undefined
 ) => {
-  await handleOperation(async () => {
-    const ownerId = getCurrentUserId() as string
-    const graphRef = doc(db, `graphs`, graphId as string)
+  return await handleOperation(async () => {
+    const graphRef = doc(db, `graphs`, String(graphId))
     const graphDoc = await getDoc(graphRef)
 
     if (graphDoc.exists()) {
       const graphData = graphDoc.data() as Graph
+      console.log(graphData)
       const newStatus =
         graphData.isFavorite === undefined ? true : !graphData.isFavorite
 

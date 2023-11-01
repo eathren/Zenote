@@ -42,10 +42,6 @@ export const createUserDoc = async (
     connectedAccounts: {},
   }
 
-  console.log("Creating user document in Firestore")
-
   // Add default data to userData sub-collection
   await setDoc(userDocRef, user)
-
-  console.log("User document created in Firestore")
 }

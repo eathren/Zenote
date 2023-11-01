@@ -21,6 +21,7 @@ const NodeControls = () => {
     undefined
   )
   const { nodes } = useNodes(graphId)
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (!nodes) return
@@ -29,7 +30,7 @@ const NodeControls = () => {
   }, [nodeId, nodes])
 
   const [open, setOpen] = useState(false)
-
+  if (!graphId || !nodeId) return <></>
   const showDeleteConfirm = (nodeId: string) => {
     Modal.confirm({
       title: "Are you sure you want to delete this Node?",
@@ -87,8 +88,6 @@ const NodeControls = () => {
       }
     )
   }
-
-  const navigate = useNavigate()
 
   return (
     <>

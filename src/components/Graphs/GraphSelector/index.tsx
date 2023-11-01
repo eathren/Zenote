@@ -164,7 +164,6 @@ const GraphSelector = () => {
           icon={selectedNode?.isFavorite ? <StarFilled /> : <StarOutlined />}
           onClick={() => {
             updateGraphFavoriteStatus(selectedNode?.id)
-            /* Add to Favorites logic */
           }}
         >
           {selectedNode?.isFavorite
