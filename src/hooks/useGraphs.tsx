@@ -38,21 +38,16 @@ export const useGraphs = () => {
           return data.graphId
         })
 
-        console.log("Fetched graphIds: ", graphIds) // Debugging line
-
         if (graphIds.length === 0) {
           setGraphs([])
           setLoading(false)
-          console.log("No graphs found") // Debugging line
           return
         }
-        console.log("1  ")
         // Fetch individual graphs since "in" query may not work as expected with doc IDs
         const graphFetchPromises = graphIds.map((graphId) =>
           getDoc(doc(db, "graphs", graphId))
         )
         const graphDocs = await Promise.all(graphFetchPromises)
-        console.log("2  ")
 
         const updatedGraphs: Graph[] = graphDocs
           .map((graphDoc) => {
@@ -63,12 +58,11 @@ export const useGraphs = () => {
           })
           .filter((graph) => graph !== null) as Graph[]
 
-        console.log("Updated graphs: ", updatedGraphs) // Debugging line
         setGraphs(updatedGraphs)
         setLoading(false)
       },
       (membershipErr) => {
-        console.error("Membership error: ", membershipErr) // Debugging line
+        console.error("Membership error: ", membershipErr)
         setError(membershipErr)
         setLoading(false)
       }
