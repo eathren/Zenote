@@ -5,254 +5,181 @@ import {
   doc,
   updateDoc,
   getDoc,
-  writeBatch,
   query,
   collection,
+  runTransaction,
+  where,
 } from "firebase/firestore"
-import { Graph, GraphPermission, GraphPrivacySetting } from "src/types/index"
-import { notification } from "antd"
+import {
+  Graph,
+  GraphMembership,
+  GraphPermission,
+  GraphPrivacySetting,
+} from "src/types/index"
 import {
   getCurrentUserId,
   getGraphsCollectionRef,
   getNodeCollectionPath,
+  handleOperation,
 } from "./utils"
 import { deleteMarkdown } from "./markdown"
+import { addGraphMembership, deleteGraphMembership } from "./membership"
 
 const db = getFirestore()
 
-// Updated Function to add a new personal graph to the database
 export const addGraphInDB = async (graphName: string) => {
-  const ownerId = getCurrentUserId()
-  if (!ownerId) {
-    notification.error({
-      message: "Error",
-      description: "User not authenticated",
-    })
-    return
-  }
-
-  const graphsCollectionRef = getGraphsCollectionRef(db)
-  const graph: Graph = {
-    name: graphName,
-    ownerId,
-    date_created: Date.now(),
-    nodes: {},
-    type: GraphPrivacySetting.Private, // Graph is private by default
-  }
-
-  try {
+  return await handleOperation(async () => {
+    const ownerId = getCurrentUserId() as string
+    const graphsCollectionRef = collection(db, "graphs")
+    const graph: Graph = {
+      name: graphName,
+      ownerId,
+      date_created: Date.now(),
+      nodes: {},
+      type: GraphPrivacySetting.Private,
+    }
     const docRef = await addDoc(graphsCollectionRef, graph)
+    const graphId = docRef.id
+    const membership: GraphMembership = {
+      graphId,
+      userId: ownerId,
+      permission: GraphPermission.Owner,
+    }
+    await addGraphMembership(graphId, membership)
     return docRef.id
-  } catch (error) {
-    notification.error({
-      message: "Error",
-      description: "Failed to add graph in DB",
-    })
-  }
-}
-
-// Function to add a new team graph to the database
-export const addTeamGraphInDB = async (
-  graphName: string,
-  teamId: string
-  // teamPermissions: Record<string, GraphPermission>
-) => {
-  const ownerId = getCurrentUserId()
-  if (!ownerId) {
-    notification.error({
-      message: "Error",
-      description: "User not authenticated",
-    })
-    return
-  }
-
-  const graphsCollectionRef = getGraphsCollectionRef(db)
-  const graph: Graph = {
-    name: graphName,
-    ownerId,
-    date_created: Date.now(),
-    type: GraphPrivacySetting.Team,
-    teamId,
-    teamPermissions: {
-      [ownerId]: GraphPermission.Owner,
-    },
-  }
-
-  try {
-    const docRef = await addDoc(graphsCollectionRef, graph)
-    return docRef.id
-  } catch (error) {
-    notification.error({
-      message: "Error",
-      description: "Failed to add graph in DB",
-    })
-  }
-}
-
-// Function to add a new global graph to the database
-export const addGlobalGraphInDB = async (
-  graphName: string,
-  globalPermissions: Record<string, GraphPermission>
-) => {
-  const ownerId = getCurrentUserId()
-  if (!ownerId) {
-    notification.error({
-      message: "Error",
-      description: "User not authenticated",
-    })
-    return
-  }
-
-  const graphsCollectionRef = getGraphsCollectionRef(db)
-  const graph: Graph = {
-    name: graphName,
-    ownerId,
-    date_created: Date.now(),
-    type: GraphPrivacySetting.Global,
-    globalPermissions,
-  }
-
-  try {
-    const docRef = await addDoc(graphsCollectionRef, graph)
-    return docRef.id
-  } catch (error) {
-    notification.error({
-      message: "Error",
-      description: "Failed to add graph in DB",
-    })
-  }
-}
-
-// Function to get all graphs from the database
-export const getGraphsFromDB = async () => {
-  const ownerId = getCurrentUserId()
-  if (!ownerId) {
-    notification.error({
-      message: "Error",
-      description: "User not authenticated",
-    })
-    return []
-  }
-
-  const graphsCollectionRef = getGraphsCollectionRef(db)
-  const graphsSnapshot = await getDocs(graphsCollectionRef)
-  const graphs: Graph[] = []
-  graphsSnapshot.forEach((doc) => {
-    graphs.push(doc.data() as Graph)
   })
-  return graphs
+}
+
+export const addTeamGraphInDB = async (graphName: string, teamId: string) => {
+  await handleOperation(async () => {
+    const ownerId = getCurrentUserId() as string
+    const graphsCollectionRef = getGraphsCollectionRef(db)
+    const graph: Graph = {
+      name: graphName,
+      ownerId,
+      date_created: Date.now(),
+      type: GraphPrivacySetting.Team,
+      teamId,
+    }
+    await addDoc(graphsCollectionRef, graph)
+  })
+}
+
+export const addGlobalGraphInDB = async (graphName: string) => {
+  await handleOperation(async () => {
+    const ownerId = getCurrentUserId() as string
+    const graphsCollectionRef = getGraphsCollectionRef(db)
+    const graph: Graph = {
+      name: graphName,
+      ownerId,
+      date_created: Date.now(),
+      type: GraphPrivacySetting.Global,
+    }
+    await addDoc(graphsCollectionRef, graph)
+  })
+}
+
+// Function to get all graphs from the database where user has a membership
+export const getGraphsFromDB = async () => {
+  return await handleOperation(async () => {
+    const ownerId = getCurrentUserId() as string
+
+    // Step 1: Fetch all memberships for the user
+    const membershipCollectionRef = collection(db, `memberships`)
+    const membershipQuery = query(
+      membershipCollectionRef,
+      where("userId", "==", ownerId)
+    )
+    const membershipSnapshot = await getDocs(membershipQuery)
+    const activeGraphIds: string[] = []
+
+    membershipSnapshot.forEach((doc) => {
+      const membershipData = doc.data() as GraphMembership
+      activeGraphIds.push(membershipData.graphId)
+    })
+
+    // Step 2: Fetch graphs based on memberships
+    const graphsCollectionRef = getGraphsCollectionRef(db)
+    const graphsSnapshot = await getDocs(graphsCollectionRef)
+    const graphs: Graph[] = []
+
+    graphsSnapshot.forEach((doc) => {
+      const graphData = doc.data() as Graph
+      if (activeGraphIds.includes(doc.id)) {
+        graphs.push(graphData)
+      }
+    })
+
+    return graphs
+  })
 }
 
 export const deleteGraph = async (graphId: string) => {
-  const ownerId = getCurrentUserId()
-  if (!ownerId) {
-    notification.error({
-      message: "Error",
-      description: "User not authenticated",
+  await handleOperation(async () => {
+    const ownerId = getCurrentUserId() as string
+    await runTransaction(db, async (transaction) => {
+      const graphRef = doc(db, `graphs`, graphId)
+      transaction.delete(graphRef)
+
+      const nodeQuery = query(
+        collection(db, getNodeCollectionPath(ownerId, graphId))
+      )
+      const nodeSnapshot = await getDocs(nodeQuery)
+      nodeSnapshot.forEach((doc) => {
+        deleteMarkdown(doc.id)
+        transaction.delete(doc.ref)
+      })
+
+      // this is passing something wrong
+      await deleteGraphMembership(graphId)
     })
-    return
-  }
-
-  const batch = writeBatch(db)
-  const graphRef = doc(db, `users/${ownerId}/graphs`, graphId)
-  batch.delete(graphRef)
-
-  // Fetch and delete all nodes associated with this graph
-  const nodeQuery = query(
-    collection(db, getNodeCollectionPath(ownerId, graphId))
-  )
-  const nodeSnapshot = await getDocs(nodeQuery)
-  nodeSnapshot.forEach((doc) => {
-    // Delete the markdown files
-    deleteMarkdown(doc.id)
-
-    // Delete the node document
-    batch.delete(doc.ref)
   })
-
-  try {
-    await batch.commit()
-    notification.success({
-      message: "Success",
-      description: "Graph and associated nodes deleted successfully",
-    })
-  } catch (error) {
-    notification.error({
-      message: "Error",
-      description: "Failed to delete graph and associated nodes",
-    })
-  }
 }
-// Function to update node summary in the graph
+
 export const updateGraphNodes = async (
   graphId: string,
   nodeId: string,
   nodeName: string,
   operation: "add" | "delete" | "update"
 ) => {
-  const ownerId = getCurrentUserId()
-  if (!ownerId) {
-    return
-  }
+  await handleOperation(async () => {
+    const ownerId = getCurrentUserId() as string
+    const graphRef = doc(db, `graphs`, graphId)
+    const graphDoc = await getDoc(graphRef)
 
-  const graphRef = doc(db, `users/${ownerId}/graphs`, graphId)
-  const graphDoc = await getDoc(graphRef)
+    if (graphDoc.exists()) {
+      const graphData = graphDoc.data() as Graph
+      const nodes = graphData.nodes ?? {}
 
-  if (graphDoc.exists()) {
-    let graphData = graphDoc.data() as Graph
+      if (operation === "add" || operation === "update") {
+        nodes[nodeId] = nodeName
+      } else if (operation === "delete") {
+        delete nodes[nodeId]
+      }
 
-    // Initialize if nodes doesn't exist
-    if (!graphData.nodes) {
-      graphData = { ...graphData, nodes: {} }
+      await updateDoc(graphRef, {
+        nodes,
+      })
     }
-
-    const nodes = graphData.nodes ?? {}
-
-    // Perform the update based on the operation
-    if (operation === "add" || operation === "update") {
-      nodes[nodeId] = nodeName
-    } else if (operation === "delete") {
-      delete nodes[nodeId]
-    }
-
-    // Update the graph
-    await updateDoc(graphRef, {
-      nodes: graphData.nodes,
-    })
-  }
+  })
 }
 
 export const updateGraphFavoriteStatus = async (
   graphId: string | undefined
 ) => {
-  const ownerId = getCurrentUserId()
-  if (!ownerId) {
-    notification.error({
-      message: "Error",
-      description: "User not authenticated",
-    })
-    return
-  }
+  await handleOperation(async () => {
+    const ownerId = getCurrentUserId() as string
+    const graphRef = doc(db, `graphs`, graphId as string)
+    const graphDoc = await getDoc(graphRef)
 
-  if (!graphId) return
+    if (graphDoc.exists()) {
+      const graphData = graphDoc.data() as Graph
+      const newStatus =
+        graphData.isFavorite === undefined ? true : !graphData.isFavorite
 
-  const graphRef = doc(db, `users/${ownerId}/graphs`, graphId)
-  const graphDoc = await getDoc(graphRef)
-
-  if (!graphDoc.exists()) return
-
-  const graphData = graphDoc.data() as Graph
-  let newStatus: boolean
-
-  // Check if isFavorite is undefined, if so set it to true
-  if (graphData.isFavorite === undefined) {
-    newStatus = true
-  } else {
-    // Toggle the status otherwise
-    newStatus = !graphData.isFavorite
-  }
-
-  await updateDoc(graphRef, {
-    isFavorite: newStatus,
+      await updateDoc(graphRef, {
+        isFavorite: newStatus,
+      })
+    }
   })
 }

@@ -1,12 +1,48 @@
+import { notification } from "antd"
 import { getAuth } from "firebase/auth"
 import { Firestore, collection, doc, getDoc } from "firebase/firestore"
 import { db } from "src/firebase"
+
+export const handleOperation = async <T>(
+  operation: () => Promise<T>
+): Promise<T | null> => {
+  const ownerId = getCurrentUserId()
+  if (!ownerId) {
+    notification.error({
+      message: "Error",
+      description: "User not authenticated",
+    })
+    return null
+  }
+  try {
+    return await operation()
+  } catch (error: any) {
+    console.error("Firebase error:", error)
+    notification.error({
+      message: "Error",
+      description: `${error.message}`,
+    })
+    return null
+  }
+}
+
+// Preconditions example: Check ownerId
+export const checkOwnerId = async (ownerId: any) => {
+  if (!ownerId || typeof ownerId !== "string") {
+    return { pass: false, message: "User not authenticated" }
+  }
+  return { pass: true, message: "" }
+}
 
 // Function to get current user's UID
 export const getCurrentUserId = () => {
   const auth = getAuth()
   const user = auth.currentUser
   return user ? user.uid : null
+}
+
+export const getMembershipCollectionRef = (db: Firestore, userId: string) => {
+  return collection(db, `users/${userId}/memberships`)
 }
 
 /**
@@ -17,8 +53,7 @@ export const getCurrentUserId = () => {
  * @returns A collection reference to the graphs collection.
  */
 export const getGraphsCollectionRef = (db: Firestore) => {
-  const ownerId = getCurrentUserId()
-  return collection(db, `users/${ownerId}/graphs`)
+  return collection(db, "graphs")
 }
 
 /**
