@@ -2,7 +2,7 @@ import { PlusCircleOutlined } from "@ant-design/icons"
 import { Button, Modal, Input } from "antd"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { addGraphInDB, addTeamGraphInDB } from "src/handles/graphs"
+import { addGraphInDB } from "src/handles/graphs"
 import { GraphPrivacySetting } from "src/types"
 
 type AddGraphButtonProps = {
@@ -29,11 +29,11 @@ const AddGraphButton = (props: AddGraphButtonProps) => {
         }
       })
     } else if (type === GraphPrivacySetting.Team) {
-      await addTeamGraphInDB(graphName, "test-team").then((docId) => {
-        if (docId) {
-          navigate(`/graphs/${docId}`)
-        }
-      })
+      // await addTeamGraphInDB(graphName, "test-team").then((docId) => {
+      //   if (docId) {
+      //     navigate(`/graphs/${docId}`)
+      //   }
+      // })
     }
     setModalOpen(false)
     setGraphName("")

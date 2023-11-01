@@ -1,4 +1,4 @@
-import { getFirestore, collection, doc, addDoc } from "firebase/firestore"
+import { getFirestore, doc, setDoc } from "firebase/firestore"
 import { User } from "src/types" // Import your User type definition
 
 const db = getFirestore()
@@ -13,7 +13,7 @@ export const createUserDoc = async (
   email: string
 ): Promise<void> => {
   // User document reference
-  const userDocRef = doc(collection(db, "users"), userId)
+  const userDocRef = doc(db, `users/${userId}`)
 
   const user: User = {
     email,
@@ -42,9 +42,6 @@ export const createUserDoc = async (
     connectedAccounts: {},
   }
 
-  // Create userData sub-collection
-  const userDataCollectionRef = collection(userDocRef, "userData")
-
   // Add default data to userData sub-collection
-  await addDoc(userDataCollectionRef, user)
+  await setDoc(userDocRef, user)
 }
