@@ -24,7 +24,19 @@ const ForceGraph = (props: ForceGraphProps) => {
 
   useEffect(() => {
     const filteredNodes = props.nodes.filter((node) => node !== undefined)
-    const filteredEdges = filteredNodes.flatMap((node) => node.edges || [])
+    const nodeSet = new Set(filteredNodes.map((node) => node.id))
+
+    // Function to check if a node exists in the Set
+    const doesNodeExist = (nodeId: string) => nodeSet.has(nodeId)
+
+    // Filter links where both source and target nodes exist
+    const filteredEdges = props.nodes
+      .flatMap((node) => node.edges || [])
+      .filter(
+        (link) =>
+          doesNodeExist(link.source as string) &&
+          doesNodeExist(link.target as string)
+      )
 
     if (showTags === false) {
       setNodes(filteredNodes)
