@@ -1,6 +1,6 @@
 import * as d3 from "d3"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { GraphNode, GraphEdge } from "src/types" // Update the import path as needed
 import { drag } from "./utils"
 import "react-contexify/ReactContexify.css"
@@ -29,9 +29,12 @@ const ForceGraph = (props: ForceGraphProps) => {
     showOrphans,
   } = getOrInitializeSettings(graphId)
 
+  const { startingNodes } = useParams()
+
   useEffect(() => {
     let filteredNodes = props.nodes.filter((node) => node !== undefined)
     const nodeSet = new Set(filteredNodes.map((node) => node.id))
+    // const startingNodeIds = startingNodes ? startingNodes.split(",") : []
 
     // Function to check if a node exists in the Set
     const doesNodeExist = (nodeId: string) => nodeSet.has(nodeId)
@@ -69,7 +72,7 @@ const ForceGraph = (props: ForceGraphProps) => {
     const tagsSet = new Set(filteredNodes.flatMap((node) => node.tags || []))
     const tagNodes: GraphNode[] = [...tagsSet].map((tag) => ({
       id: `tag:${tag}`,
-      name: tag,
+      name: `#${tag}`,
       tags: [],
       isTagNode: true,
     }))
@@ -87,7 +90,7 @@ const ForceGraph = (props: ForceGraphProps) => {
 
     setNodes([...tagNodes, ...filteredNodes])
     setEdges([...filteredEdges, ...tagsEdges])
-  }, [props.nodes, showOrphans, showTags])
+  }, [props.nodes, showOrphans, showTags, startingNodes])
   const getNodeColor = useCallback(
     (nodeName: string, tags: string[] = [], isTagNode: boolean = false) => {
       // Default color for tag nodes
