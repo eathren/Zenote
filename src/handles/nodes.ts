@@ -120,9 +120,13 @@ export const deleteNodeInDB = async (graphId: string, nodeId: string) => {
   return await handleOperation(async () => {
     const nodeCollectionPath = getNodeCollectionPath(graphId)
     const nodeRef = doc(db, `${nodeCollectionPath}/${nodeId}`)
-    await deleteDoc(nodeRef)
+    const nodeDoc = await getDoc(nodeRef)
+    if (!nodeDoc.exists()) {
+      throw new Error(`Node document does not exist: ${nodeId}`)
+    }
     await updateGraphNodes(graphId, nodeId, "", "delete")
     await deleteMarkdown(nodeId)
+    await deleteDoc(nodeRef)
   })
 }
 

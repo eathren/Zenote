@@ -34,6 +34,7 @@ export const uploadMarkdown = async (nodeId: string, markdown: string) => {
       contentType: "text/markdown",
       customMetadata: {
         ownerId: currentUser.uid,
+        canDelete: "true",
       },
     }
 
