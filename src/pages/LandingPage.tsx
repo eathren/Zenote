@@ -37,7 +37,7 @@ const LandingPage = () => {
           </Col>
 
           {/* New Cards */}
-          <Col xs={24} md={12}>
+          {/* <Col xs={24} md={12}>
             <Card hoverable>
               <Title level={4}>Advanced Tables</Title>
               <Paragraph>
@@ -47,10 +47,21 @@ const LandingPage = () => {
                 embed media to make your tables more comprehensive.
               </Paragraph>
             </Card>
+          </Col> */}
+          <Col xs={24} md={12}>
+            <Card hoverable>
+              <Title level={4}>Sharing and Collaboration</Title>
+              <Paragraph>
+                Easily share nodes, connections, or entire graphs with team
+                members, friends, or just make them global! Real-time
+                collaboration features enable multiple users to work on the same
+                notes, ensuring everyone is on the same page.
+              </Paragraph>
+            </Card>
           </Col>
           <Col xs={24} md={12}>
             <Card hoverable>
-              <Title level={4}>Online-First Database</Title>
+              <Title level={4}>Online-First Functionality</Title>
               <Paragraph>
                 Built on an online-first database architecture, Zenote ensures
                 you always have the latest version of your notes. Work
@@ -58,17 +69,7 @@ const LandingPage = () => {
               </Paragraph>
             </Card>
           </Col>
-          <Col xs={24} md={12}>
-            <Card hoverable>
-              <Title level={4}>Sharing and Collaboration</Title>
-              <Paragraph>
-                Easily share nodes, connections, or entire graphs with team
-                members or friends. Real-time collaboration features enable
-                multiple users to work on the same notes, ensuring everyone is
-                on the same page.
-              </Paragraph>
-            </Card>
-          </Col>
+
           <Col xs={24} md={12}>
             <Card hoverable>
               <Title level={4}>Fill Out Notes</Title>
@@ -76,6 +77,17 @@ const LandingPage = () => {
                 Give your nodes and connections more context by filling them out
                 with detailed notes. Add references, files, or just your
                 thoughts to make each node a treasure trove of information.
+              </Paragraph>
+            </Card>
+          </Col>
+
+          <Col xs={24} md={12}>
+            <Card hoverable>
+              <Title level={4}>Dynamic tagging and filtering</Title>
+              <Paragraph>
+                Make even more connections with tags, and filter them as needed,
+                and hide them when not. Now, making connections between
+                different subjects has never been easier.
               </Paragraph>
             </Card>
           </Col>
