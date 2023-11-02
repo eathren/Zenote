@@ -27,7 +27,7 @@ export const BasicLayout = ({ children }: LayoutProps) => {
   const {
     token: { colorBgContainer },
   } = theme.useToken()
-  const { user } = useUser()
+  const { user, loading } = useUser()
 
   const { graphId } = useParams<{ graphId?: string }>()
   const [modalOpen, setModalOpen] = useState(false)
@@ -91,7 +91,7 @@ export const BasicLayout = ({ children }: LayoutProps) => {
         className={styles.layout__body}
         style={{ background: colorBgContainer }}
       >
-        {!user && <CustomHeader />}
+        {!user && !loading && <CustomHeader />}
         <Layout className={styles.main__content}>
           <Layout>
             <Content

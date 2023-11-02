@@ -1,6 +1,7 @@
-import { Spin, Typography } from "antd"
+import { Typography } from "antd"
 import { Link } from "react-router-dom"
 import { useNodes } from "src/hooks/useNodes"
+import LoadingSpinner from "../LoadingSpinner"
 
 const { Text } = Typography
 
@@ -12,7 +13,7 @@ const Playground = ({ graphId }: PlaygroundProps) => {
   const { nodes, loading } = useNodes(graphId)
 
   if (loading) {
-    return <Spin style={{ position: "absolute", left: "50%", top: "50%" }} />
+    return <LoadingSpinner />
   }
 
   return (

@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { GraphNode, GraphEdge } from "src/types" // Update the import path as needed
 import { drag } from "./utils"
-import { useContextMenu } from "react-contexify"
 import "react-contexify/ReactContexify.css"
 import useGraphSettingsStore from "src/stores/graphSettingsStore"
 type ForceGraphProps = {
@@ -14,25 +13,55 @@ type ForceGraphProps = {
 const ForceGraph = (props: ForceGraphProps) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const navigate = useNavigate()
-  const { graphId, nodes } = props
+  const { graphId } = props
+
+  const [nodes, setNodes] = useState<GraphNode[]>(props.nodes)
   const [edges, setEdges] = useState<GraphEdge[]>([])
 
-  const { show } = useContextMenu({
-    id: "forceGraphContextMenu",
-  })
-
   const { getOrInitializeSettings } = useGraphSettingsStore()
-  const { nodeSize, nodeGrowth, repelForce, linkStrength, groups } =
+  const { nodeSize, nodeGrowth, repelForce, linkStrength, groups, showTags } =
     getOrInitializeSettings(graphId)
 
-  // const validEdges = edges.filter((edge) => {
-  //   const sourceExists = nodes.some((node) => node.id === edge.source)
-  //   const targetExists = nodes.some((node) => node.id === edge.target)
-  //   return sourceExists && targetExists
-  // })
+  useEffect(() => {
+    const filteredNodes = props.nodes.filter((node) => node !== undefined)
+    const filteredEdges = filteredNodes.flatMap((node) => node.edges || [])
+
+    if (showTags === false) {
+      setNodes(filteredNodes)
+      setEdges(filteredEdges)
+      return
+    }
+
+    // Collect unique tags
+    const tagsSet = new Set(filteredNodes.flatMap((node) => node.tags || []))
+    const tagNodes: GraphNode[] = [...tagsSet].map((tag) => ({
+      id: `tag:${tag}`,
+      name: tag,
+      tags: [],
+      isTagNode: true,
+    }))
+    const tagsEdges: GraphEdge[] = []
+
+    filteredNodes.forEach((node) => {
+      node.tags?.forEach((tag) => {
+        tagsEdges.push({
+          id: `${node.id}->tag:${tag}`,
+          source: node.id,
+          target: `tag:${tag}`,
+        })
+      })
+    })
+    setNodes([...tagNodes, ...filteredNodes])
+    setEdges([...filteredEdges, ...tagsEdges])
+  }, [props.nodes, showTags])
 
   const getNodeColor = useCallback(
-    (nodeName: string, tags: string[] = []) => {
+    (nodeName: string, tags: string[] = [], isTagNode: boolean = false) => {
+      // Default color for tag nodes
+      if (isTagNode) {
+        return "#82a8ff" // Light blue
+      }
+
       let color = "#ffffff"
 
       groups?.forEach((group) => {
@@ -55,16 +84,6 @@ const ForceGraph = (props: ForceGraphProps) => {
     [groups]
   )
 
-  // Capture the right click on a node or a link and show the context menu
-  const handleContextMenu = useCallback(
-    (event: MouseEvent, id: string) => {
-      event.preventDefault()
-      console.log("Right click detected, showing context menu.") // Debugging log
-      show({ event, props: { id } })
-    },
-    [show]
-  )
-
   const calculateNodeSizeHover = useCallback(
     (d: GraphNode) => {
       const numOutgoingEdges = edges.filter((edge) => edge.source === d).length
@@ -83,11 +102,6 @@ const ForceGraph = (props: ForceGraphProps) => {
     [edges, nodeGrowth, nodeSize]
   )
 
-  useEffect(() => {
-    const filteredNodes = nodes.filter((node) => node !== undefined)
-    const e = filteredNodes.flatMap((node) => node.edges || []) // Use || [] to handle undefined edges
-    setEdges(e)
-  }, [nodes])
   useEffect(() => {
     if (!svgRef.current) {
       return
@@ -134,7 +148,7 @@ const ForceGraph = (props: ForceGraphProps) => {
     nodeGroup
       .append("circle")
       .attr("r", (d) => calculateNodeSize(d))
-      .attr("fill", (d) => getNodeColor(d.name, d.tags))
+      .attr("fill", (d) => getNodeColor(d.name, d.tags, d.isTagNode))
       .style("transition", "all 0.3s ease-in-out")
       .on("mouseover", function (_event, d) {
         d3.select(this)
@@ -229,20 +243,11 @@ const ForceGraph = (props: ForceGraphProps) => {
 
       nodeGroup.attr("transform", (d) => `translate(${d.x!}, ${d.y!})`)
     })
-    nodeGroup.on("contextmenu", (event: MouseEvent, d: GraphNode) => {
-      handleContextMenu(event, d.id!)
-    })
-
-    // Add right-click context menu for links
-    link.on("contextmenu", (event: MouseEvent, d: GraphEdge) => {
-      handleContextMenu(event, d.id)
-    })
   }, [
     nodes,
     edges,
     navigate,
     graphId,
-    handleContextMenu,
     calculateNodeSize,
     repelForce,
     linkStrength,
