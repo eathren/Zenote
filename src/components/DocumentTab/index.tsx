@@ -161,7 +161,7 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
       node.edges?.map((edge: GraphEdge) => edge.target as string) || []
     ).filter((remoteEdge) => !allTargetIds.includes(remoteEdge))
 
-    console.log("Added links:", addedLinks, "Deleted links:", deletedLinks)
+    // console.log("Added links:", addedLinks, "Deleted links:", deletedLinks)
 
     if (addedLinks.length || deletedLinks.length) {
       const result = await batchUpdateNodeEdges(
@@ -185,7 +185,7 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
       (tag) => !tagsInMarkdown.includes(tag)
     )
 
-    console.log("Added tags:", addedTags, "Deleted tags:", deletedTags)
+    // console.log("Added tags:", addedTags, "Deleted tags:", deletedTags)
 
     if (addedTags.length || deletedTags.length) {
       const result = await batchUpdateNodeTags(

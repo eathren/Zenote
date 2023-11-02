@@ -156,3 +156,10 @@ export const updateGraphFavoriteStatus = async (
     }
   })
 }
+
+export const updateGraphTitle = async (graphId: string, graphName: string) => {
+  return await handleOperation(async () => {
+    const graphRef = doc(db, "graphs", graphId)
+    await updateDoc(graphRef, { name: graphName })
+  })
+}
