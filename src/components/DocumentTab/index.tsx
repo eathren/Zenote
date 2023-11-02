@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react"
-import { Spin, Input, Drawer, Typography } from "antd"
+import { Input, Drawer, Typography } from "antd"
 import Markdown from "react-markdown"
 import NodeHeader from "src/components/UI/Headers/NodeHeader"
 import { useParams } from "react-router-dom"
@@ -8,6 +8,7 @@ import { useNodes } from "src/hooks/useNodes"
 import { batchUpdateNodeEdges } from "src/handles/edges"
 import { GraphEdge } from "src/types"
 import { batchUpdateNodeTags } from "src/handles/nodes"
+import LoadingSpinner from "../LoadingSpinner"
 
 type DocumentTabProps = {
   markdownContent: string
@@ -188,7 +189,7 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
       node.edges?.map((edge: GraphEdge) => edge.target as string) || []
     ).filter((remoteEdge) => !allTargetIds.includes(remoteEdge))
 
-    console.log("Added links:", addedLinks, "Deleted links:", deletedLinks)
+    // console.log("Added links:", addedLinks, "Deleted links:", deletedLinks)
 
     if (addedLinks.length || deletedLinks.length) {
       const result = await batchUpdateNodeEdges(
@@ -212,7 +213,7 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
       (tag) => !tagsInMarkdown.includes(tag)
     )
 
-    console.log("Added tags:", addedTags, "Deleted tags:", deletedTags)
+    // console.log("Added tags:", addedTags, "Deleted tags:", deletedTags)
 
     if (addedTags.length || deletedTags.length) {
       const result = await batchUpdateNodeTags(
@@ -283,7 +284,7 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
   return (
     <div>
       {isLoading ? (
-        <Spin style={{ position: "absolute", left: "50%", top: "50%" }} />
+        <LoadingSpinner />
       ) : (
         <>
           <Typography>

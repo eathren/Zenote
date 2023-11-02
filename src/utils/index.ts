@@ -1,5 +1,11 @@
 import { notification } from "antd"
-import { GraphNode } from "src/types"
+import { Graph, GraphNode } from "src/types"
+
+export const findGraph = (graphs: Graph[], id: string | undefined) => {
+  if (!id) return null
+  const graph = graphs.find((graph) => graph.id === id)
+  return graph
+}
 
 export const findNodeId = (nodes: GraphNode[], name: string): string | null => {
   const node = nodes.find((node) => node.name === name)

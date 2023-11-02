@@ -1,6 +1,6 @@
 import { PlusCircleOutlined } from "@ant-design/icons"
-import { Button, Modal, Input } from "antd"
-import { useState } from "react"
+import { Button, Modal, Input, InputRef } from "antd"
+import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { addGraphInDB } from "src/handles/graphs"
 import { GraphPrivacySetting } from "src/types"
@@ -14,11 +14,17 @@ const AddGraphButton = (props: AddGraphButtonProps) => {
   const [modalOpen, setModalOpen] = useState(false)
   const [graphName, setGraphName] = useState("")
   const navigate = useNavigate()
-
+  const inputRef = useRef<InputRef>(null)
   // Handle changes in the graph name input
   const handleGraphNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setGraphName(e.target.value)
   }
+
+  useEffect(() => {
+    if (modalOpen) {
+      inputRef.current?.focus()
+    }
+  }, [modalOpen])
 
   // Function to create a new graph
   const createGraph = async () => {
@@ -61,7 +67,7 @@ const AddGraphButton = (props: AddGraphButtonProps) => {
         onCancel={() => setModalOpen(false)}
       >
         <Input
-          autoFocus
+          ref={inputRef}
           placeholder="Graph Name..."
           value={graphName}
           onChange={handleGraphNameChange}

@@ -70,6 +70,17 @@ const GraphControls = () => {
                 }
               />
             </Row>
+            <Row justify={"space-between"}>
+              {" "}
+              {/* Added showTags row */}
+              <label>Show Tags: </label>
+              <Switch
+                checked={settings.showTags}
+                onChange={(checked) =>
+                  updateSetting(graphId, "showTags", checked)
+                }
+              />
+            </Row>
           </Panel>
           <Panel header="Groups " key="2">
             {settings?.groups?.map((group, idx) => (
@@ -186,7 +197,6 @@ const GraphControls = () => {
         type="text"
         icon={<EllipsisOutlined />}
         onClick={() => setOpen(true)}
-        style={{ position: "absolute", right: 0, top: 0 }}
       />
     </>
   )

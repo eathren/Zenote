@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react"
 import { useParams } from "react-router-dom"
-import { notification, Spin, Typography } from "antd"
+import { notification, Typography } from "antd"
 import { debounce } from "lodash"
 
 import { GraphNode } from "src/types"
 import DocumentTab from "src/components/DocumentTab"
 import { fetchMarkdown, uploadMarkdown } from "src/handles/markdown"
 import { fetchNode, updateNodeTitle } from "src/handles/nodes"
+import LoadingSpinner from "src/components/LoadingSpinner"
 
 const NodePage: React.FC = () => {
   const { graphId, nodeId } = useParams<{ nodeId: string; graphId: string }>()
@@ -73,7 +74,7 @@ const NodePage: React.FC = () => {
   }, 400)
 
   return isLoading ? (
-    <Spin style={{ position: "absolute", left: "50%", top: "50%" }} />
+    <LoadingSpinner />
   ) : (
     <Typography>
       <DocumentTab

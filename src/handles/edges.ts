@@ -7,7 +7,7 @@ import {
 } from "firebase/firestore"
 import { GraphEdge } from "src/types/index" // Update the import path according to your project structure
 import { notification } from "antd"
-import { getCurrentUserId, getNodeCollectionPath, getNodeDocRef } from "./utils"
+import { getNodeCollectionPath, getNodeDocRef } from "./utils"
 import { v4 as uuidv4 } from "uuid"
 import { GraphNode } from "src/types/index"
 const db = getFirestore()
@@ -29,16 +29,8 @@ export const addEdgeToNode = async (
 ) => {
   try {
     if (!graphId || !nodeId || !targetNodeId) return false
-    const ownerId = getCurrentUserId()
-    if (!ownerId) {
-      notification.error({
-        message: "Error",
-        description: "User not authenticated",
-      })
-      return false
-    }
     // Get reference to the specific node document
-    const nodeDocRef = getNodeDocRef(db, ownerId, graphId, nodeId)
+    const nodeDocRef = getNodeDocRef(db, graphId, nodeId)
 
     // Fetch the node data
     const nodeDocSnap = await getDoc(nodeDocRef)
@@ -74,25 +66,14 @@ export const addEdgeToNode = async (
 
 // Updated batchUpdateNodeEdges function
 export const batchUpdateNodeEdges = async (
-  graphId: string | undefined,
-  nodeId: string | undefined,
+  graphId: string,
+  nodeId: string,
   edgesToAdd: string[],
   edgesToRemove: string[]
 ) => {
   try {
-    if (!graphId || !nodeId) return
-
-    const ownerId = getCurrentUserId()
-    if (!ownerId) {
-      notification.error({
-        message: "Error",
-        description: "User not authenticated",
-      })
-      return false
-    }
-
     // Get reference to the specific node document
-    const nodeDocRef = getNodeDocRef(db, ownerId, graphId, nodeId)
+    const nodeDocRef = getNodeDocRef(db, graphId, nodeId)
 
     // Fetch the node data
     const nodeDocSnap = await getDoc(nodeDocRef)
@@ -111,6 +92,8 @@ export const batchUpdateNodeEdges = async (
     if (!Array.isArray(nodeData.edges)) {
       nodeData.edges = []
     }
+
+    console.log("newEdges", newEdges, nodeData)
 
     // Add new edges to edges array locally, only if they do not already exist
     newEdges.forEach((newEdge) => {
@@ -148,22 +131,13 @@ export const addEdgesToNodeBatch = async (
   targetNodeIds: string[]
 ): Promise<boolean> => {
   try {
-    const ownerId = getCurrentUserId()
-    if (!ownerId) {
-      notification.error({
-        message: "Error",
-        description: "User not authenticated",
-      })
-      return false
-    }
-
     // Get reference to the specific node document
-    const nodeDocRef = getNodeDocRef(db, ownerId, graphId, nodeId)
+    const nodeDocRef = getNodeDocRef(db, graphId, nodeId)
 
     // Fetch the node data
     const nodeDocSnap = await getDoc(nodeDocRef)
     const nodeData = nodeDocSnap.data() as GraphNode
-
+    console.log("here", nodeData)
     // Initialize new edges
     const newEdges = targetNodeIds.map((targetNodeId) => ({
       id: uuidv4(),
@@ -200,15 +174,6 @@ export const addEdgesToNodeBatch = async (
  * @returns An array of edges.
  */
 export const getEdgesFromDB = async (graphId: string): Promise<GraphEdge[]> => {
-  const ownerId = getCurrentUserId()
-  if (!ownerId) {
-    notification.error({
-      message: "Error",
-      description: "User not authenticated",
-    })
-    return []
-  }
-
   // Define the path to the nodes collection for this graph
   const nodesCollectionPath = getNodeCollectionPath(graphId)
 
@@ -240,17 +205,9 @@ export const deleteEdgeInDB = async (
   edgeId: string | undefined
 ) => {
   if (!graphId || !nodeId || !edgeId) return
-  const ownerId = getCurrentUserId()
-  if (!ownerId) {
-    notification.error({
-      message: "Error",
-      description: "User not authenticated",
-    })
-    return
-  }
 
   // Get the document reference for the specific node
-  const nodeDocRef = getNodeDocRef(db, ownerId, graphId, nodeId)
+  const nodeDocRef = getNodeDocRef(db, graphId, nodeId)
 
   // Fetch the existing node data
   const nodeDocSnap = await getDoc(nodeDocRef)

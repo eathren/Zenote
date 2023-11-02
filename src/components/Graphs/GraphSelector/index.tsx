@@ -1,5 +1,14 @@
 import React, { useState, useCallback, useMemo } from "react"
-import { Tree, Input, Row, Drawer, Button, Space, Typography } from "antd"
+import {
+  Tree,
+  Input,
+  Row,
+  Drawer,
+  Button,
+  Space,
+  Typography,
+  Modal,
+} from "antd"
 import { useGraphs } from "src/hooks/useGraphs"
 import { useNavigate } from "react-router-dom"
 import {
@@ -8,10 +17,11 @@ import {
   StarOutlined,
   DeleteOutlined,
   StarFilled,
+  ExclamationCircleOutlined,
 } from "@ant-design/icons"
 import { Graph, GraphPrivacySetting } from "src/types"
 import AddGraphButton from "../AddGraphButton"
-import { updateGraphFavoriteStatus } from "src/handles/graphs"
+import { deleteGraph, updateGraphFavoriteStatus } from "src/handles/graphs"
 
 const GraphSelector = () => {
   const { graphs, loading } = useGraphs()
@@ -20,6 +30,23 @@ const GraphSelector = () => {
   const [drawerVisible, setDrawerVisible] = useState(false)
   const [selectedNode, setSelectedNode] = useState<Graph | null>(null)
 
+  const showDeleteConfirm = (graphId: string) => {
+    Modal.confirm({
+      title: "Are you sure you want to delete this graph?",
+      icon: <ExclamationCircleOutlined />,
+      content: "Once deleted, this action cannot be undone.",
+      okText: "Yes",
+      okType: "danger",
+      cancelText: "No",
+      onOk() {
+        deleteGraph(graphId)
+        // Delete logic here
+      },
+      onCancel() {
+        console.log("Cancel")
+      },
+    })
+  }
   const filterGraphs = useCallback(
     (type: "private" | "team" | "favorites") => {
       return graphs?.filter((graph) => {
@@ -176,7 +203,7 @@ const GraphSelector = () => {
           danger
           onClick={() => {
             if (selectedNode?.id) {
-              // showDeleteConfirm(selectedNode.id)
+              showDeleteConfirm(selectedNode.id)
             }
           }}
         >

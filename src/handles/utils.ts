@@ -77,11 +77,10 @@ export const getNodeCollectionPath = (graphId: string): string => {
  */
 export const getNodeDocRef = (
   db: Firestore,
-  ownerId: string,
   graphId: string,
   nodeId: string
 ) => {
-  return doc(db, `users/${ownerId}/graphs/${graphId}/nodes/${nodeId}`)
+  return doc(db, `/graphs/${graphId}/nodes/${nodeId}`)
 }
 // Fetches a single document by its ID and collection
 export const fetchSingleDoc = async (collectionName: string, docId: string) => {

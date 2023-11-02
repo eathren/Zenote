@@ -35,21 +35,22 @@ export interface Graph {
 
 export interface GraphNode extends d3.SimulationNodeDatum {
   id: string
-  ownerId: string // Firebase User ID
+  ownerId?: string // Firebase User ID
   name: string
-  graphId: string
-  date_created: number
+  graphId?: string
+  date_created?: number | Date
   markdownUrl?: string
   tags?: string[]
   groups?: string[]
   edges?: GraphEdge[]
   isFavorite?: boolean
+  isTagNode?: boolean
 }
 
 export interface GraphEdge extends d3.SimulationLinkDatum<GraphNode> {
   id: string
-  graphId: string
-  date_created: number
+  graphId?: string
+  date_created?: number
   label?: string
 }
 
@@ -87,6 +88,7 @@ export interface Group {
 
 export interface GraphSettings {
   showOrphans: boolean
+  showTags: boolean
   nodeSize: number
   linkStrength: number
   nodeStrength: number

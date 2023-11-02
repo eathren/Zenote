@@ -1,5 +1,5 @@
-import React from "react"
-import { Modal, Input, List } from "antd"
+import React, { useEffect, useRef } from "react"
+import { Modal, Input, List, InputRef } from "antd"
 import { useNavigate } from "react-router-dom"
 import { GraphNode } from "src/types"
 import { useNodeModal } from "src/hooks/useNodeModal"
@@ -49,6 +49,15 @@ const AddNodeModal: React.FC<AddNodeModalProps> = ({
     }
   }
 
+  const inputRef = useRef<InputRef>(null)
+
+  useEffect(() => {
+    if (isOpen) {
+      console.log("focus")
+      inputRef.current?.focus()
+    }
+  }, [isOpen])
+
   return (
     <Modal
       title="Find or Add New Node"
@@ -58,10 +67,12 @@ const AddNodeModal: React.FC<AddNodeModalProps> = ({
       bodyStyle={{ height: "65vh", maxHeight: "65vh" }}
     >
       <Input
+        ref={inputRef}
         placeholder="Node Name..."
         value={searchTerm}
         onChange={handleSearchTermChange}
         onKeyDown={handleKeyDown}
+        autoFocus
       />
       <List
         dataSource={filteredNodes}
