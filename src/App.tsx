@@ -17,6 +17,7 @@ import "./App.css"
 import { ReactNode } from "react"
 import ForgotPasswordPage from "./pages/ForgotPasswordPage"
 import SettingsPage from "./pages/SettingsPage"
+import LoadingSpinner from "./components/LoadingSpinner"
 
 const { darkAlgorithm } = theme
 // const { TabPane } = Tabs
@@ -44,9 +45,7 @@ function App() {
         }}
       >
         <BasicLayout>
-          <Spin
-            style={{ position: "absolute", left: "50%", top: "50%" }}
-          ></Spin>
+          <LoadingSpinner />
         </BasicLayout>
       </ConfigProvider>
     )
