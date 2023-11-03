@@ -450,8 +450,7 @@ const LandingPage = () => {
         <Typography>
           <Title level={1}>Connect everything</Title>
           <Text strong style={{ fontSize: "18px" }}>
-            Zenote lets you and your team take notes the same way your brain
-            does. Except... better.
+            Zenote is a note-taking app designed to mimic how your brain works.
           </Text>
           <br />
           <div
@@ -492,25 +491,18 @@ const LandingPage = () => {
 
             <Col xs={24} md={12}>
               <Card hoverable>
-                <Title level={4}>Own Your Graph</Title>
+                <Title level={4}>Visualize your thoughts</Title>
+                <Paragraph>
+                  Zenote's graph view allows you to see your notes in a new way.
+                  Visualize your ideas and thought processes as a network of
+                  nodes and connections, and gain new insights into your work.
+                </Paragraph>
                 <div style={{ maxHeight: "600px" }}>
                   <DemoGraph graphId={"demo"} nodes={nodes} />
                 </div>
               </Card>
             </Col>
 
-            {/* New Cards */}
-            {/* <Col xs={24} md={12}>
-            <Card hoverable>
-              <Title level={4}>Advanced Tables</Title>
-              <Paragraph>
-                Create tables that do more than just hold data. With sorting,
-                filtering, and grouping features, you can make sense of your
-                information effortlessly. Merge cells, add footnotes, and even
-                embed media to make your tables more comprehensive.
-              </Paragraph>
-            </Card>
-          </Col> */}
             <Col xs={24} md={12}>
               <Card hoverable>
                 <Title level={4}>Sharing and Collaboration</Title>
@@ -521,8 +513,7 @@ const LandingPage = () => {
                   same notes, ensuring everyone is on the same page.
                 </Paragraph>
               </Card>
-            </Col>
-            <Col xs={24} md={12}>
+              <br />
               <Card hoverable>
                 <Title level={4}>Online-First Functionality</Title>
                 <Paragraph>
@@ -556,11 +547,19 @@ const LandingPage = () => {
             </Col>
           </Row>
 
-          <Row style={{ marginTop: "40px" }}>
+          <Row style={{ marginTop: "20px" }}>
             <Col span={24}>
-              <Link to="/signup">
-                <Button size="large">Get Started with Zenote</Button>
-              </Link>
+              <div style={{ textAlign: "center", marginTop: "60px" }}>
+                <Title level={2}>Ready to Elevate Your Note-Taking?</Title>
+                <Paragraph strong style={{ fontSize: "18px" }}>
+                  Join Zenote today and transform your productivity. Our
+                  platform is designed to make your ideas come to life. Try it
+                  now and see the difference.
+                </Paragraph>
+                <Button type="primary" size="large">
+                  <Link to="/signup">Sign Up & Start Exploring</Link>
+                </Button>
+              </div>
             </Col>
           </Row>
         </Typography>

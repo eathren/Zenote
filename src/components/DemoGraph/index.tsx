@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { GraphNode, GraphEdge } from "src/types" // Update the import path as needed
 import "react-contexify/ReactContexify.css"
-import useGraphSettingsStore from "src/stores/graphSettingsStore"
 type ForceGraphProps = {
   graphId: string
   nodes: GraphNode[]
@@ -53,7 +52,6 @@ const DemoGraph = (props: ForceGraphProps) => {
   const [nodes, setNodes] = useState<GraphNode[]>(props.nodes)
   const [edges, setEdges] = useState<GraphEdge[]>([])
 
-  const { getOrInitializeSettings } = useGraphSettingsStore()
   const showOrphans = true,
     showTags = true,
     nodeSize = 5,
@@ -108,17 +106,14 @@ const DemoGraph = (props: ForceGraphProps) => {
     setNodes([...tagNodes, ...filteredNodes])
     setEdges([...filteredEdges, ...tagsEdges])
   }, [props.nodes, showOrphans, showTags, startingNodes])
-  const getNodeColor = useCallback(
-    (_nodeName: string, _tags: string[] = [], isTagNode: boolean = false) => {
-      // Default color for tag nodes
-      if (isTagNode) {
-        return "#82a8ff" // Light blue
-      }
+  const getNodeColor = useCallback((isTagNode: boolean = false) => {
+    // Default color for tag nodes
+    if (isTagNode) {
+      return "#82a8ff" // Light blue
+    }
 
-      return "#ffffff"
-    },
-    []
-  )
+    return "#ffffff"
+  }, [])
 
   const calculateNodeSizeHover = useCallback(
     (d: GraphNode) => {
@@ -184,7 +179,7 @@ const DemoGraph = (props: ForceGraphProps) => {
     nodeGroup
       .append("circle")
       .attr("r", (d) => calculateNodeSize(d))
-      .attr("fill", (d) => getNodeColor(d.name, d.tags, d.isTagNode))
+      .attr("fill", (d) => getNodeColor(d.isTagNode))
       .style("transition", "all 0.3s ease-in-out")
       .on("mouseover", function (_event, d) {
         d3.select(this)
@@ -217,7 +212,7 @@ const DemoGraph = (props: ForceGraphProps) => {
         // Reset the node color and size to the original
         d3.select(this)
           .attr("r", calculateNodeSize(d))
-          .attr("fill", getNodeColor(d.name, d.tags, d.isTagNode))
+          .attr("fill", getNodeColor(d.isTagNode))
 
         // Reset link colors to the original
         link.attr("stroke", "#AAAAAA")
@@ -291,7 +286,7 @@ const DemoGraph = (props: ForceGraphProps) => {
   ])
 
   return (
-    <div style={{ height: "100vh", maxHeight: "100%", position: "relative" }}>
+    <div style={{ height: "300px", position: "relative" }}>
       <svg ref={svgRef} width="100%" height="100%"></svg>
     </div>
   )
