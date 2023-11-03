@@ -2,7 +2,6 @@ import * as d3 from "d3"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { GraphNode, GraphEdge } from "src/types" // Update the import path as needed
-import { drag } from "./utils"
 import "react-contexify/ReactContexify.css"
 import useGraphSettingsStore from "src/stores/graphSettingsStore"
 type ForceGraphProps = {
@@ -10,7 +9,43 @@ type ForceGraphProps = {
   nodes: GraphNode[]
 }
 
-const ForceGraph = (props: ForceGraphProps) => {
+// Utility function for creating a drag behavior
+export const drag = (simulation: d3.Simulation<GraphNode, undefined>) => {
+  function dragstarted(
+    event: d3.D3DragEvent<SVGCircleElement, GraphNode, unknown>,
+    d: GraphNode
+  ) {
+    if (!event.active) simulation.alphaTarget(0.3).restart()
+    d.fx = d.x
+    d.fy = d.y
+  }
+
+  function dragged(
+    event: d3.D3DragEvent<SVGCircleElement, GraphNode, unknown>,
+    d: GraphNode
+  ) {
+    d.fx = event.x
+    d.fy = event.y
+  }
+
+  function dragended(
+    event: d3.D3DragEvent<SVGCircleElement, GraphNode, unknown>,
+    d: GraphNode
+  ) {
+    if (!event.active) simulation.alphaTarget(0)
+    d.fx = null
+    d.fy = null
+  }
+
+  simulation.alpha(1).restart()
+  return d3
+    .drag<SVGCircleElement, GraphNode>()
+    .on("start", dragstarted)
+    .on("drag", dragged)
+    .on("end", dragended)
+}
+
+const DemoGraph = (props: ForceGraphProps) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const navigate = useNavigate()
   const { graphId } = props
@@ -19,20 +54,17 @@ const ForceGraph = (props: ForceGraphProps) => {
   const [edges, setEdges] = useState<GraphEdge[]>([])
 
   const { getOrInitializeSettings } = useGraphSettingsStore()
-  const {
-    nodeSize,
-    nodeGrowth,
-    repelForce,
-    linkStrength,
-    groups,
-    showTags,
-    showOrphans,
-  } = getOrInitializeSettings(graphId)
+  const showOrphans = true,
+    showTags = true,
+    nodeSize = 5,
+    linkStrength = 100,
+    repelForce = 100,
+    nodeGrowth = false
 
   const { startingNodes } = useParams()
 
   useEffect(() => {
-    let filteredNodes = props.nodes.filter((node) => node !== undefined)
+    const filteredNodes = props.nodes.filter((node) => node !== undefined)
     const nodeSet = new Set(filteredNodes.map((node) => node.id))
     // const startingNodeIds = startingNodes ? startingNodes.split(",") : []
 
@@ -53,26 +85,11 @@ const ForceGraph = (props: ForceGraphProps) => {
       connectedNodeSet.add(edge.target)
     })
 
-    // Filter out orphan nodes (nodes without any incoming or outgoing links)
-    const nonOrphanNodes = filteredNodes.filter((node) =>
-      connectedNodeSet.has(node.id)
-    )
-
-    if (showOrphans === false) {
-      filteredNodes = nonOrphanNodes.length > 0 ? nonOrphanNodes : filteredNodes
-    }
-
-    if (showTags === false) {
-      setNodes(filteredNodes)
-      setEdges(filteredEdges)
-      return
-    }
-
     // Collect unique tags
     const tagsSet = new Set(filteredNodes.flatMap((node) => node.tags || []))
     const tagNodes: GraphNode[] = [...tagsSet].map((tag) => ({
       id: `tag:${tag}`,
-      name: `#${tag}`,
+      name: `${tag}`,
       tags: [],
       isTagNode: true,
     }))
@@ -92,32 +109,15 @@ const ForceGraph = (props: ForceGraphProps) => {
     setEdges([...filteredEdges, ...tagsEdges])
   }, [props.nodes, showOrphans, showTags, startingNodes])
   const getNodeColor = useCallback(
-    (nodeName: string, tags: string[] = [], isTagNode: boolean = false) => {
+    (_nodeName: string, _tags: string[] = [], isTagNode: boolean = false) => {
       // Default color for tag nodes
       if (isTagNode) {
         return "#82a8ff" // Light blue
       }
 
-      let color = "#ffffff"
-
-      groups?.forEach((group) => {
-        // Case-insensitive check for group name in node name
-        if (nodeName.toLowerCase().includes(group.name.toLowerCase())) {
-          color = group.color as string
-        }
-
-        tags.forEach((tag) => {
-          // Remove "tag:" prefix and make it case-insensitive
-          const tagWithoutPrefix = tag.replace(/^tag:/i, "").toLowerCase()
-          if (tagWithoutPrefix === group.name.toLowerCase()) {
-            color = group.color as string
-          }
-        })
-      })
-
-      return color
+      return "#ffffff"
     },
-    [groups]
+    []
   )
 
   const calculateNodeSizeHover = useCallback(
@@ -226,9 +226,6 @@ const ForceGraph = (props: ForceGraphProps) => {
         nodeGroup.attr("opacity", 1)
         link.attr("stroke-opacity", 1)
       })
-      .on("click", (_event, d) => {
-        navigate(`/graphs/${graphId}/node/${d.id}`)
-      })
 
     nodeGroup
       .append("text")
@@ -300,4 +297,4 @@ const ForceGraph = (props: ForceGraphProps) => {
   )
 }
 
-export default ForceGraph
+export default DemoGraph
