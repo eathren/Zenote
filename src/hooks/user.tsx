@@ -1,17 +1,19 @@
 import {
   AuthError,
+  signInWithPopup,
   User,
   UserCredential,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   createUserWithEmailAndPassword as firebaseSignUp,
+  GoogleAuthProvider,
 } from "firebase/auth"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { auth } from "src/firebase"
 import { createUserDoc } from "src/handles/user"
 import { openNotification } from "src/utils"
-
+const googleProvider = new GoogleAuthProvider()
 export const useUser = () => {
   const [user, setUser] = useState<User | null>(null)
 
@@ -61,6 +63,29 @@ export const useUser = () => {
     }
   }
 
+  // Google sign-in method
+  const googleSignIn = async () => {
+    try {
+      const userCredential: UserCredential = await signInWithPopup(
+        auth,
+        googleProvider
+      )
+      const user = userCredential.user
+      if (user) {
+        navigate("/")
+      }
+      return user
+    } catch (error) {
+      const authError: AuthError = error as AuthError
+      openNotification(
+        "error",
+        "Error during Google sign-in",
+        authError.message
+      )
+      console.error("Error during Google sign-in:", authError.code)
+    }
+  }
+
   // Function to handle sign up
   const signUp = async (email: string, password: string) => {
     try {
@@ -86,5 +111,5 @@ export const useUser = () => {
     }
   }
 
-  return { user, signOut, signIn, signUp, loading }
+  return { user, signOut, signIn, signUp, googleSignIn, loading }
 }

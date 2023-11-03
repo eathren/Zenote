@@ -24,12 +24,16 @@ const AddNodeModal: React.FC<AddNodeModalProps> = ({
 
   // Function to add new node
   const confirmAddNode = async () => {
-    if (graphId && searchTerm !== "") {
-      const id = await addNode(graphId, searchTerm)
+    if (graphId && searchTerm.trim() !== "") {
+      const nodeNames = searchTerm.split(",") // Split the search term by spaces
+      const nodeIds = await addNode(graphId, nodeNames) // Pass the array of node names
 
       resetSearchTerm()
       onClose()
-      navigate(`/graphs/${graphId}/node/${id}`)
+      // Navigate to the last created node. Alternatively, you can handle navigation differently
+      if (nodeIds && nodeIds?.length === 1) {
+        navigate(`/graphs/${graphId}/node/${nodeIds[0]}`)
+      }
     }
   }
 

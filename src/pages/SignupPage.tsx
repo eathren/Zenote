@@ -6,13 +6,14 @@ import {
   LockOutlined,
   EyeInvisibleOutlined,
   EyeTwoTone,
+  GoogleOutlined,
 } from "@ant-design/icons"
 import { Link } from "react-router-dom"
 
 const { Text } = Typography
 
 const SignUpPage: React.FC = () => {
-  const { signUp } = useUser()
+  const { signUp, googleSignIn } = useUser()
   const [showPassword] = useState(false)
 
   const onFinish = async (values: { email: string; password: string }) => {
@@ -67,6 +68,19 @@ const SignUpPage: React.FC = () => {
               }}
             >
               Sign Up
+            </Button>
+            <Button
+              onClick={googleSignIn}
+              style={{
+                backgroundColor: "#4285F4",
+                color: "white",
+                width: "80%",
+                display: "block",
+                margin: "10px auto",
+              }}
+              icon={<GoogleOutlined />}
+            >
+              Sign up with Google
             </Button>
             <Row align="middle" justify="center">
               <Text type="secondary">
