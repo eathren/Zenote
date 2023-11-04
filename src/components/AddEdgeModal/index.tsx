@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react"
-import { Modal, Input, List, notification } from "antd"
+import { Modal, Input, List } from "antd"
 import { GraphNode } from "src/types"
 import { useNodeModal } from "src/hooks/useNodeModal"
 import { batchUpdateNodeEdges } from "src/handles/edges"
 import { useNodes } from "src/hooks/useNodes"
 import { findNode } from "src/utils"
+import { addNodeAndReturn } from "src/handles/nodes"
 
 type AddEdgeModalProps = {
   isOpen: boolean
@@ -22,10 +23,12 @@ const AddEdgeModal: React.FC<AddEdgeModalProps> = ({
   onConfirm,
 }) => {
   const [selectedNodes, setSelectedNodes] = useState<GraphNode[]>([])
-  const { searchTerm, handleSearchTermChange, filteredNodes } = useNodeModal({
-    isOpen,
-  })
+  const { searchTerm, handleSearchTermChange, filteredNodes, resetSearchTerm } =
+    useNodeModal({
+      isOpen,
+    })
   const { nodes } = useNodes(graphId)
+
   useEffect(() => {
     setSelectedNodes([])
   }, [isOpen])
@@ -38,68 +41,105 @@ const AddEdgeModal: React.FC<AddEdgeModalProps> = ({
     )
   }
 
-  const confirmCreateEdges = async () => {
+  const confirmCreateEdgesAndNodes = async () => {
     if (!graphId || !nodeId) return
 
-    // Collect all target node IDs into an array
-    const targetNodeIds = selectedNodes.map((targetNode) => targetNode.id!)
-    const returnObj = targetNodeIds.map((targetNodeId) => {
+    // Split the searchTerm into individual names, trimming whitespace.
+    const potentialNewNodeNames = searchTerm
+      .split(",")
+      .map((name) => name.trim())
+      .filter((name) => name) // Ensure no empty names
+
+    // Determine which of the entered names do not match existing nodes.
+    const nodesToCreate = potentialNewNodeNames.filter(
+      (name) => !nodes.some((node) => node.name === name)
+    )
+
+    // IDs of existing nodes that were selected.
+    const existingSelectedNodeIds = selectedNodes.map((node) => node.id)
+
+    // Create the nodes and then create the edges.
+    const createNodesAndEdges = async () => {
+      let newNodes: GraphNode[] = []
+
+      if (nodesToCreate.length > 0) {
+        // Attempt to create the new nodes and capture the new node objects.
+        newNodes = (await addNodeAndReturn(graphId, nodesToCreate)) || []
+      }
+
+      // Extract the IDs from the new node objects.
+      const newNodesIds = newNodes.map((node) => node.id)
+
+      // Combine the IDs of the newly created nodes with the existing selected nodes.
+      const allTargetNodeIds = [...existingSelectedNodeIds, ...newNodesIds]
+
+      // Now create the edges.
+      await createEdges(allTargetNodeIds, newNodes)
+    }
+
+    // If there are new nodes to be created, show a confirmation dialog.
+    if (nodesToCreate.length > 0) {
+      Modal.confirm({
+        title: "Confirm Node Creation",
+        content: `You are about to create new node(s): ${nodesToCreate.join(
+          ", "
+        )}. Continue?`,
+        onOk: createNodesAndEdges,
+      })
+    } else {
+      // If no new nodes are being created, just create the edges.
+      await createEdges(existingSelectedNodeIds, [])
+    }
+  }
+
+  const createEdges = async (
+    targetNodeIds: string[],
+    newNodes: GraphNode[]
+  ) => {
+    console.log("Creating edges with node IDs: ", targetNodeIds)
+    if (!graphId || !nodeId) return
+
+    // Proceed with creating edges between the current node and the target node IDs.
+    await batchUpdateNodeEdges(graphId, nodeId, targetNodeIds, [])
+    resetSearchTerm()
+
+    // Map the new nodes to their names, assuming that new nodes are not yet in the nodes state.
+
+    const newNodesMap: { [key: string]: string } = {}
+    for (const node of newNodes) {
+      newNodesMap[node.id] = node.name
+    }
+
+    // Prepare the return object with node IDs and names.
+    const returnObj = targetNodeIds.map((targetNodeId: string) => {
+      // Use the name from the new nodes map if the node is new, otherwise find it in the existing nodes.
       return {
-        targetNodeId: targetNodeId,
-        name: findNode(nodes, targetNodeId)?.name,
+        targetNodeId,
+        name: newNodesMap[targetNodeId] || findNode(nodes, targetNodeId)?.name,
       }
     })
-    let message = ""
 
-    try {
-      // Attempt to add edges in a batch
-      const result = await batchUpdateNodeEdges(
-        graphId,
-        nodeId,
-        targetNodeIds,
-        []
-      )
-      if (!result) {
-        message = "Failed to add edges"
-        notification.error({
-          message: message,
-          duration: 3,
-        })
-      } else {
-        message = "Edges added successfully"
-        notification.success({
-          message: message,
-          duration: 3,
-        })
-      }
-    } catch (error) {
-      console.error(error)
-      message = "Error occurred"
-      notification.error({
-        message: message,
-        duration: 3,
-      })
-    }
-    console.log(returnObj)
+    console.log("returnObj", returnObj)
+
+    // If there is a callback function provided, call it with the return object.
     if (onConfirm) {
       onConfirm(returnObj)
     }
 
+    // Close the modal.
     onClose()
   }
 
-  // Function to handle Enter key press
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      confirmCreateEdges()
+      confirmCreateEdgesAndNodes()
     }
   }
-
   return (
     <Modal
       title="Select Nodes to Create Edge(s)"
       open={isOpen}
-      onOk={confirmCreateEdges}
+      onOk={confirmCreateEdgesAndNodes}
       onCancel={onClose}
       bodyStyle={{ height: "65vh", maxHeight: "65vh" }}
     >

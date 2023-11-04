@@ -11,7 +11,7 @@ type GraphControlsState = {
 
 const defaultSettings: GraphSettings = {
   showOrphans: true,
-  showTags: false,
+  showTags: true,
   nodeSize: 5,
   linkStrength: 100,
   nodeStrength: -30,

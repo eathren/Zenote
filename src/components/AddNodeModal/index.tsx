@@ -57,7 +57,6 @@ const AddNodeModal: React.FC<AddNodeModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      console.log("focus")
       inputRef.current?.focus()
     }
   }, [isOpen])
