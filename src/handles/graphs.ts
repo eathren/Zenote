@@ -10,6 +10,7 @@ import {
   runTransaction,
   where,
   setDoc,
+  deleteField,
 } from "firebase/firestore"
 import {
   Graph,
@@ -134,6 +135,36 @@ export const updateGraphNodes = async (
         nodes,
       })
     }
+  })
+}
+
+export const updateGraphNodesBatch = async (
+  graphId: string,
+  nodes: Array<{ nodeId: string; nodeName: string }>,
+  operation: "add" | "delete" | "update"
+) => {
+  return await handleOperation(async () => {
+    const graphRef = doc(db, `graphs`, graphId)
+
+    const updates: Record<string, any> = {}
+
+    switch (operation) {
+      case "add":
+      case "update":
+        for (const { nodeId, nodeName } of nodes) {
+          updates[`nodes.${nodeId}`] = nodeName
+        }
+        break
+      case "delete":
+        for (const { nodeId } of nodes) {
+          updates[`nodes.${nodeId}`] = deleteField()
+        }
+        break
+      default:
+        throw new Error(`Unsupported operation: ${operation}`)
+    }
+
+    await updateDoc(graphRef, updates)
   })
 }
 

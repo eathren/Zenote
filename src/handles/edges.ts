@@ -7,7 +7,7 @@ import {
 } from "firebase/firestore"
 import { GraphEdge } from "src/types/index" // Update the import path according to your project structure
 import { notification } from "antd"
-import { getNodeCollectionPath, getNodeDocRef } from "./utils"
+import { getNodeCollectionPath, getNodeDocRef, handleOperation } from "./utils"
 import { v4 as uuidv4 } from "uuid"
 import { GraphNode } from "src/types/index"
 const db = getFirestore()
@@ -71,7 +71,7 @@ export const batchUpdateNodeEdges = async (
   edgesToAdd: string[],
   edgesToRemove: string[]
 ) => {
-  try {
+  return await handleOperation(async () => {
     // Get reference to the specific node document
     const nodeDocRef = getNodeDocRef(db, graphId, nodeId)
 
@@ -93,8 +93,6 @@ export const batchUpdateNodeEdges = async (
       nodeData.edges = []
     }
 
-    console.log("newEdges", newEdges, nodeData)
-
     // Add new edges to edges array locally, only if they do not already exist
     newEdges.forEach((newEdge) => {
       if (
@@ -113,16 +111,14 @@ export const batchUpdateNodeEdges = async (
       )
     }
 
+    console.log("nodeData.edges", nodeData.edges)
     // Perform a single batch update to the database
     await updateDoc(nodeDocRef, {
       edges: nodeData.edges,
     })
 
     return true
-  } catch (error) {
-    console.error("Error updating edges: ", error)
-    return false
-  }
+  })
 }
 
 export const addEdgesToNodeBatch = async (
