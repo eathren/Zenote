@@ -161,6 +161,60 @@ const ForceGraph = (props: ForceGraphProps) => {
 
     const container = svg.append("g")
 
+    const applyDragBehavior = (
+      selection:
+        | d3.Selection<SVGCircleElement, GraphNode, SVGGElement, unknown>
+        | any
+    ) => {
+      selection
+        .on(
+          "start",
+          (
+            event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>,
+            d: GraphNode
+          ) => {
+            if (!event.active) simulation.alphaTarget(0.3).restart()
+            d.fx = event.x
+            d.fy = event.y
+          }
+        )
+        .on(
+          "drag",
+          (
+            event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>,
+            d: GraphNode
+          ) => {
+            d.fx = event.x
+            d.fy = event.y
+            // Change color and size on drag
+            d3.select(event.sourceEvent.target as SVGCircleElement)
+              .attr("fill", "#82a8ff")
+              .attr("r", calculateNodeSizeHover(d))
+              .transition() // Start a transition
+              .duration(300) // Duration in milliseconds
+              .ease(d3.easeCubicInOut) // Ease-in-out transition
+              .style("font-size", "12px")
+              .attr("dy", 25)
+              .attr("fill", "#82a8ff")
+          }
+        )
+        .on(
+          "end",
+          (
+            event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>,
+            d: GraphNode
+          ) => {
+            if (!event.active) simulation.alphaTarget(0)
+            d.fx = null
+            d.fy = null
+            // Reset color and size after drag ends
+            d3.select(event.sourceEvent.target as SVGCircleElement)
+              .attr("fill", getNodeColor(d.name, d.tags, d.isTagNode))
+              .attr("r", calculateNodeSize(d))
+          }
+        )
+    }
+
     const link = container
       .append("g")
       .attr("class", "links")
@@ -177,6 +231,7 @@ const ForceGraph = (props: ForceGraphProps) => {
       .data(nodes)
       .join("g")
       .call(drag(simulation) as any)
+      .call(applyDragBehavior)
 
     nodeGroup
       .append("circle")
@@ -187,6 +242,15 @@ const ForceGraph = (props: ForceGraphProps) => {
         d3.select(this)
           .attr("r", calculateNodeSizeHover(d))
           .attr("fill", "#82a8ff")
+          .attr("text")
+
+        nodeGroup
+          .selectAll("text")
+          .filter((n: GraphNode | any) => n.id === d.id)
+          .style("font-size", "12px")
+          .attr("dy", 20)
+          .attr("fill", "#82a8ff")
+          .style("transition", "all 0.1s ease-in-out")
 
         link
           .filter((l: GraphEdge) => l.source === d || l.target === d)
@@ -219,12 +283,22 @@ const ForceGraph = (props: ForceGraphProps) => {
         // Reset link colors to the original
         link.attr("stroke", "#AAAAAA")
 
+        nodeGroup
+          .selectAll("text")
+          .filter((n: GraphNode | any) => n.id === d.id)
+          .style("font-size", "8px")
+          .attr("dy", 20)
+          .attr("fill", "#FFFFFF")
+          .style("transition", "all 0.2s ease-in-out")
+
         // Remove the fading out of other nodes and links
         nodeGroup.attr("opacity", 1)
         link.attr("stroke-opacity", 1)
       })
       .on("click", (_event, d) => {
-        navigate(`/graphs/${graphId}/node/${d.id}`)
+        if (!d.isTagNode) {
+          navigate(`/graphs/${graphId}/node/${d.id}`)
+        }
       })
 
     nodeGroup
