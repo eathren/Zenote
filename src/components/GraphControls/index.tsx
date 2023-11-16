@@ -55,8 +55,8 @@ const GraphControls = () => {
     _.debounce((value) => {
       const filterParams = value
         .split(",")
-        .map((s) => s.trim())
-        .filter((s) => s)
+        .map((s: string) => s.trim())
+        .filter((s: string) => s)
         .join(",")
 
       if (filterParams) {
