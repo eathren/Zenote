@@ -1,9 +1,16 @@
 import * as d3 from "d3"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { GraphNode, GraphEdge } from "src/types" // Update the import path as needed
-import { drag } from "./utils"
+import {
+  createTagEdges,
+  createTagNodes,
+  drag,
+  filterEdges,
+  filterNodesAndIncludeChildren,
+} from "./utils"
 import "react-contexify/ReactContexify.css"
+
 import useGraphSettingsStore from "src/stores/graphSettingsStore"
 type ForceGraphProps = {
   graphId: string
@@ -14,7 +21,7 @@ const ForceGraph = (props: ForceGraphProps) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const navigate = useNavigate()
   const { graphId } = props
-
+  const [searchParams] = useSearchParams()
   const [nodes, setNodes] = useState<GraphNode[]>(props.nodes)
   const [edges, setEdges] = useState<GraphEdge[]>([])
 
@@ -31,32 +38,20 @@ const ForceGraph = (props: ForceGraphProps) => {
 
   useEffect(() => {
     let filteredNodes = props.nodes.filter((node) => node !== undefined)
-    const nodeSet = new Set(filteredNodes.map((node) => node.id))
 
-    // Function to check if a node exists in the Set
-    const doesNodeExist = (nodeId: string) => nodeSet.has(nodeId)
-
-    // Filter links where both source and target nodes exist
-    const filteredEdges = props.nodes
-      .flatMap((node) => node.edges || [])
-      .filter(
-        (link) =>
-          doesNodeExist(link.source as string) &&
-          doesNodeExist(link.target as string)
-      )
-
-    const connectedNodeSet = new Set()
-    filteredEdges.forEach((edge) => {
-      connectedNodeSet.add(edge.source)
-      connectedNodeSet.add(edge.target)
-    })
-
-    // Filter out orphan nodes (nodes without any incoming or outgoing links)
-    if (showOrphans === false) {
-      filteredNodes = filteredNodes.filter((node) =>
-        connectedNodeSet.has(node.id)
-      )
+    const filterParam = searchParams.get("filter")
+    if (filterParam) {
+      const filterCriteria = filterParam
+        ? filterParam.split(",").map((tag) => tag.trim().toLowerCase())
+        : []
+      filteredNodes = filterNodesAndIncludeChildren(props.nodes, filterCriteria)
     }
+    // Filter out orphan nodes (nodes without any incoming or outgoing links)
+    // if (showOrphans === false) {
+    //   filteredNodes = filteredNodes.filter((node) =>
+    //     connectedNodeSet.has(node.id)
+    //   )
+    // }
 
     // If showTags is false, we just update the nodes and edges state without modifying them
     // if (showTags === false) {
@@ -64,29 +59,16 @@ const ForceGraph = (props: ForceGraphProps) => {
     //   setEdges(filteredEdges)
     // } else {
     // Collect unique tags and create tag nodes and edges
-    const tagsSet = new Set(filteredNodes.flatMap((node) => node.tags || []))
-    const tagNodes: GraphNode[] = [...tagsSet].map((tag) => ({
-      id: `tag:${tag}`,
-      name: `#${tag}`,
-      tags: [],
-      isTagNode: true,
-    }))
-    const tagsEdges: GraphEdge[] = []
-
-    filteredNodes.forEach((node) => {
-      node.tags?.forEach((tag) => {
-        tagsEdges.push({
-          id: `${node.id}->tag:${tag}`,
-          source: node.id,
-          target: `tag:${tag}`,
-        })
-      })
-    })
-
+    const filteredEdges = filterEdges(filteredNodes)
+    const tagNodes = createTagNodes(filteredNodes)
+    const tagEdges = createTagEdges(filteredNodes)
     setNodes([...tagNodes, ...filteredNodes])
-    setEdges([...filteredEdges, ...tagsEdges])
+    setEdges([...filteredEdges, ...tagEdges])
+
     // }
-  }, [props.nodes, showOrphans])
+  }, [props.nodes, searchParams, showOrphans])
+
+  console.log("nodes", nodes, "edges", edges)
 
   const getNodeColor = useCallback(
     (nodeName: string, tags: string[] = [], isTagNode: boolean = false) => {

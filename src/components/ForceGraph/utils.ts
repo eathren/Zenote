@@ -1,5 +1,83 @@
 import * as d3 from "d3"
-import { GraphNode } from "src/types" // Update the import path as needed
+import { GraphEdge, GraphNode } from "src/types"
+
+export const createTagNodes = (nodes: GraphNode[]): GraphNode[] => {
+  const tagsSet = new Set(nodes.flatMap((node) => node.tags || []))
+  return [...tagsSet].map((tag) => ({
+    id: `tag:${tag}`,
+    name: `#${tag}`,
+    tags: [],
+    isTagNode: true,
+  }))
+}
+
+export const createTagEdges = (nodes: GraphNode[]): GraphEdge[] => {
+  const tagsEdges: GraphEdge[] = []
+
+  nodes.forEach((node) => {
+    node.tags?.forEach((tag) => {
+      tagsEdges.push({
+        id: `${node.id}->tag:${tag}`,
+        source: node.id,
+        target: `tag:${tag}`,
+      })
+    })
+  })
+
+  return tagsEdges
+}
+
+export const filterEdges = (nodes: GraphNode[]): GraphEdge[] => {
+  const nodeIds = new Set(nodes.map((node) => node.id))
+  return nodes.flatMap(
+    (node) =>
+      node.edges?.filter(
+        (edge) =>
+          nodeIds.has(edge.source as string) &&
+          nodeIds.has(edge.target as string)
+      ) || []
+  )
+}
+
+export const filterNodesAndIncludeChildren = (
+  nodes: GraphNode[],
+  filterCriteria: string[]
+): GraphNode[] => {
+  let filteredNodes = nodes.filter((node) => node !== undefined)
+
+  if (filterCriteria.length > 0) {
+    filteredNodes = filteredNodes.filter(
+      (node) =>
+        node.tags?.some((tag) =>
+          filterCriteria.some((criteria) =>
+            tag.toLowerCase().includes(criteria)
+          )
+        ) ||
+        filterCriteria.some((criteria) =>
+          node.name.toLowerCase().includes(criteria)
+        )
+    )
+
+    const filteredNodeIds = new Set(filteredNodes.map((node) => node.id))
+
+    // Include children of the filtered nodes
+    nodes.forEach((node) => {
+      node.edges?.forEach((edge) => {
+        if (
+          filteredNodeIds.has(edge.source as string) ||
+          filteredNodeIds.has(edge.target as string)
+        ) {
+          filteredNodeIds.add(edge.source as string)
+          filteredNodeIds.add(edge.target as string)
+        }
+      })
+    })
+
+    filteredNodes = nodes.filter((node) => filteredNodeIds.has(node.id))
+  }
+
+  return filteredNodes
+}
 
 // Utility function for creating a zoom behavior
 export const createZoom = (
