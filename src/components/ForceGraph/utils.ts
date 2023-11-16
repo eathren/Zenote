@@ -1,5 +1,6 @@
 import * as d3 from "d3"
 import { GraphEdge, GraphNode } from "src/types"
+import { findNode } from "src/utils"
 
 export const createTagNodes = (nodes: GraphNode[]): GraphNode[] => {
   const tagsSet = new Set(nodes.flatMap((node) => node.tags || []))
@@ -29,54 +30,66 @@ export const createTagEdges = (nodes: GraphNode[]): GraphEdge[] => {
 
 export const filterEdges = (nodes: GraphNode[]): GraphEdge[] => {
   const nodeIds = new Set(nodes.map((node) => node.id))
-  return nodes.flatMap(
-    (node) =>
+  let allEdges: GraphEdge[] = []
+
+  // Iterate over all nodes to access their edges
+  nodes.forEach((node) => {
+    // Filter edges for each node where both source and target are valid nodes
+    const validEdges =
       node.edges?.filter(
         (edge) =>
-          nodeIds.has(edge.source as string) &&
-          nodeIds.has(edge.target as string)
+          nodeIds.has(
+            typeof edge.source === "object" ? edge.source.id : edge.source
+          ) &&
+          nodeIds.has(
+            typeof edge.target === "object" ? edge.target.id : edge.target
+          )
       ) || []
-  )
+
+    // Combine these edges into the overall edge list
+    allEdges = allEdges.concat(validEdges)
+  })
+
+  return allEdges
 }
 
 export const filterNodesAndIncludeChildren = (
   nodes: GraphNode[],
   filterCriteria: string[]
 ): GraphNode[] => {
-  let filteredNodes = nodes.filter((node) => node !== undefined)
-
-  if (filterCriteria.length > 0) {
-    filteredNodes = filteredNodes.filter(
-      (node) =>
-        node.tags?.some((tag) =>
+  // Filter nodes based on criteria
+  const filteredNodes = nodes.filter(
+    (node) =>
+      filterCriteria.length === 0 ||
+      (node.tags &&
+        node.tags.some((tag) =>
           filterCriteria.some((criteria) =>
             tag.toLowerCase().includes(criteria)
           )
-        ) ||
-        filterCriteria.some((criteria) =>
-          node.name.toLowerCase().includes(criteria)
-        )
-    )
+        )) ||
+      filterCriteria.some((criteria) =>
+        node.name.toLowerCase().includes(criteria)
+      )
+  )
 
-    const filteredNodeIds = new Set(filteredNodes.map((node) => node.id))
+  // Set to track included node IDs to avoid duplicates
+  const includedNodeIds = new Set(filteredNodes.map((node) => node.id))
 
-    // Include children of the filtered nodes
-    nodes.forEach((node) => {
-      node.edges?.forEach((edge) => {
-        if (
-          filteredNodeIds.has(edge.source as string) ||
-          filteredNodeIds.has(edge.target as string)
-        ) {
-          filteredNodeIds.add(edge.source as string)
-          filteredNodeIds.add(edge.target as string)
-        }
-      })
+  // Process edges and connected nodes
+  const output = [...filteredNodes]
+  filteredNodes.forEach((node) => {
+    node.edges?.forEach((edge) => {
+      const target = edge.target as GraphNode
+      const targetNode = findNode(nodes, target.id as string)
+      if (targetNode && !includedNodeIds.has(targetNode.id)) {
+        includedNodeIds.add(targetNode.id)
+        output.push(targetNode)
+      }
     })
+  })
+  console.log(output)
 
-    filteredNodes = nodes.filter((node) => filteredNodeIds.has(node.id))
-  }
-
-  return filteredNodes
+  return output
 }
 
 // Utility function for creating a zoom behavior

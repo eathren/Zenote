@@ -19,7 +19,7 @@ const LoginPage: React.FC = () => {
   // Function to handle form submission
   const onFinish = async (values: { email: string; password: string }) => {
     try {
-      await signIn(values.email, values.password)
+      await signIn(values.email.trim(), values.password.trim())
     } catch (error: any) {
       //
     }

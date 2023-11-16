@@ -23,7 +23,7 @@ const ForceGraph = (props: ForceGraphProps) => {
   const { graphId } = props
   const [searchParams] = useSearchParams()
   const [nodes, setNodes] = useState<GraphNode[]>(props.nodes)
-  const [edges, setEdges] = useState<GraphEdge[]>([])
+  const [edges, setEdges] = useState<GraphEdge[] | any[]>([])
 
   const { getOrInitializeSettings } = useGraphSettingsStore()
   const {
@@ -60,6 +60,13 @@ const ForceGraph = (props: ForceGraphProps) => {
     // } else {
     // Collect unique tags and create tag nodes and edges
     const filteredEdges = filterEdges(filteredNodes)
+
+    // const filteredEdges = filteredNodes
+    // .flatMap((node) => node.edges)
+
+    console.log("filteredEdges", filteredEdges)
+
+    // const filteredEdges = filterEdges(filteredNodes)
     const tagNodes = createTagNodes(filteredNodes)
     const tagEdges = createTagEdges(filteredNodes)
     setNodes([...tagNodes, ...filteredNodes])
@@ -68,7 +75,7 @@ const ForceGraph = (props: ForceGraphProps) => {
     // }
   }, [props.nodes, searchParams, showOrphans])
 
-  console.log("nodes", nodes, "edges", edges)
+  // console.log("nodes", nodes, "edges", edges)
 
   const getNodeColor = useCallback(
     (nodeName: string, tags: string[] = [], isTagNode: boolean = false) => {

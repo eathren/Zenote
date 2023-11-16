@@ -18,7 +18,7 @@ const SignUpPage: React.FC = () => {
 
   const onFinish = async (values: { email: string; password: string }) => {
     try {
-      await signUp(values.email, values.password)
+      await signUp(values.email.trim(), values.password.trim())
     } catch (error) {
       //
     }
