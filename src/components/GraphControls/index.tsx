@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import {
   Slider,
   Switch,
@@ -16,18 +16,64 @@ import {
   SearchOutlined,
 } from "@ant-design/icons"
 import { useGraphSettingsStore } from "src/stores/graphSettingsStore"
-import { useParams } from "react-router-dom"
+import { useParams, useSearchParams } from "react-router-dom"
+import { GraphSettings } from "src/types"
+import _ from "lodash"
 const { Panel } = Collapse
 const GraphControls = () => {
-  const { graphId } = useParams()
-  const [open, setOpen] = useState(false)
-  // TODO, fix this undefined string
+  const [searchParams, setSearchParams] = useSearchParams()
+  const { graphId } = useParams<{ graphId: string }>()
+  const [open, setOpen] = useState<boolean>(false)
+  const [filterValue, setFilterValue] = useState<string>("")
   const settings =
-    useGraphSettingsStore((state) => state.settings[graphId!]) || {}
+    useGraphSettingsStore(
+      (state) => state.settings[graphId!] as GraphSettings
+    ) || ({} as GraphSettings)
   const updateSetting = useGraphSettingsStore((state) => state.updateSetting)
   const resetToDefaults = useGraphSettingsStore(
     (state) => state.resetToDefaults
   )
+
+  useEffect(() => {
+    const filter = searchParams.get("filter")
+    if (filter) {
+      setFilterValue(filter)
+    }
+  }, [searchParams])
+
+  const debouncedSetSearchParams = useCallback(
+    _.debounce((value) => {
+      const filterParams = value
+        .split(",")
+        .map((s: string) => s.trim())
+        .filter((s: any) => s)
+        .join(",")
+      setSearchParams({ filter: filterParams })
+    }, 500), // 500ms debounce time
+    [setSearchParams]
+  )
+
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newFilterValue = e.target.value.trim()
+
+    // Update input field value
+    setFilterValue(newFilterValue)
+
+    // Only set the URL parameter if there is a non-empty filter value
+    if (newFilterValue) {
+      const filterParams = newFilterValue
+        .split(",")
+        .map((s) => s.trim())
+        .filter((s) => s)
+        .join(",")
+
+      debouncedSetSearchParams(filterParams)
+    } else {
+      // If the filter is empty, remove the 'filter' parameter from the URL
+      searchParams.delete("filter")
+      setSearchParams(searchParams)
+    }
+  }
 
   const handleCreateGroup = () => {
     updateSetting(graphId, "groups", [
@@ -55,11 +101,9 @@ const GraphControls = () => {
           <Panel header="Filters" key="1">
             <Input
               prefix={<SearchOutlined />}
-              value={settings.searchText}
-              onChange={(e) =>
-                updateSetting(graphId, "searchText", e.target.value)
-              }
-              placeholder="Search"
+              value={filterValue}
+              onChange={handleFilterChange}
+              placeholder="Search (comma separated)"
             />
             <Row justify={"space-between"}>
               <label>Show Orphans: </label>
