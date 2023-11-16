@@ -23,7 +23,7 @@ const ForceGraph = (props: ForceGraphProps) => {
   const { graphId } = props
   const [searchParams] = useSearchParams()
   const [nodes, setNodes] = useState<GraphNode[]>(props.nodes)
-  const [edges, setEdges] = useState<GraphEdge[] | any[]>([])
+  const [edges, setEdges] = useState<GraphEdge[]>([])
 
   const { getOrInitializeSettings } = useGraphSettingsStore()
   const {
@@ -46,27 +46,8 @@ const ForceGraph = (props: ForceGraphProps) => {
         : []
       filteredNodes = filterNodesAndIncludeChildren(props.nodes, filterCriteria)
     }
-    // Filter out orphan nodes (nodes without any incoming or outgoing links)
-    // if (showOrphans === false) {
-    //   filteredNodes = filteredNodes.filter((node) =>
-    //     connectedNodeSet.has(node.id)
-    //   )
-    // }
 
-    // If showTags is false, we just update the nodes and edges state without modifying them
-    // if (showTags === false) {
-    //   setNodes(filteredNodes)
-    //   setEdges(filteredEdges)
-    // } else {
-    // Collect unique tags and create tag nodes and edges
     const filteredEdges = filterEdges(filteredNodes)
-
-    // const filteredEdges = filteredNodes
-    // .flatMap((node) => node.edges)
-
-    console.log("filteredEdges", filteredEdges)
-
-    // const filteredEdges = filterEdges(filteredNodes)
     const tagNodes = createTagNodes(filteredNodes)
     const tagEdges = createTagEdges(filteredNodes)
     setNodes([...tagNodes, ...filteredNodes])

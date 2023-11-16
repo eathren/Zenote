@@ -28,29 +28,23 @@ export const createTagEdges = (nodes: GraphNode[]): GraphEdge[] => {
   return tagsEdges
 }
 
-export const filterEdges = (nodes: GraphNode[]): GraphEdge[] => {
+export const filterEdges = (nodes: GraphNode[]) => {
   const nodeIds = new Set(nodes.map((node) => node.id))
-  let allEdges: GraphEdge[] = []
 
-  // Iterate over all nodes to access their edges
-  nodes.forEach((node) => {
-    // Filter edges for each node where both source and target are valid nodes
-    const validEdges =
-      node.edges?.filter(
-        (edge) =>
-          nodeIds.has(
-            typeof edge.source === "object" ? edge.source.id : edge.source
-          ) &&
-          nodeIds.has(
-            typeof edge.target === "object" ? edge.target.id : edge.target
-          )
-      ) || []
+  // Flatten the array of arrays of edges into a single array of edges
+  const allEdges = nodes.flatMap((node) => node.edges || [])
 
-    // Combine these edges into the overall edge list
-    allEdges = allEdges.concat(validEdges)
-  })
-
-  return allEdges
+  // Filter the edges
+  const filteredEdges = allEdges.filter(
+    (edge) =>
+      nodeIds.has(
+        typeof edge.source === "object" ? edge.source.id : edge.source
+      ) &&
+      nodeIds.has(
+        typeof edge.target === "object" ? edge.target.id : edge.target
+      )
+  )
+  return filteredEdges
 }
 
 export const filterNodesAndIncludeChildren = (
