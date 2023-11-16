@@ -41,39 +41,34 @@ const GraphControls = () => {
     }
   }, [searchParams])
 
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newFilterValue = e.target.value
+
+    // Update input field value with raw input
+    setFilterValue(newFilterValue)
+
+    // Use debounced function to update URL parameters
+    debouncedSetSearchParams(newFilterValue)
+  }
+
   const debouncedSetSearchParams = useCallback(
     _.debounce((value) => {
       const filterParams = value
         .split(",")
         .map((s: string) => s.trim())
-        .filter((s: any) => s)
+        .filter((s: string) => s)
         .join(",")
-      setSearchParams({ filter: filterParams })
+
+      if (filterParams) {
+        setSearchParams({ filter: filterParams })
+      } else {
+        // If the filter is empty, remove the 'filter' parameter from the URL
+        searchParams.delete("filter")
+        setSearchParams(searchParams)
+      }
     }, 500), // 500ms debounce time
     [setSearchParams]
   )
-
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newFilterValue = e.target.value.trim()
-
-    // Update input field value
-    setFilterValue(newFilterValue)
-
-    // Only set the URL parameter if there is a non-empty filter value
-    if (newFilterValue) {
-      const filterParams = newFilterValue
-        .split(",")
-        .map((s) => s.trim())
-        .filter((s) => s)
-        .join(",")
-
-      debouncedSetSearchParams(filterParams)
-    } else {
-      // If the filter is empty, remove the 'filter' parameter from the URL
-      searchParams.delete("filter")
-      setSearchParams(searchParams)
-    }
-  }
 
   const handleCreateGroup = () => {
     updateSetting(graphId, "groups", [

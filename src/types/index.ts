@@ -52,6 +52,8 @@ export interface GraphEdge extends d3.SimulationLinkDatum<GraphNode> {
   graphId?: string
   date_created?: number
   label?: string
+  source: string | GraphNode
+  target: string | GraphNode
 }
 
 export interface User {
