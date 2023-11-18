@@ -7,6 +7,7 @@ import { GraphPrivacySetting } from "src/types"
 
 type AddGraphButtonProps = {
   type: GraphPrivacySetting
+  children?: React.ReactNode
 }
 
 const AddGraphButton = (props: AddGraphButtonProps) => {
@@ -58,7 +59,9 @@ const AddGraphButton = (props: AddGraphButtonProps) => {
         icon={<PlusCircleOutlined />}
         type="text"
         onClick={() => setModalOpen(true)}
-      ></Button>
+      >
+        {props.children}
+      </Button>
       <Modal
         title="Create a new graph"
         centered

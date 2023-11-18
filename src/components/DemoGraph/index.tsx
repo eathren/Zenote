@@ -230,15 +230,6 @@ const DemoGraph = (props: ForceGraphProps) => {
       .attr("dy", 20)
       .attr("fill", "#FFFFFF")
 
-    const zoom: d3.ZoomBehavior<SVGSVGElement, unknown> = d3
-      .zoom<SVGSVGElement, unknown>()
-      .on("zoom", (event: d3.D3ZoomEvent<SVGSVGElement, unknown>) => {
-        const transform = event.transform
-        container.attr("transform", transform.toString())
-      })
-
-    svg.call(zoom)
-
     simulation.on("tick", () => {
       link
         .attr("x1", (d) => {

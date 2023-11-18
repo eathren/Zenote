@@ -466,7 +466,7 @@ const LandingPage = () => {
           <Row gutter={[32, 32]} style={{ marginTop: "40px" }}>
             {/* Existing Cards */}
             <Col xs={24} md={12}>
-              <Card hoverable>
+              <Card>
                 <Title level={4}>Create Nodes</Title>
                 <Paragraph>
                   With Zenote, your notes are not just static text; they're
@@ -475,10 +475,9 @@ const LandingPage = () => {
                   them as you would in your mind.
                 </Paragraph>
               </Card>
-              {/* <img src={Mobile} alt="Description" height="50%" /> */}
             </Col>
             <Col xs={24} md={12}>
-              <Card hoverable>
+              <Card>
                 <Title level={4}>Make Connections</Title>
                 <Paragraph>
                   Don't let your notes exist in isolation. Create meaningful
@@ -489,8 +488,8 @@ const LandingPage = () => {
               </Card>
             </Col>
 
-            <Col xs={24} md={12}>
-              <Card hoverable>
+            <Col xs={24} md={24}>
+              <Card>
                 <Title level={4}>Visualize your thoughts</Title>
                 <Paragraph>
                   Zenote's graph view allows you to see your notes in a new way.
@@ -504,7 +503,7 @@ const LandingPage = () => {
             </Col>
 
             <Col xs={24} md={12}>
-              <Card hoverable>
+              <Card>
                 <Title level={4}>Sharing and Collaboration</Title>
                 <Paragraph>
                   Easily share nodes, connections, or entire graphs with team
@@ -513,8 +512,9 @@ const LandingPage = () => {
                   same notes, ensuring everyone is on the same page.
                 </Paragraph>
               </Card>
-              <br />
-              <Card hoverable>
+            </Col>
+            <Col xs={24} md={12}>
+              <Card>
                 <Title level={4}>Online-First Functionality</Title>
                 <Paragraph>
                   Built on an online-first database architecture, Zenote ensures
@@ -525,7 +525,7 @@ const LandingPage = () => {
             </Col>
 
             <Col xs={24} md={12}>
-              <Card hoverable>
+              <Card>
                 <Title level={4}>Fill Out Notes</Title>
                 <Paragraph>
                   Give your nodes and connections more context by filling them
@@ -536,7 +536,7 @@ const LandingPage = () => {
             </Col>
 
             <Col xs={24} md={12}>
-              <Card hoverable>
+              <Card>
                 <Title level={4}>Dynamic tagging and filtering</Title>
                 <Paragraph>
                   Make even more connections with tags, and filter them as
