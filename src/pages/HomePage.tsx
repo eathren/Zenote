@@ -12,11 +12,11 @@ const HomePage = () => {
   const [isSiderVisible, setIsSiderVisible] = useState(false)
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsSiderVisible(window.innerWidth >= 1200) // Adjust the threshold as needed
+      setIsSiderVisible(window.innerWidth > 1200)
     }
 
     window.addEventListener("resize", checkScreenSize)
-    checkScreenSize() // Initial check
+    checkScreenSize()
 
     return () => window.removeEventListener("resize", checkScreenSize)
   }, [])

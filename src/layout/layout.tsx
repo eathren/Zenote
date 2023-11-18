@@ -53,7 +53,7 @@ export const BasicLayout = ({ children }: LayoutProps) => {
 
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsSiderVisible(window.innerWidth >= 1200) // Adjust the threshold as needed
+      setIsSiderVisible(window.innerWidth > 1200) // Adjust the threshold as needed
     }
 
     window.addEventListener("resize", checkScreenSize)
