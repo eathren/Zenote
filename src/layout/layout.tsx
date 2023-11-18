@@ -116,6 +116,13 @@ export const BasicLayout = ({ children }: LayoutProps) => {
                 background: colorBgContainer,
                 overflow: "auto",
                 padding: "20px",
+                height: "100vh",
+                position: "fixed",
+                left: 0,
+                top: 0,
+                bottom: 0,
+                zIndex: 2,
+                scrollbarWidth: "thin",
               }}
             >
               <GraphSelector />
@@ -123,6 +130,7 @@ export const BasicLayout = ({ children }: LayoutProps) => {
           )}
           <Content
             style={{
+              zIndex: "0",
               padding: 24,
               margin: 0,
               background: colorBgContainer,
@@ -132,7 +140,7 @@ export const BasicLayout = ({ children }: LayoutProps) => {
           </Content>
         </Layout>
         {user && (
-          <Footer className={styles.footer}>
+          <Footer className={styles.footer} style={{ zIndex: "3" }}>
             <FooterButtonList buttonList={ButtonList} />
           </Footer>
         )}

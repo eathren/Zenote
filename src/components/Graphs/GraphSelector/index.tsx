@@ -47,6 +47,28 @@ const GraphSelector = () => {
       },
     })
   }
+
+  const onSelect = useCallback(
+    (selectedKeys: React.Key[]) => {
+      const key: string = selectedKeys[0] as string
+      if (key.startsWith("graph-")) {
+        const graphId = key.substring("graph-".length)
+        navigate(`/graphs/${graphId}`)
+      } else if (key.startsWith("node-")) {
+        const parts = key.split("-")
+        const nodeId = parts[2]
+        const parentGraph = graphs?.find(
+          (graph) =>
+            graph.nodes && Object.hasOwnProperty.call(graph.nodes, nodeId)
+        )
+        if (parentGraph?.id) {
+          navigate(`/graphs/${parentGraph.id}/node/${nodeId}`)
+        }
+      }
+    },
+    [graphs, navigate]
+  )
+
   const filterGraphs = useCallback(
     (type: "private" | "team" | "favorites") => {
       return graphs?.filter((graph) => {
@@ -73,7 +95,11 @@ const GraphSelector = () => {
         filterGraphs(type)?.map((graph) => {
           const children = graph.nodes
             ? Object.entries(graph.nodes).map(([nodeId, nodeName]) => {
-                return { title: nodeName, key: `node-${nodeName}-${nodeId}` }
+                return {
+                  title: nodeName,
+                  key: `node-${nodeName}-${nodeId}`,
+                  isLeaf: true,
+                }
               })
             : []
 
@@ -100,27 +126,6 @@ const GraphSelector = () => {
     [filterGraphs]
   )
 
-  const onSelect = useCallback(
-    (selectedKeys: React.Key[]) => {
-      const key: string = selectedKeys[0] as string
-      if (key.startsWith("graph-")) {
-        const graphId = key.substring("graph-".length)
-        navigate(`/graphs/${graphId}`)
-      } else if (key.startsWith("node-")) {
-        const parts = key.split("-")
-        const nodeId = parts[2]
-        const parentGraph = graphs?.find(
-          (graph) =>
-            graph.nodes && Object.hasOwnProperty.call(graph.nodes, nodeId)
-        )
-        if (parentGraph?.id) {
-          navigate(`/graphs/${parentGraph.id}/node/${nodeId}`)
-        }
-      }
-    },
-    [graphs, navigate]
-  )
-
   const privateTreeData = useMemo(
     () => buildTreeData("private"),
     [buildTreeData]
@@ -135,7 +140,7 @@ const GraphSelector = () => {
 
   return (
     <>
-      <Typography>
+      <Typography style={{ paddingBottom: "100px" }}>
         <Row gutter={[16, 16]} style={{ marginBottom: "1rem" }}>
           <Input.Search
             placeholder="Search for graphs and nodes"
