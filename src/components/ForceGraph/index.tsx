@@ -12,6 +12,9 @@ import {
 import "react-contexify/ReactContexify.css"
 
 import useGraphSettingsStore from "src/stores/graphSettingsStore"
+import { Button, Card } from "antd"
+import { PlusCircleOutlined } from "@ant-design/icons"
+import AddNodeModal from "../AddNodeModal"
 type ForceGraphProps = {
   graphId: string
   nodes: GraphNode[]
@@ -24,7 +27,11 @@ const ForceGraph = (props: ForceGraphProps) => {
   const [searchParams] = useSearchParams()
   const [nodes, setNodes] = useState<GraphNode[]>(props.nodes)
   const [edges, setEdges] = useState<GraphEdge[]>([])
+  const [modalOpen, setModalOpen] = useState(false)
 
+  const openAddNodeModal = () => {
+    setModalOpen(true)
+  }
   const { getOrInitializeSettings } = useGraphSettingsStore()
   const {
     nodeSize,
@@ -336,7 +343,47 @@ const ForceGraph = (props: ForceGraphProps) => {
 
   return (
     <div style={{ height: "100vh", maxHeight: "100%", position: "relative" }}>
-      <svg ref={svgRef} width="100%" height="100%"></svg>
+      {nodes.length === 0 ? (
+        <>
+          <div
+            style={{
+              position: "absolute",
+              top: "30%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              textAlign: "center",
+            }}
+          >
+            <Card
+              style={{ width: 300 }}
+              cover={
+                <div style={{ padding: "20px", textAlign: "center" }}>
+                  <PlusCircleOutlined
+                    style={{ fontSize: "48px", color: "#1890ff" }}
+                  />
+                </div>
+              }
+              actions={[
+                <Button type="primary" onClick={openAddNodeModal}>
+                  Create Node
+                </Button>,
+              ]}
+            >
+              <Card.Meta
+                title="Welcome to Your Graph"
+                description="Get started by creating your first node."
+              />
+            </Card>
+            <AddNodeModal
+              isOpen={modalOpen}
+              onClose={() => setModalOpen(false)}
+              graphId={props.graphId}
+            />
+          </div>
+        </>
+      ) : (
+        <svg ref={svgRef} width="100%" height="100%"></svg>
+      )}
     </div>
   )
 }

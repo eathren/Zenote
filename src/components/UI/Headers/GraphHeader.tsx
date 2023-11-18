@@ -16,13 +16,12 @@ const GraphHeader = (props: GraphHeaderProps) => {
           justify="space-between"
           align="middle"
           gutter={16}
-          style={{ width: "100%" }}
+          style={{ width: "100%", display: "flex" }}
         >
-          <Col md={2} sm={4} xs={4}></Col>
-          <Col md={10} sm={8} xs={10} style={{ maxWidth: "100%" }}>
-            <Typography style={{ textAlign: "center" }}> {title} </Typography>
+          <Col flex={1} style={{ display: "flex", justifyContent: "center" }}>
+            <Typography style={{ textAlign: "center" }}>{title}</Typography>
           </Col>
-          <Col>
+          <Col style={{ display: "flex", justifyContent: "flex-end" }}>
             <GraphControls />
           </Col>
         </Row>
