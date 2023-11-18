@@ -52,7 +52,8 @@ export const filterNodesAndIncludeChildren = (
   filterCriteria: string[]
 ): GraphNode[] => {
   // Filter nodes based on criteria
-  const filteredNodes = nodes.filter(
+  if (!nodes) return []
+  const filteredNodes = nodes?.filter(
     (node) =>
       filterCriteria.length === 0 ||
       (node.tags &&

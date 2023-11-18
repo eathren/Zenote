@@ -19,7 +19,7 @@ export const useNodeModal = ({ isOpen }: UseNodeModalProps) => {
 
   useEffect(() => {
     setFilteredNodes(
-      nodes.filter((node) =>
+      nodes?.filter((node) =>
         node.name.toLowerCase().includes(searchTerm.toLowerCase())
       )
     )
