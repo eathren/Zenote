@@ -4,10 +4,22 @@ import { Spin } from "antd"
 import useGraphs from "src/hooks/useGraphs"
 import { GraphPrivacySetting } from "src/types"
 import AddGraphButton from "src/components/Graphs/AddGraphButton"
+import GraphSelector from "src/components/Graphs/GraphSelector"
+import { useEffect, useState } from "react"
 
 const HomePage = () => {
   const { graphs, loading } = useGraphs()
+  const [isSiderVisible, setIsSiderVisible] = useState(false)
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsSiderVisible(window.innerWidth >= 1200) // Adjust the threshold as needed
+    }
 
+    window.addEventListener("resize", checkScreenSize)
+    checkScreenSize() // Initial check
+
+    return () => window.removeEventListener("resize", checkScreenSize)
+  }, [])
   if (loading)
     return <Spin style={{ position: "absolute", top: "50%", left: "50%" }} />
 
@@ -47,6 +59,7 @@ const HomePage = () => {
           </Card>
         </div>
       )}
+      {!isSiderVisible && <GraphSelector />}
     </div>
   )
 }
