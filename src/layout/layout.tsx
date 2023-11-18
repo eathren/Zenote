@@ -34,7 +34,7 @@ export const BasicLayout = ({ children }: LayoutProps) => {
   const [modalOpen, setModalOpen] = useState(false)
   const { hasForwardHistory } = useForwardHistory()
   const navigate = useNavigate()
-
+  const [collapsed] = useState(false)
   const handleAddNode = useCallback(() => {
     setModalOpen(true)
   }, [])
@@ -105,8 +105,11 @@ export const BasicLayout = ({ children }: LayoutProps) => {
       >
         {!user && !loading && <CustomHeader />}
         <Layout className={styles.main__content}>
-          {isSiderVisible && (
+          {isSiderVisible && user && (
             <Sider
+              trigger={null}
+              collapsible
+              collapsed={collapsed}
               width={300}
               className={styles.sider}
               style={{

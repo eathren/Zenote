@@ -1,6 +1,6 @@
 import NodeControls from "../../NodeControls"
 import BasicHeader from "./BasicHeader"
-import { Button, Col, Input, Row } from "antd"
+import { Button, Input, Row, Col } from "antd"
 import { EditOutlined, BookOutlined } from "@ant-design/icons"
 
 type NodeHeaderProps = {
@@ -23,38 +23,30 @@ const NodeHeader = (props: NodeHeaderProps) => {
     <>
       <BasicHeader>
         <Row
-          justify="space-around" // Updated this line
+          justify="space-between"
           align="middle"
           gutter={16}
-          style={{ width: "100%" }}
+          style={{ width: "100%", display: "flex" }}
         >
-          <Col md={8} sm={6} xs={2}></Col> {/* Empty column for spacing */}
-          <Col md={8} sm={12} xs={20}>
+          <Col flex={1} style={{ display: "flex", justifyContent: "center" }}>
             <Input
               value={editableTitle}
               onChange={onTitleChange}
               style={{
                 ...commonStyle,
                 maxWidth: "100%",
-                width: "100%",
                 textAlign: "center",
                 whiteSpace: "nowrap",
                 overflow: "hidden",
               }}
             />
           </Col>
-          <Col md={8} sm={6} xs={2}>
-            <Row justify="end" align="middle" gutter={16}>
-              <Col>
-                <Button
-                  onClick={() => props.toggleEditMode()}
-                  icon={props.editMode ? <EditOutlined /> : <BookOutlined />}
-                />
-              </Col>
-              <Col>
-                <NodeControls />
-              </Col>
-            </Row>
+          <Col style={{ display: "flex", justifyContent: "flex-end" }}>
+            <Button
+              onClick={() => props.toggleEditMode()}
+              icon={props.editMode ? <EditOutlined /> : <BookOutlined />}
+            />
+            <NodeControls />
           </Col>
         </Row>
       </BasicHeader>
