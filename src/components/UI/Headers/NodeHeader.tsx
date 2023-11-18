@@ -1,4 +1,3 @@
-import NodeMenu from "../../NodeMenu"
 import NodeControls from "../../NodeControls"
 import BasicHeader from "./BasicHeader"
 import { Button, Col, Input, Row } from "antd"
@@ -24,15 +23,13 @@ const NodeHeader = (props: NodeHeaderProps) => {
     <>
       <BasicHeader>
         <Row
-          justify="space-between"
+          justify="space-around" // Updated this line
           align="middle"
           gutter={16}
           style={{ width: "100%" }}
         >
-          <Col md={2} sm={4} xs={4}>
-            <NodeMenu />
-          </Col>
-          <Col md={10} sm={8} xs={10} style={{ maxWidth: "100%" }}>
+          <Col md={8} sm={6} xs={2}></Col> {/* Empty column for spacing */}
+          <Col md={8} sm={12} xs={20}>
             <Input
               value={editableTitle}
               onChange={onTitleChange}
@@ -40,12 +37,13 @@ const NodeHeader = (props: NodeHeaderProps) => {
                 ...commonStyle,
                 maxWidth: "100%",
                 width: "100%",
+                textAlign: "center",
                 whiteSpace: "nowrap",
                 overflow: "hidden",
               }}
             />
           </Col>
-          <Col md={12} sm={12} xs={10}>
+          <Col md={8} sm={6} xs={2}>
             <Row justify="end" align="middle" gutter={16}>
               <Col>
                 <Button

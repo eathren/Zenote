@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import {
   RadarChartOutlined,
   ArrowLeftOutlined,
@@ -16,8 +16,9 @@ import { useForwardHistory } from "src/hooks/useForwardHistory"
 import AddNodeModal from "src/components/AddNodeModal"
 import { Header as CustomHeader } from "src/components/UI/NonAuth/Header"
 import { useUser } from "src/hooks/user"
+import GraphSelector from "src/components/Graphs/GraphSelector"
 
-const { Content, Footer } = Layout
+const { Content, Footer, Sider } = Layout
 
 type LayoutProps = {
   children: React.ReactNode
@@ -28,7 +29,7 @@ export const BasicLayout = ({ children }: LayoutProps) => {
     token: { colorBgContainer },
   } = theme.useToken()
   const { user, loading } = useUser()
-
+  const [isSiderVisible, setIsSiderVisible] = useState(false)
   const { graphId } = useParams<{ graphId?: string }>()
   const [modalOpen, setModalOpen] = useState(false)
   const { hasForwardHistory } = useForwardHistory()
@@ -49,6 +50,17 @@ export const BasicLayout = ({ children }: LayoutProps) => {
   const handleNavigateGraphView = () => {
     navigate(`/graphs/${graphId}`)
   }
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsSiderVisible(window.innerWidth >= 1200) // Adjust the threshold as needed
+    }
+
+    window.addEventListener("resize", checkScreenSize)
+    checkScreenSize() // Initial check
+
+    return () => window.removeEventListener("resize", checkScreenSize)
+  }, [])
 
   const ButtonList = [
     {
@@ -93,17 +105,28 @@ export const BasicLayout = ({ children }: LayoutProps) => {
       >
         {!user && !loading && <CustomHeader />}
         <Layout className={styles.main__content}>
-          <Layout>
-            <Content
+          {isSiderVisible && (
+            <Sider
+              width={300}
+              className={styles.sider}
               style={{
-                padding: 24,
-                margin: 0,
                 background: colorBgContainer,
+                overflow: "auto",
+                padding: "20px",
               }}
             >
-              {children}
-            </Content>
-          </Layout>
+              <GraphSelector />
+            </Sider>
+          )}
+          <Content
+            style={{
+              padding: 24,
+              margin: 0,
+              background: colorBgContainer,
+            }}
+          >
+            {children}
+          </Content>
         </Layout>
         {user && (
           <Footer className={styles.footer}>
