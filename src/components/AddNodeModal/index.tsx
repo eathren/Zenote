@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react"
-import { Modal, Input, List, InputRef } from "antd"
+import { Modal, Input, List, Button, InputRef } from "antd"
 import { useNavigate } from "react-router-dom"
 import { GraphNode } from "src/types"
 import { useNodeModal } from "src/hooks/useNodeModal"
@@ -22,22 +22,19 @@ const AddNodeModal: React.FC<AddNodeModalProps> = ({
       isOpen,
     })
 
-  // Function to add new node
   const confirmAddNode = async () => {
     if (graphId && searchTerm.trim() !== "") {
-      const nodeNames = searchTerm.split(",") // Split the search term by spaces
+      const nodeNames = searchTerm.split(",") // Split the search term by commas
       const nodeIds = await addNode(graphId, nodeNames) // Pass the array of node names
 
       resetSearchTerm()
       onClose()
-      // Navigate to the last created node. Alternatively, you can handle navigation differently
-      if (nodeIds && nodeIds?.length === 1) {
+      if (nodeIds && nodeIds.length === 1) {
         navigate(`/graphs/${graphId}/node/${nodeIds[0]}`)
       }
     }
   }
 
-  // Function to navigate to existing node
   const confirmClickNode = (node: GraphNode) => {
     if (graphId) {
       onClose()
@@ -46,7 +43,6 @@ const AddNodeModal: React.FC<AddNodeModalProps> = ({
     }
   }
 
-  // Function to handle Enter key press
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       confirmAddNode()
@@ -77,23 +73,32 @@ const AddNodeModal: React.FC<AddNodeModalProps> = ({
         onKeyDown={handleKeyDown}
         autoFocus
       />
-      <List
-        dataSource={filteredNodes}
-        style={{ overflowY: "scroll", height: "inherit" }}
-        renderItem={(node) => (
-          <List.Item
-            onClick={() => confirmClickNode(node)}
-            style={{
-              cursor: "pointer",
-              padding: "5px 10px",
-              borderRadius: "5px",
-              backgroundColor: "transparent",
-            }}
-          >
-            {node.name}
-          </List.Item>
-        )}
-      />
+      {filteredNodes.length === 0 && searchTerm.trim() ? (
+        <div style={{ marginTop: "20px", textAlign: "center" }}>
+          <p>No matching nodes found.</p>
+          <Button type="primary" onClick={confirmAddNode}>
+            Create New Node
+          </Button>
+        </div>
+      ) : (
+        <List
+          dataSource={filteredNodes}
+          style={{ overflowY: "scroll", height: "inherit" }}
+          renderItem={(node) => (
+            <List.Item
+              onClick={() => confirmClickNode(node)}
+              style={{
+                cursor: "pointer",
+                padding: "5px 10px",
+                borderRadius: "5px",
+                backgroundColor: "transparent",
+              }}
+            >
+              {node.name}
+            </List.Item>
+          )}
+        />
+      )}
     </Modal>
   )
 }
