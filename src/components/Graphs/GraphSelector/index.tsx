@@ -132,7 +132,7 @@ const GraphSelector = () => {
     [buildTreeData]
   )
 
-  if (loading) return <span>Loading...</span>
+  if (loading) return <span></span>
 
   return (
     <>

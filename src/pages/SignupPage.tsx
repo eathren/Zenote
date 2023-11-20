@@ -6,7 +6,6 @@ import {
   LockOutlined,
   EyeInvisibleOutlined,
   EyeTwoTone,
-  GoogleOutlined,
 } from "@ant-design/icons"
 import { Link } from "react-router-dom"
 
@@ -69,7 +68,7 @@ const SignUpPage: React.FC = () => {
             >
               Sign Up
             </Button>
-            <Button
+            {/* <Button
               onClick={googleSignIn}
               style={{
                 backgroundColor: "#4285F4",
@@ -81,7 +80,7 @@ const SignUpPage: React.FC = () => {
               icon={<GoogleOutlined />}
             >
               Sign up with Google
-            </Button>
+            </Button> */}
             <Row align="middle" justify="center">
               <Text type="secondary">
                 Already have an account? <Link to="/login">Sign In</Link>
