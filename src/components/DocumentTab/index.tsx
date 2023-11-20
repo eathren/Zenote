@@ -9,6 +9,7 @@ import { batchUpdateNodeEdges } from "src/handles/edges"
 import { GraphEdge } from "src/types"
 import { batchUpdateNodeTags } from "src/handles/nodes"
 import LoadingSpinner from "../LoadingSpinner"
+import NodeControlBar from "../NodeControlBar"
 
 type DocumentTabProps = {
   markdownContent: string
@@ -286,83 +287,86 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
       {isLoading ? (
         <LoadingSpinner />
       ) : (
-        <>
-          <Typography>
-            <NodeHeader
-              editMode={isEditing}
-              editableTitle={editableTitle}
-              onTitleChange={onTitleChange}
-              toggleEditMode={toggleEditMode}
-            />
-            <div ref={titleRef} onClick={toggleTitleEdit}>
-              {isTitleEditable ? (
-                <Input
-                  value={editableTitle}
-                  onChange={onTitleChange}
-                  onKeyDown={onTitleKeyDown}
-                  autoFocus
-                  style={headerStyle}
-                />
-              ) : (
-                <h1 style={headerStyle}>{editableTitle}</h1>
-              )}
-            </div>
-            {isEditing ? (
-              <Input.TextArea
-                style={commonStyle}
-                ref={textAreaRef}
-                autoSize={{ minRows: 30 }}
-                value={markdownContent}
-                autoFocus
-                onChange={(e) => handleEditorChangeWithCheck(e.target.value)}
-                onBlur={() => setIsEditing(false)}
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div style={{ flexGrow: 1 }}>
+            <Typography>
+              <NodeHeader
+                editMode={isEditing}
+                editableTitle={editableTitle}
+                onTitleChange={onTitleChange}
+                toggleEditMode={toggleEditMode}
               />
-            ) : (
-              <div>
-                {markdownContent.length > 1 ? (
-                  markdownContent.split("\n").map((line, index) => (
-                    <div
-                      key={index}
-                      style={{ display: "flex", alignItems: "center" }}
-                    >
-                      <div
-                        onClick={() => handleLineClick(index)}
-                        role="button"
-                        tabIndex={0}
-                      >
-                        <Markdown>{line}</Markdown>
-                      </div>
-                    </div>
-                  ))
+              <div ref={titleRef} onClick={toggleTitleEdit}>
+                {isTitleEditable ? (
+                  <Input
+                    value={editableTitle}
+                    onChange={onTitleChange}
+                    onKeyDown={onTitleKeyDown}
+                    autoFocus
+                    style={headerStyle}
+                  />
                 ) : (
-                  <div
-                    style={{ height: "50vh", cursor: "pointer" }}
-                    onClick={() => setIsEditing(true)}
-                  >
-                    Click to start editing.
-                  </div>
+                  <h1 style={headerStyle}>{editableTitle}</h1>
                 )}
               </div>
-            )}
-            <AddEdgeModal
-              isOpen={showAddEdgeModal}
-              onClose={() => setShowAddEdgeModal(false)}
-              graphId={graphId}
-              nodeId={nodeId}
-              onConfirm={generateMarkdownLinks}
-            />
+              {isEditing ? (
+                <Input.TextArea
+                  style={commonStyle}
+                  ref={textAreaRef}
+                  autoSize={{ minRows: 30 }}
+                  value={markdownContent}
+                  autoFocus
+                  onChange={(e) => handleEditorChangeWithCheck(e.target.value)}
+                  onBlur={() => setIsEditing(false)}
+                />
+              ) : (
+                <div>
+                  {markdownContent.length > 1 ? (
+                    markdownContent.split("\n").map((line, index) => (
+                      <div
+                        key={index}
+                        style={{ display: "flex", alignItems: "center" }}
+                      >
+                        <div
+                          onClick={() => handleLineClick(index)}
+                          role="button"
+                          tabIndex={0}
+                        >
+                          <Markdown>{line}</Markdown>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div
+                      style={{ height: "50vh", cursor: "pointer" }}
+                      onClick={() => setIsEditing(true)}
+                    >
+                      Click to start editing.
+                    </div>
+                  )}
+                </div>
+              )}
+              <AddEdgeModal
+                isOpen={showAddEdgeModal}
+                onClose={() => setShowAddEdgeModal(false)}
+                graphId={graphId}
+                nodeId={nodeId}
+                onConfirm={generateMarkdownLinks}
+              />
 
-            <Drawer
-              title="Context Menu"
-              placement="bottom"
-              onClose={handleCloseDrawer}
-              open={showDrawer}
-              height={200}
-            >
-              {/* Your context menu content here */}
-            </Drawer>
-          </Typography>
-        </>
+              <Drawer
+                title="Context Menu"
+                placement="bottom"
+                onClose={handleCloseDrawer}
+                open={showDrawer}
+                height={200}
+              >
+                {/* Your context menu content here */}
+              </Drawer>
+            </Typography>
+          </div>
+          <NodeControlBar />
+        </div>
       )}
     </div>
   )

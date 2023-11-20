@@ -71,19 +71,15 @@ const GraphSelector = () => {
 
   const filterGraphs = useCallback(
     (type: "private" | "team" | "favorites") => {
+      const lowerCaseSearchTerm = searchTerm.toLowerCase()
       return graphs?.filter((graph) => {
-        const nameMatches = graph.name
+        const graphNameMatches = graph.name
           .toLowerCase()
-          .includes(searchTerm.toLowerCase())
+          .includes(lowerCaseSearchTerm)
         const nodeMatches = Object.values(graph.nodes || {}).some((nodeName) =>
-          nodeName.toLowerCase().includes(searchTerm.toLowerCase())
+          nodeName.toLowerCase().includes(lowerCaseSearchTerm)
         )
-
-        if (type === "favorites") {
-          return graph.isFavorite && (nameMatches || nodeMatches)
-        }
-
-        return graph.type === type && (nameMatches || nodeMatches)
+        return graph.type === type && (graphNameMatches || nodeMatches)
       })
     },
     [graphs, searchTerm]
@@ -93,15 +89,17 @@ const GraphSelector = () => {
     (type: "private" | "team" | "favorites") => {
       return (
         filterGraphs(type)?.map((graph) => {
-          const children = graph.nodes
-            ? Object.entries(graph.nodes).map(([nodeId, nodeName]) => {
-                return {
-                  title: nodeName,
-                  key: `node-${nodeName}-${nodeId}`,
-                  isLeaf: true,
-                }
-              })
-            : []
+          const children = Object.entries(graph.nodes || {})
+            .filter(
+              ([, nodeName]) =>
+                searchTerm === "" ||
+                nodeName.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+            .map(([, nodeName]) => ({
+              title: nodeName,
+              key: `node-${graph.id}-${nodeName}`,
+              isLeaf: true,
+            }))
 
           return {
             title: (
@@ -123,7 +121,7 @@ const GraphSelector = () => {
         }) || []
       )
     },
-    [filterGraphs]
+    [filterGraphs, searchTerm]
   )
 
   const privateTreeData = useMemo(
