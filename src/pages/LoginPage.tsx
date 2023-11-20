@@ -12,7 +12,7 @@ import { Link } from "react-router-dom"
 const { Text } = Typography
 
 const LoginPage: React.FC = () => {
-  const { signIn, googleSignIn } = useUser()
+  const { signIn } = useUser()
   const [showPassword] = useState(false)
 
   // Function to handle form submission

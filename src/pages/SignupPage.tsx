@@ -12,7 +12,7 @@ import { Link } from "react-router-dom"
 const { Text } = Typography
 
 const SignUpPage: React.FC = () => {
-  const { signUp, googleSignIn } = useUser()
+  const { signUp } = useUser()
   const [showPassword] = useState(false)
 
   const onFinish = async (values: { email: string; password: string }) => {
