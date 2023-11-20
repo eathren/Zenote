@@ -55,11 +55,9 @@ const GraphSelector = () => {
         const graphId = key.substring("graph-".length)
         navigate(`/graphs/${graphId}`)
       } else if (key.startsWith("node-")) {
-        const parts = key.split("-")
-        const nodeId = parts[2]
+        const nodeId = key.split("-")[1]
         const parentGraph = graphs?.find(
-          (graph) =>
-            graph.nodes && Object.hasOwnProperty.call(graph.nodes, nodeId)
+          (graph) => graph.nodes && Object.keys(graph.nodes).includes(nodeId)
         )
         if (parentGraph?.id) {
           navigate(`/graphs/${parentGraph.id}/node/${nodeId}`)
@@ -95,9 +93,9 @@ const GraphSelector = () => {
                 searchTerm === "" ||
                 nodeName.toLowerCase().includes(searchTerm.toLowerCase())
             )
-            .map(([, nodeName]) => ({
+            .map(([nodeId, nodeName]) => ({
               title: nodeName,
-              key: `node-${graph.id}-${nodeName}`,
+              key: `node-${nodeId}-${nodeName}`,
               isLeaf: true,
             }))
 
