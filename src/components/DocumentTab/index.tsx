@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react"
-import { Input, Drawer, Typography } from "antd"
+import { Input, Drawer, Typography, Button } from "antd"
 import Markdown from "react-markdown"
 import NodeHeader from "src/components/UI/Headers/NodeHeader"
 import { useParams } from "react-router-dom"
@@ -9,7 +9,6 @@ import { batchUpdateNodeEdges } from "src/handles/edges"
 import { GraphEdge } from "src/types"
 import { batchUpdateNodeTags } from "src/handles/nodes"
 import LoadingSpinner from "../LoadingSpinner"
-import NodeControlBar from "../NodeControlBar"
 
 type DocumentTabProps = {
   markdownContent: string
@@ -33,6 +32,11 @@ const headerStyle = {
   fontWeight: 600,
   fontSize: "1.5rem",
   marginBottom: "1rem",
+}
+
+const inputStyle = {
+  ...commonStyle,
+  minHeight: "100vh",
 }
 
 const generateNewNodeURL = (nodeId: string | number) => {
@@ -190,8 +194,6 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
       node.edges?.map((edge: GraphEdge) => edge.target as string) || []
     ).filter((remoteEdge) => !allTargetIds.includes(remoteEdge))
 
-    // console.log("Added links:", addedLinks, "Deleted links:", deletedLinks)
-
     if (addedLinks.length || deletedLinks.length) {
       const result = await batchUpdateNodeEdges(
         graphId,
@@ -281,6 +283,14 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
       setCaretPosition(caretPosition + markdownLinks.length)
     }
   }
+  const handleFABClick = () => {
+    // Set the cursor position to the end of the content
+    const endPosition = markdownContent.length
+    setCursorPosition(endPosition) // Update cursor position state
+
+    // Open the AddEdgeModal
+    setShowAddEdgeModal(true)
+  }
 
   return (
     <div>
@@ -288,7 +298,7 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
         <LoadingSpinner />
       ) : (
         <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ flexGrow: 1 }}>
+          <div>
             <Typography>
               <NodeHeader
                 editMode={isEditing}
@@ -311,7 +321,7 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
               </div>
               {isEditing ? (
                 <Input.TextArea
-                  style={commonStyle}
+                  style={inputStyle}
                   ref={textAreaRef}
                   autoSize={{ minRows: 30 }}
                   value={markdownContent}
@@ -353,6 +363,20 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
                 nodeId={nodeId}
                 onConfirm={generateMarkdownLinks}
               />
+              <Button
+                type="primary"
+                shape="circle"
+                size="large"
+                style={{
+                  position: "absolute",
+                  right: "20px",
+                  bottom: "70px",
+                  zIndex: 1000,
+                }}
+                onClick={handleFABClick}
+              >
+                {"[ ]"}
+              </Button>
 
               <Drawer
                 title="Context Menu"
@@ -365,7 +389,6 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
               </Drawer>
             </Typography>
           </div>
-          <NodeControlBar />
         </div>
       )}
     </div>
