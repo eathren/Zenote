@@ -24,14 +24,11 @@ const NodePage: React.FC = () => {
 
     // Asynchronously fetch markdown content and node information
     const fetchMarkdownAsync = async () => {
-      console.log("fetching md")
-
       const md = await fetchMarkdown(nodeId)
       if (md) setMarkdownContent(md)
     }
 
     const fetchNodeAsync = async () => {
-      console.log("fetching node")
       const node = await fetchNode(graphId, nodeId)
       if (node) setCurrentNode(node)
     }

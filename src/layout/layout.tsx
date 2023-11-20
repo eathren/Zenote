@@ -53,11 +53,11 @@ export const BasicLayout = ({ children }: LayoutProps) => {
 
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsSiderVisible(window.innerWidth > 1200) // Adjust the threshold as needed
+      setIsSiderVisible(window.innerWidth > 1200)
     }
 
     window.addEventListener("resize", checkScreenSize)
-    checkScreenSize() // Initial check
+    checkScreenSize()
 
     return () => window.removeEventListener("resize", checkScreenSize)
   }, [])
@@ -114,13 +114,9 @@ export const BasicLayout = ({ children }: LayoutProps) => {
               className={styles.sider}
               style={{
                 background: colorBgContainer,
-                overflow: "auto",
+                overflowY: "auto",
                 padding: "20px",
                 height: "100vh",
-                position: "fixed",
-                left: 0,
-                top: 0,
-                bottom: 0,
                 zIndex: 2,
                 scrollbarWidth: "thin",
               }}
