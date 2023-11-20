@@ -20,6 +20,7 @@ const HomePage = () => {
 
     return () => window.removeEventListener("resize", checkScreenSize)
   }, [])
+
   if (loading)
     return <Spin style={{ position: "absolute", top: "50%", left: "50%" }} />
 

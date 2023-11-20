@@ -71,7 +71,7 @@ const GraphSelector = () => {
     (type: "private" | "team" | "favorites") => {
       const lowerCaseSearchTerm = searchTerm.toLowerCase()
       return graphs?.filter((graph) => {
-        const graphNameMatches = graph.name
+        const graphNameMatches = graph?.name
           .toLowerCase()
           .includes(lowerCaseSearchTerm)
         const nodeMatches = Object.values(graph.nodes || {}).some((nodeName) =>
@@ -91,7 +91,7 @@ const GraphSelector = () => {
             .filter(
               ([, nodeName]) =>
                 searchTerm === "" ||
-                nodeName.toLowerCase().includes(searchTerm.toLowerCase())
+                nodeName?.toLowerCase().includes(searchTerm?.toLowerCase())
             )
             .map(([nodeId, nodeName]) => ({
               title: nodeName,

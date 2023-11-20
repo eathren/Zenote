@@ -281,15 +281,20 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
 
       handleEditorChange(newText)
       setCaretPosition(caretPosition + markdownLinks.length)
+    } else {
+      const newText = `${markdownContent}\n${markdownLinks}`
+      handleEditorChange(newText)
     }
   }
   const handleFABClick = () => {
     // Set the cursor position to the end of the content
     const endPosition = markdownContent.length
+    console.log("End position:", endPosition)
     setCursorPosition(endPosition) // Update cursor position state
 
     // Open the AddEdgeModal
     setShowAddEdgeModal(true)
+    console.log("content", markdownContent)
   }
 
   return (

@@ -49,7 +49,7 @@ const ForceGraph = (props: ForceGraphProps) => {
     const filterParam = searchParams.get("filter")
     if (filterParam) {
       const filterCriteria = filterParam
-        ? filterParam.split(",").map((tag) => tag.trim().toLowerCase())
+        ? filterParam.split(",").map((tag) => tag?.trim().toLowerCase())
         : []
       filteredNodes = filterNodesAndIncludeChildren(props.nodes, filterCriteria)
     }
@@ -76,14 +76,14 @@ const ForceGraph = (props: ForceGraphProps) => {
 
       groups?.forEach((group) => {
         // Case-insensitive check for group name in node name
-        if (nodeName.toLowerCase().includes(group.name.toLowerCase())) {
+        if (nodeName?.toLowerCase().includes(group?.name?.toLowerCase())) {
           color = group.color as string
         }
 
-        tags.forEach((tag) => {
+        tags?.forEach((tag) => {
           // Remove "tag:" prefix and make it case-insensitive
-          const tagWithoutPrefix = tag.replace(/^tag:/i, "").toLowerCase()
-          if (tagWithoutPrefix === group.name.toLowerCase()) {
+          const tagWithoutPrefix = tag?.replace(/^tag:/i, "").toLowerCase()
+          if (tagWithoutPrefix === group?.name.toLowerCase()) {
             color = group.color as string
           }
         })
