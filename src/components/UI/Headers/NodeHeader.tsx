@@ -45,6 +45,7 @@ const NodeHeader = (props: NodeHeaderProps) => {
             <Button
               onClick={() => props.toggleEditMode()}
               icon={props.editMode ? <EditOutlined /> : <BookOutlined />}
+              style={{ marginRight: "10px" }}
             />
             <NodeControls />
           </Col>
