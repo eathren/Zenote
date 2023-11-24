@@ -1,21 +1,13 @@
-import React, { useState, useEffect, useCallback } from "react"
+import React, { useState } from "react"
 import { useParams } from "react-router-dom"
-import { notification } from "antd"
-import { debounce } from "lodash"
 
 import { GraphNode } from "src/types"
-import { fetchMarkdown, uploadMarkdown } from "src/handles/markdown"
-import { fetchNode, updateNodeTitle } from "src/handles/nodes"
 import LoadingSpinner from "src/components/LoadingSpinner"
-import PageBlock from "src/components/Blocks/PageBlock"
 import Block from "src/components/Blocks"
 
 const NodePage: React.FC = () => {
   const { graphId, nodeId } = useParams<{ nodeId: string; graphId: string }>()
-  const [markdownContent, setMarkdownContent] = useState<string>("")
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [currentNode, setCurrentNode] = useState<GraphNode | null>(null)
-
   // useEffect(() => {
   //   setIsLoading(true)
   //   setMarkdownContent("")
@@ -74,7 +66,7 @@ const NodePage: React.FC = () => {
   if (isLoading) return <LoadingSpinner />
   return (
     <>
-      <PageBlock nodeId={nodeId} />
+      <Block nodeId={nodeId} />
     </>
   )
 }

@@ -1,15 +1,15 @@
-import { Block, BlockType } from "src/types/blocks"
+import { Block as BlockT, BlockType } from "src/types/blocks"
 import TextBlock from "./TextBlock"
 import TodoBlock from "./TodoBlock"
 
 interface BlockRendererProps {
   nodeId?: string
-  block?: Block
+  block?: BlockT
   // Add other props like `updateBlock` for handling updates
 }
 
 const Block: React.FC<BlockRendererProps> = ({ block }) => {
-  const renderBlock = (block: Block | undefined) => {
+  const renderBlock = (block: BlockT | undefined) => {
     if (!block) return null
     switch (block.type) {
       case BlockType.Text:

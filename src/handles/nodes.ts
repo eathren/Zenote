@@ -28,11 +28,10 @@ export const addNode = async (graphId: string, nodeNames: string[]) => {
 
     const nodeIds = []
     const nodesToUpdate = []
-    const blockIds = []
 
     for (const nodeName of nodeNames) {
       const nodeDocRef = doc(nodesCollection)
-      const nodeId = nodeDocRef.id
+      const nodeId = nodeDocRef.id // This is the ID for both the node and its first block
 
       const newNode = {
         name: nodeName.trim(),
@@ -47,13 +46,15 @@ export const addNode = async (graphId: string, nodeNames: string[]) => {
       nodeIds.push(nodeId)
       nodesToUpdate.push({ nodeId, nodeName: nodeName.trim() })
 
-      const blocksCollectionPath = `graphs/${graphId}/nodes/${nodeId}/blocks`
-      const blocksCollection = collection(db, blocksCollectionPath)
-      const blockDocRef = doc(blocksCollection)
-      const blockId = blockDocRef.id
+      // Create the first block for the node with the same ID as the node
+      const blockDocRef = doc(
+        db,
+        `graphs/${graphId}/nodes/${nodeId}/blocks`,
+        nodeId
+      )
 
       const pageBlock: Block = {
-        id: blockId,
+        id: nodeId,
         type: BlockType.Page,
         content: [],
         properties: {},
@@ -61,7 +62,6 @@ export const addNode = async (graphId: string, nodeNames: string[]) => {
       }
 
       batch.set(blockDocRef, pageBlock)
-      blockIds.push(blockId)
     }
 
     await batch.commit()
