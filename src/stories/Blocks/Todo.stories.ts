@@ -1,10 +1,9 @@
-import ToDo from "src/components/Blocks/ToDo"
+import TodoBlock from "src/components/Blocks/TodoBlock"
 import type { Meta, StoryObj } from "@storybook/react"
 import { withRouter } from "storybook-addon-react-router-v6"
-
-const meta: Meta<typeof ToDo> = {
-  title: "Blocks/ToDo",
-  component: ToDo,
+const meta: Meta<typeof TodoBlock> = {
+  title: "Blocks/TodoBlock",
+  component: TodoBlock,
   decorators: [withRouter],
   parameters: {},
   tags: ["autodocs"],

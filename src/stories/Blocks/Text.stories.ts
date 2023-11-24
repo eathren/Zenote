@@ -1,11 +1,11 @@
-import Text from "src/components/Blocks/Text"
 import type { Meta, StoryObj } from "@storybook/react"
 import { withRouter } from "storybook-addon-react-router-v6"
 import { BlockType, TextType } from "src/types/blocks"
+import TextBlock from "src/components/Blocks/TextBlock"
 
-const meta: Meta<typeof Text> = {
+const meta: Meta<typeof TextBlock> = {
   title: "Blocks/Text",
-  component: Text,
+  component: TextBlock,
   decorators: [withRouter],
   parameters: {},
   tags: ["autodocs"],
@@ -26,6 +26,6 @@ const DemoText: TextType = {
 
 export const Primary: Story = {
   args: {
-    text: DemoText,
+    block: DemoText,
   },
 }

@@ -5,17 +5,17 @@ interface CreateTextBlockOptions {
   parent?: string
 }
 
-function createTextBlock(options: CreateTextBlockOptions = {}): Text {
+function createTextBlock(options: CreateTextBlockOptions = {}): TextType {
   const { parent } = options
 
   return {
     id: uuidv4(),
     type: BlockType.Text,
     content: [""],
-    property: {
+    properties: {
       content: "",
     },
-    parent: parent || "",
+    parent: parent && parent,
   }
 }
 
