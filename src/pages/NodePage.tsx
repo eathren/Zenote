@@ -13,7 +13,7 @@ import Block from "src/components/Blocks"
 const NodePage: React.FC = () => {
   const { graphId, nodeId } = useParams<{ nodeId: string; graphId: string }>()
   const [markdownContent, setMarkdownContent] = useState<string>("")
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [currentNode, setCurrentNode] = useState<GraphNode | null>(null)
 
   // useEffect(() => {

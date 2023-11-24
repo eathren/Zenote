@@ -16,6 +16,7 @@ import { GraphNode } from "src/types/index"
 import { getNodeCollectionPath, handleOperation } from "./utils"
 import { deleteMarkdown, uploadMarkdown } from "./markdown"
 import { updateGraphNodes, updateGraphNodesBatch } from "./graphs"
+import { Block, BlockType } from "src/types/blocks"
 
 const db = getFirestore()
 
@@ -24,10 +25,15 @@ export const addNode = async (graphId: string, nodeNames: string[]) => {
     const nodeCollectionPath = `graphs/${graphId}/nodes`
     const nodesCollection = collection(db, nodeCollectionPath)
     const batch = writeBatch(db)
+
     const nodeIds = []
     const nodesToUpdate = []
+    const blockIds = []
 
     for (const nodeName of nodeNames) {
+      const nodeDocRef = doc(nodesCollection)
+      const nodeId = nodeDocRef.id
+
       const newNode = {
         name: nodeName.trim(),
         graphId,
@@ -37,24 +43,29 @@ export const addNode = async (graphId: string, nodeNames: string[]) => {
         edges: [],
       }
 
-      const nodeDocRef = doc(nodesCollection)
       batch.set(nodeDocRef, newNode)
-      nodeIds.push(nodeDocRef.id)
-      nodesToUpdate.push({ nodeId: nodeDocRef.id, nodeName: nodeName.trim() })
+      nodeIds.push(nodeId)
+      nodesToUpdate.push({ nodeId, nodeName: nodeName.trim() })
+
+      const blocksCollectionPath = `graphs/${graphId}/nodes/${nodeId}/blocks`
+      const blocksCollection = collection(db, blocksCollectionPath)
+      const blockDocRef = doc(blocksCollection)
+      const blockId = blockDocRef.id
+
+      const pageBlock: Block = {
+        id: blockId,
+        type: BlockType.Page,
+        content: [],
+        properties: {},
+        parent: graphId,
+      }
+
+      batch.set(blockDocRef, pageBlock)
+      blockIds.push(blockId)
     }
 
     await batch.commit()
 
-    const markdownBatch = writeBatch(db)
-    for (const nodeId of nodeIds) {
-      const markdownUrl = await uploadMarkdown(nodeId, "")
-      const nodeRef = doc(db, nodeCollectionPath, nodeId)
-      markdownBatch.set(nodeRef, { markdownUrl, id: nodeId }, { merge: true })
-    }
-
-    await markdownBatch.commit()
-
-    // Update the graph document with the new nodes in a batch operation
     await updateGraphNodesBatch(graphId, nodesToUpdate, "add")
 
     return nodeIds

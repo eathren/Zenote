@@ -11,5 +11,5 @@ export interface Block {
   type: BlockType
   content: string[] // Array of string IDs
   properties: Record<string, any>
-  parent?: string // UUIDV4
+  parent: string // UUIDV4
 }

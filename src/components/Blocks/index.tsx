@@ -3,12 +3,14 @@ import TextBlock from "./TextBlock"
 import TodoBlock from "./TodoBlock"
 
 interface BlockRendererProps {
-  block: Block
+  nodeId?: string
+  block?: Block
   // Add other props like `updateBlock` for handling updates
 }
 
 const Block: React.FC<BlockRendererProps> = ({ block }) => {
-  const renderBlock = (block: Block) => {
+  const renderBlock = (block: Block | undefined) => {
+    if (!block) return null
     switch (block.type) {
       case BlockType.Text:
         return <TextBlock block={block} />
