@@ -1,15 +1,14 @@
-import { Block as BlockT, BlockType } from "src/types/blocks"
-import TextBlock from "./TextBlock"
-import TodoBlock from "./TodoBlock"
+import { Block, BlockType } from "src/types/blocks"
+import TextBlock from "../TextBlock"
+import TodoBlock from "../TodoBlock"
 
 interface BlockRendererProps {
-  nodeId?: string
-  block?: BlockT
+  block?: Block
   // Add other props like `updateBlock` for handling updates
 }
 
-const Block: React.FC<BlockRendererProps> = ({ block }) => {
-  const renderBlock = (block: BlockT | undefined) => {
+const DynamicBlock: React.FC<BlockRendererProps> = ({ block }) => {
+  const renderBlock = (block: Block | undefined) => {
     if (!block) return null
     switch (block.type) {
       case BlockType.Text:
@@ -41,4 +40,4 @@ const Block: React.FC<BlockRendererProps> = ({ block }) => {
   )
 }
 
-export default Block
+export default DynamicBlock

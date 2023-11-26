@@ -26,6 +26,18 @@ export const handleOperation = async <T>(
   }
 }
 
+/**
+ * Generates the Firestore path for the blocks subcollection of a node.
+ * @param {string} graphId - The ID of the graph.
+ * @param {string} nodeId - The ID of the node.
+ * @returns {string} The Firestore path to the blocks subcollection.
+ */
+export const getBlocksCollectionPath = (
+  graphId: string,
+  nodeId: string
+): string => {
+  return `graphs/${graphId}/nodes/${nodeId}/blocks`
+}
 // Preconditions example: Check ownerId
 export const checkOwnerId = async (ownerId: any) => {
   if (!ownerId || typeof ownerId !== "string") {
