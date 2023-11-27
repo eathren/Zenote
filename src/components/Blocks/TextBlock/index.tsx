@@ -12,13 +12,7 @@ interface TextBlockProps {
   deleteBlock?: () => void
 }
 
-const TextBlock: React.FC<TextBlockProps> = ({
-  block,
-  graphId,
-  nodeId,
-  addBlockAfter,
-  deleteBlock,
-}) => {
+const TextBlock: React.FC<TextBlockProps> = ({ block, graphId, nodeId }) => {
   const [content, setContent] = useState<string>(block.content.join(", ")) // Assuming content is an array of strings
   console.log(block)
   // Debounced function to update the block in Firebase
