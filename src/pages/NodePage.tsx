@@ -27,15 +27,10 @@ const NodePage: React.FC = () => {
 
   if (loading) return <LoadingSpinner />
   if (!node?.id || !graphId) return <div>Node not found</div>
-  console.log("blocks", blocks)
   return (
     <>
       <NodeHeader node={node} />
-      <PageBlock
-        graphId={graphId}
-        nodeId={node?.id}
-        initialBlocks={blocks.filter((block) => block.id !== node.id)}
-      />
+      <PageBlock graphId={graphId} nodeId={node?.id} initialBlocks={blocks} />
     </>
   )
 }

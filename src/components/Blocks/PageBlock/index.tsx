@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import { Block, BlockType } from "src/types/blocks"
-import { createBlock } from "src/handles/blocks"
-import { Input } from "antd"
+import { createBlock, deleteBlock, updateBlock } from "src/handles/blocks"
+import { Input, Button } from "antd"
+import { debounce } from "lodash"
 
 interface PageBlockProps {
   graphId: string
@@ -20,22 +21,33 @@ const PageBlock: React.FC<PageBlockProps> = ({
     setBlocks(initialBlocks)
   }, [initialBlocks])
 
-  const handleKeyPress = async (
-    event: React.KeyboardEvent<HTMLInputElement>,
-    blockId: string
-  ) => {
-    if (event.key === "Enter") {
-      const target = event.target as HTMLInputElement
-      if (target.selectionStart === target.value.length) {
-        // Check if cursor is at the end
-        event.preventDefault()
-        await createRootBlock(blockId)
-      }
-    }
+  // Debounced function to update block
+  const debouncedUpdateBlock = useCallback(
+    debounce(async (blockId: string, newTitle: string) => {
+      await updateBlock(graphId, nodeId, blockId, newTitle)
+    }, 500),
+    [graphId, nodeId]
+  )
+  const handleChange = (blockId: string, newTitle: string) => {
+    // Update local state immediately for a responsive UI
+    const updatedBlocks = blocks.map((block) =>
+      block.id === blockId
+        ? { ...block, properties: { ...block.properties, title: newTitle } }
+        : block
+    )
+    setBlocks(updatedBlocks)
+
+    // Debounced update to backend
+    debouncedUpdateBlock(blockId, newTitle)
   }
 
-  const createRootBlock = async (currentBlockId: string) => {
-    const newBlockId = await createBlock(graphId, nodeId, BlockType.Text)
+  const createNewBlock = async () => {
+    const newBlockId = await createBlock(
+      graphId,
+      nodeId,
+      BlockType.Text,
+      nodeId
+    )
     if (!newBlockId) return
 
     const newBlock: Block = {
@@ -46,23 +58,52 @@ const PageBlock: React.FC<PageBlockProps> = ({
       parent: nodeId,
     }
 
-    const newBlocks = [...blocks]
-    const currentIndex = blocks.findIndex(
-      (block) => block.id === currentBlockId
-    )
-    newBlocks.splice(currentIndex + 1, 0, newBlock)
-    setBlocks(newBlocks)
+    setBlocks([...blocks, newBlock])
+  }
+
+  const handleKeyPress = async (
+    event: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (event.key === "Enter") {
+      event.preventDefault()
+      await createNewBlock()
+    }
+  }
+
+  const handleKeyDown = async (
+    event: React.KeyboardEvent<HTMLInputElement>,
+    blockId: string
+  ) => {
+    if (event.key === "Backspace" && event.currentTarget.value === "") {
+      event.preventDefault()
+      await deleteExistingBlock(blockId)
+    }
+  }
+
+  const deleteExistingBlock = async (blockId: string) => {
+    const updatedBlocks = blocks.filter((block) => block.id !== blockId)
+    setBlocks(updatedBlocks) // Optimistic deletion
+
+    await deleteBlock(graphId, nodeId, blockId)
+    // Handle any error or reconciliation needed after backend operation
   }
 
   return (
     <div>
-      {blocks.map((block) => (
-        <Input
-          key={block.id}
-          value={block.properties.text}
-          onPressEnter={(e) => handleKeyPress(e, block.id)}
-        />
-      ))}
+      {!blocks.filter((block) => block.id !== nodeId).length && (
+        <Button onClick={createNewBlock}>Add Block</Button>
+      )}
+      {blocks
+        .filter((block) => block.id !== nodeId)
+        .map((block) => (
+          <Input
+            key={block.id}
+            value={block.properties.title || ""}
+            onPressEnter={handleKeyPress}
+            onChange={(e) => handleChange(block.id, e.target.value)}
+            onKeyDown={(e) => handleKeyDown(e, block.id)}
+          />
+        ))}
     </div>
   )
 }

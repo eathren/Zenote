@@ -68,7 +68,7 @@ export const createBlock = async (
   parentBlockId?: string,
   insertIndex?: number
 ) => {
-  const blockId = await createNewBlock(graphId, nodeId, blockType, [], {})
+  const blockId = await createNewBlock(graphId, nodeId, blockType)
   if (parentBlockId) {
     await updateParentBlockContent(
       graphId,
@@ -129,6 +129,34 @@ export const deleteBlock = async (
       `graphs/${graphId}/nodes/${nodeId}/blocks`,
       blockId
     )
+    const blockDoc = await getDoc(blockDocRef)
+
+    if (!blockDoc.exists()) {
+      throw new Error("Block not found")
+    }
+
+    // Extract parent ID from the block
+    const parentBlockId = (blockDoc.data() as Block).parent
+
+    // If there's a parent, update its content array
+    if (parentBlockId) {
+      const parentBlockDocRef = doc(
+        db,
+        `graphs/${graphId}/nodes/${nodeId}/blocks`,
+        parentBlockId
+      )
+      const parentBlockDoc = await getDoc(parentBlockDocRef)
+
+      if (parentBlockDoc.exists()) {
+        const parentBlockData = parentBlockDoc.data() as Block
+        const updatedContent = parentBlockData.content.filter(
+          (id) => id !== blockId
+        )
+        await updateDoc(parentBlockDocRef, { content: updatedContent })
+      }
+    }
+
+    // Delete the block
     await deleteDoc(blockDocRef)
   })
 }
