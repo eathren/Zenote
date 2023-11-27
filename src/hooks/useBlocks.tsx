@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import { db } from "../firebase"
 import { collection, query, onSnapshot } from "firebase/firestore"
-import { Block } from "src/types/blocks" // Replace with your actual Block type
-import { getCurrentUserId, getBlocksCollectionPath } from "src/handles/utils" // Update with the actual path to your utility file
+import { Block } from "src/types/blocks"
+import { getCurrentUserId, getBlocksCollectionPath } from "src/handles/utils"
 
 export const useBlocks = (
   graphId: string | undefined,
@@ -79,6 +79,5 @@ export const useBlocks = (
       unsubscribe()
     }
   }, [graphId, nodeId])
-
   return { blocks, loading, error }
 }

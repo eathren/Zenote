@@ -1,13 +1,14 @@
 import NodeControls from "../../NodeControls"
 import BasicHeader from "./BasicHeader"
-import { Button, Input, Row, Col } from "antd"
-import { EditOutlined, BookOutlined } from "@ant-design/icons"
+import { Input, Row, Col } from "antd"
+import { GraphNode } from "src/types"
+import { useCallback, useState } from "react"
+import { debounce } from "lodash"
+import { updateNodeTitle } from "src/handles/nodes"
+import { useParams } from "react-router-dom"
 
 type NodeHeaderProps = {
-  editableTitle: string | undefined
-  onTitleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  toggleEditMode: () => void
-  editMode: boolean
+  node: GraphNode
 }
 
 const commonStyle = {
@@ -17,7 +18,21 @@ const commonStyle = {
 }
 
 const NodeHeader = (props: NodeHeaderProps) => {
-  const { editableTitle, onTitleChange } = props
+  const { node } = props
+  const { graphId } = useParams<{ graphId: string }>()
+  const [editableTitle, setEditableTitle] = useState(node.name)
+
+  const debouncedUpdateTitle = useCallback(
+    debounce((newTitle) => updateNodeTitle(graphId, node.id, newTitle), 500), // 500ms delay
+    []
+  )
+
+  const onTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!graphId || !node.id) return
+    const newTitle = e.target.value
+    setEditableTitle(newTitle)
+    debouncedUpdateTitle(newTitle)
+  }
 
   return (
     <>
@@ -42,11 +57,11 @@ const NodeHeader = (props: NodeHeaderProps) => {
             />
           </Col>
           <Col style={{ display: "flex", justifyContent: "flex-end" }}>
-            <Button
+            {/* <Button
               onClick={() => props.toggleEditMode()}
               icon={props.editMode ? <EditOutlined /> : <BookOutlined />}
               style={{ marginRight: "10px" }}
-            />
+            /> */}
             <NodeControls />
           </Col>
         </Row>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react"
 import { Input, Drawer, Typography, Button } from "antd"
 import Markdown from "react-markdown"
-import NodeHeader from "src/components/UI/Headers/NodeHeader"
 import { useParams } from "react-router-dom"
 import AddEdgeModal from "../AddEdgeModal"
 import { useNodes } from "src/hooks/useNodes"
@@ -163,10 +162,6 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
     setShowDrawer(false)
   }
 
-  const toggleEditMode = () => {
-    setIsEditing(!isEditing)
-  }
-
   const extractLinks = (content: string): string[] => {
     const links = content.match(/\/graphs\/[^/]+\/node\/([^)]+)/g) || []
     return links.map((link) => link.split("node/")[1])
@@ -305,12 +300,6 @@ const DocumentTab: React.FC<DocumentTabProps> = ({
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div>
             <Typography>
-              <NodeHeader
-                editMode={isEditing}
-                editableTitle={editableTitle}
-                onTitleChange={onTitleChange}
-                toggleEditMode={toggleEditMode}
-              />
               <div ref={titleRef} onClick={toggleTitleEdit}>
                 {isTitleEditable ? (
                   <Input

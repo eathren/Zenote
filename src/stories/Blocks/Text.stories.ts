@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import { withRouter } from "storybook-addon-react-router-v6"
-import { BlockType, TextType } from "src/types/blocks"
+import { Block, BlockType } from "src/types/blocks"
 import TextBlock from "src/components/Blocks/TextBlock"
 
 const meta: Meta<typeof TextBlock> = {
@@ -15,7 +15,7 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-const DemoText: TextType = {
+const DemoText: Block = {
   id: "1",
   type: BlockType.Text,
   content: [""],

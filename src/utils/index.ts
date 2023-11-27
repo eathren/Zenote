@@ -15,6 +15,7 @@ export const findNodeId = (nodes: GraphNode[], name: string): string | null => {
 export const findNode = (nodes: GraphNode[], id: string) => {
   return nodes.find((node) => node.id === id)
 }
+
 /**
  * Check if a node name is unique within a specific graph.
  *

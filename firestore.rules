@@ -54,7 +54,7 @@ service cloud.firestore {
     match /graphs/{graphId}/nodes/{nodeId}/blocks/{blockId} {
       allow read: if canRead(request.auth.uid, graphId);
       allow create: if request.auth.uid != null;
-      allow update, delete: if canUpdate(request.auth.uid, graphId);
+  allow update, delete: if canUpdate(request.auth.uid, graphId) || isOwner(request.auth.uid, graphId);
     }
 
     // Rules for users

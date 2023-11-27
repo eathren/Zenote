@@ -73,9 +73,15 @@ export const addNode = async (graphId: string, nodeNames: string[]) => {
 }
 export const fetchNode = async (graphId: string, nodeId: string) => {
   return await handleOperation(async () => {
-    const nodeRef = doc(db, `graphs/${graphId}/nodes/${nodeId}`)
+    const nodeCollectionPath = getNodeCollectionPath(graphId)
+    const nodeRef = doc(db, `${nodeCollectionPath}/${nodeId}`)
     const nodeDoc = await getDoc(nodeRef)
-    const node = { ...nodeDoc.data() } as GraphNode
+
+    if (!nodeDoc.exists()) {
+      throw new Error("Node not found")
+    }
+
+    const node = { id: nodeDoc.id, ...nodeDoc.data() } as GraphNode
     return node
   })
 }
@@ -127,12 +133,13 @@ export const addNodeAndReturn = async (
   })
 }
 export const updateNodeTitle = async (
-  graphId: string,
-  nodeId: string,
+  graphId: string | undefined,
+  nodeId: string | undefined,
   newTitle: string
 ): Promise<GraphNode[] | null> => {
   return await handleOperation(async () => {
     // Use the utility function to get the node collection path
+    if (!graphId || !nodeId) return null
     const nodeCollectionPath = getNodeCollectionPath(graphId)
 
     // Navigate to the specific node document
