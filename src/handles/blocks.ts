@@ -93,7 +93,7 @@ export const updateBlock = async (
       `graphs/${graphId}/nodes/${nodeId}/blocks`,
       blockId
     )
-    await updateDoc(blockDocRef, { content: newContent })
+    await updateDoc(blockDocRef, { properties: { title: newContent } })
   })
 }
 

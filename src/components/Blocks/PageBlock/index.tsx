@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect, useCallback, useRef } from "react"
 import { Block, BlockType } from "src/types/blocks"
 import { createBlock, deleteBlock, updateBlock } from "src/handles/blocks"
-import { Input, Button } from "antd"
+import { Button, Typography } from "antd"
 import { debounce } from "lodash"
-
+import TextareaAutosize from "react-textarea-autosize"
 interface PageBlockProps {
   graphId: string
   nodeId: string
@@ -16,20 +16,30 @@ const PageBlock: React.FC<PageBlockProps> = ({
   initialBlocks,
 }) => {
   const [blocks, setBlocks] = useState<Block[]>(initialBlocks)
+  const inputRefs = useRef<(HTMLTextAreaElement | null)[]>([])
 
   useEffect(() => {
     setBlocks(initialBlocks)
   }, [initialBlocks])
 
-  // Debounced function to update block
   const debouncedUpdateBlock = useCallback(
-    debounce(async (blockId: string, newTitle: string) => {
-      await updateBlock(graphId, nodeId, blockId, newTitle)
-    }, 500),
+    debounce(
+      async (blockId: string, newTitle: string, previousBlocks: Block[]) => {
+        try {
+          await updateBlock(graphId, nodeId, blockId, newTitle)
+        } catch (error) {
+          // Revert to previous state in case of error
+          setBlocks(previousBlocks)
+          console.error("Failed to update block:", error)
+        }
+      },
+      500
+    ),
     [graphId, nodeId]
   )
+
   const handleChange = (blockId: string, newTitle: string) => {
-    // Update local state immediately for a responsive UI
+    const previousBlocks = [...blocks]
     const updatedBlocks = blocks.map((block) =>
       block.id === blockId
         ? { ...block, properties: { ...block.properties, title: newTitle } }
@@ -37,73 +47,109 @@ const PageBlock: React.FC<PageBlockProps> = ({
     )
     setBlocks(updatedBlocks)
 
-    // Debounced update to backend
-    debouncedUpdateBlock(blockId, newTitle)
+    // Fire off the debounced update with optimistic update
+    debouncedUpdateBlock(blockId, newTitle, previousBlocks)
   }
 
-  const createNewBlock = async () => {
-    const newBlockId = await createBlock(
-      graphId,
-      nodeId,
-      BlockType.Text,
-      nodeId
-    )
-    if (!newBlockId) return
+  const createNewBlockOptimistically = async (index: number) => {
+    const previousBlocks = [...blocks]
+    try {
+      const newBlockId = await createBlock(
+        graphId,
+        nodeId,
+        BlockType.Text,
+        nodeId
+      )
+      const newBlock: Block = {
+        id: newBlockId,
+        type: BlockType.Text,
+        content: [],
+        properties: {},
+        parent: nodeId,
+      }
 
-    const newBlock: Block = {
-      id: newBlockId,
-      type: BlockType.Text,
-      content: [],
-      properties: {},
-      parent: nodeId,
+      const updatedBlocks = [...blocks, newBlock]
+      setBlocks(updatedBlocks)
+
+      // Focus on the new input field after state update
+      setTimeout(() => {
+        inputRefs.current[index + 1]?.focus()
+      }, 0)
+    } catch (error) {
+      // Revert to previous state in case of error
+      setBlocks(previousBlocks)
+      console.error("Failed to create block:", error)
     }
-
-    setBlocks([...blocks, newBlock])
   }
 
-  const handleKeyPress = async (
-    event: React.KeyboardEvent<HTMLInputElement>
+  const handleDeleteBlockOptimistically = async (
+    blockId: string,
+    index: number
   ) => {
-    if (event.key === "Enter") {
-      event.preventDefault()
-      await createNewBlock()
+    const previousBlocks = [...blocks]
+    try {
+      setBlocks(blocks.filter((block) => block.id !== blockId))
+      await deleteBlock(graphId, nodeId, blockId)
+      // Focus on the previous or next input field after deletion
+      if (inputRefs.current[index - 1]) {
+        inputRefs.current[index - 1]?.focus()
+      } else if (inputRefs.current[index]) {
+        inputRefs.current[index]?.focus()
+      }
+    } catch (error) {
+      // Revert to previous state in case of error
+      setBlocks(previousBlocks)
+      console.error("Failed to delete block:", error)
     }
   }
 
   const handleKeyDown = async (
     event: React.KeyboardEvent<HTMLInputElement>,
-    blockId: string
+    blockId: string,
+    index: number
   ) => {
-    if (event.key === "Backspace" && event.currentTarget.value === "") {
+    if (event.key === "Enter") {
       event.preventDefault()
-      await deleteExistingBlock(blockId)
+      await createNewBlockOptimistically(index)
+    } else if (event.key === "Backspace" && event.currentTarget.value === "") {
+      event.preventDefault()
+      await handleDeleteBlockOptimistically(blockId, index)
+    } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      // ... handle arrow keys
     }
-  }
-
-  const deleteExistingBlock = async (blockId: string) => {
-    const updatedBlocks = blocks.filter((block) => block.id !== blockId)
-    setBlocks(updatedBlocks) // Optimistic deletion
-
-    await deleteBlock(graphId, nodeId, blockId)
-    // Handle any error or reconciliation needed after backend operation
   }
 
   return (
     <div>
-      {!blocks.filter((block) => block.id !== nodeId).length && (
-        <Button onClick={createNewBlock}>Add Block</Button>
+      {!blocks.length && (
+        <Button onClick={() => createNewBlockOptimistically(-1)}>
+          Add Block
+        </Button>
       )}
-      {blocks
-        .filter((block) => block.id !== nodeId)
-        .map((block) => (
-          <Input
-            key={block.id}
-            value={block.properties.title || ""}
-            onPressEnter={handleKeyPress}
-            onChange={(e) => handleChange(block.id, e.target.value)}
-            onKeyDown={(e) => handleKeyDown(e, block.id)}
-          />
-        ))}
+      <Typography>
+        {blocks
+          .filter((block) => block.id !== nodeId)
+          .map((block, index) => (
+            <TextareaAutosize
+              key={block.id}
+              ref={(el) => (inputRefs.current[index] = el)}
+              value={block.properties.title || ""}
+              onChange={(e) => handleChange(block.id, e.target.value)}
+              onKeyDown={(e) => handleKeyDown(e, block.id, index)}
+              style={{
+                width: "100%",
+                outline: "none",
+                border: "none",
+                backgroundColor: "transparent",
+                color: "inherit",
+                fontSize: "1rem",
+                fontFamily: "inherit",
+                resize: "none",
+              }}
+              // Add other necessary props
+            />
+          ))}
+      </Typography>
     </div>
   )
 }
