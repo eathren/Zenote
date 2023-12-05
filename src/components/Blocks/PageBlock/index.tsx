@@ -1,9 +1,15 @@
 import React, { useState, useEffect, useCallback, useRef } from "react"
 import { Block, BlockType } from "src/types/blocks"
-import { createBlock, deleteBlock, updateBlock } from "src/handles/blocks"
+import {
+  createBlock,
+  deleteBlock,
+  updateBlock,
+  updateParentBlockContent,
+} from "src/handles/blocks"
 import { Button, Typography } from "antd"
 import { debounce } from "lodash"
 import TextareaAutosize from "react-textarea-autosize"
+import { v4 as uuidv4 } from "uuid"
 interface PageBlockProps {
   graphId: string
   nodeId: string
@@ -50,28 +56,52 @@ const PageBlock: React.FC<PageBlockProps> = ({
     // Fire off the debounced update with optimistic update
     debouncedUpdateBlock(blockId, newTitle, previousBlocks)
   }
-
   const createNewBlockOptimistically = async (index: number) => {
     const previousBlocks = [...blocks]
     try {
-      const newBlockId = await createBlock(
+      const id = uuidv4()
+
+      // Optimistic UI update
+      // const newBlock: Block = {
+      //   id: id,
+      //   type: BlockType.Text,
+      //   content: [],
+      //   properties: {},
+      //   parent: nodeId,
+      // }
+
+      // const updatedBlocks = [...blocks]
+      // updatedBlocks.splice(index + 1, 0, newBlock)
+      // setBlocks(updatedBlocks)
+
+      const createBlockPromise = createBlock(
         graphId,
         nodeId,
+        id,
         BlockType.Text,
-        nodeId
+        nodeId,
+        index + 1
       )
-      const newBlock: Block = {
-        id: newBlockId,
-        type: BlockType.Text,
-        content: [],
-        properties: {},
-        parent: nodeId,
-      }
+      const updateParentBlockPromise = updateParentBlockContent(
+        graphId,
+        nodeId,
+        nodeId,
+        id,
+        index + 1
+      )
 
-      const updatedBlocks = [...blocks, newBlock]
-      setBlocks(updatedBlocks)
+      // Execute both operations concurrently
+      await Promise.all([createBlockPromise, updateParentBlockPromise])
+
+      // const updatedBlocks = [...blocks]
+      // updatedBlocks.splice(index + 1, 0, newBlock)
+      // setBlocks(updatedBlocks)
 
       // Focus on the new input field after state update
+
+      // Perform Firestore updates
+
+      // Update the parent block's content array
       setTimeout(() => {
         inputRefs.current[index + 1]?.focus()
       }, 0)
@@ -89,7 +119,7 @@ const PageBlock: React.FC<PageBlockProps> = ({
     const previousBlocks = [...blocks]
     try {
       setBlocks(blocks.filter((block) => block.id !== blockId))
-      await deleteBlock(graphId, nodeId, blockId)
+      deleteBlock(graphId, nodeId, blockId)
       // Focus on the previous or next input field after deletion
       if (inputRefs.current[index - 1]) {
         inputRefs.current[index - 1]?.focus()
@@ -104,24 +134,30 @@ const PageBlock: React.FC<PageBlockProps> = ({
   }
 
   const handleKeyDown = async (
-    event: React.KeyboardEvent<HTMLInputElement>,
+    event: React.KeyboardEvent<HTMLTextAreaElement>,
     blockId: string,
     index: number
   ) => {
     if (event.key === "Enter") {
+      console.log("enter")
       event.preventDefault()
       await createNewBlockOptimistically(index)
     } else if (event.key === "Backspace" && event.currentTarget.value === "") {
       event.preventDefault()
       await handleDeleteBlockOptimistically(blockId, index)
     } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-      // ... handle arrow keys
+      event.preventDefault()
+      if (event.key === "ArrowDown") {
+        inputRefs.current[index + 1]?.focus()
+      } else if (event.key === "ArrowUp") {
+        inputRefs.current[index - 1]?.focus()
+      }
     }
   }
 
   return (
     <div>
-      {!blocks.length && (
+      {blocks.length < 2 && (
         <Button onClick={() => createNewBlockOptimistically(-1)}>
           Add Block
         </Button>

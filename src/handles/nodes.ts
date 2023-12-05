@@ -31,7 +31,7 @@ export const addNode = async (graphId: string, nodeNames: string[]) => {
 
     for (const nodeName of nodeNames) {
       const nodeDocRef = doc(nodesCollection)
-      const nodeId = nodeDocRef.id // This is the ID for both the node and its first block
+      const nodeId = nodeDocRef.id
 
       const newNode = {
         name: nodeName.trim(),
@@ -71,6 +71,7 @@ export const addNode = async (graphId: string, nodeNames: string[]) => {
     return nodeIds
   })
 }
+
 export const fetchNode = async (graphId: string, nodeId: string) => {
   return await handleOperation(async () => {
     const nodeCollectionPath = getNodeCollectionPath(graphId)

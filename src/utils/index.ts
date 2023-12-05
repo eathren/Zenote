@@ -1,5 +1,10 @@
 import { notification } from "antd"
 import { Graph, GraphNode } from "src/types"
+import { v4 as uuidv4 } from "uuid"
+
+export const generateId = () => {
+  return uuidv4()
+}
 
 export const findGraph = (graphs: Graph[], id: string | undefined) => {
   if (!id) return null

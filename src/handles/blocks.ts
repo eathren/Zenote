@@ -1,5 +1,4 @@
 import {
-  collection,
   deleteDoc,
   doc,
   getDoc,
@@ -13,12 +12,11 @@ import { handleOperation } from "./utils"
 export const createNewBlock = async (
   graphId: string,
   nodeId: string,
+  blockId: string,
   blockType: BlockType
 ): Promise<string> => {
   const blocksCollectionPath = `graphs/${graphId}/nodes/${nodeId}/blocks`
-  const blocksCollection = collection(db, blocksCollectionPath)
-  const blockDocRef = doc(blocksCollection)
-  const blockId = blockDocRef.id
+  const blockDocRef = doc(db, blocksCollectionPath, blockId) // Specify the Firestore document ID
 
   const newBlock: Block = {
     id: blockId,
@@ -34,7 +32,6 @@ export const createNewBlock = async (
 
   return blockId
 }
-
 export const updateParentBlockContent = async (
   graphId: string,
   nodeId: string,
@@ -64,11 +61,12 @@ export const updateParentBlockContent = async (
 export const createBlock = async (
   graphId: string,
   nodeId: string,
+  blockId: string,
   blockType: BlockType,
   parentBlockId?: string,
   insertIndex?: number
 ) => {
-  const blockId = await createNewBlock(graphId, nodeId, blockType)
+  await createNewBlock(graphId, nodeId, blockId, blockType)
   if (parentBlockId) {
     await updateParentBlockContent(
       graphId,
@@ -78,7 +76,6 @@ export const createBlock = async (
       insertIndex
     )
   }
-  return blockId
 }
 
 export const updateBlock = async (
