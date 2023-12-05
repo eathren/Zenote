@@ -6,10 +6,13 @@ import {
   updateBlock,
   updateParentBlockContent,
 } from "src/handles/blocks"
-import { Button, Typography } from "antd"
+import { Button, Col, Dropdown, MenuProps, Typography } from "antd"
 import { debounce } from "lodash"
 import TextareaAutosize from "react-textarea-autosize"
 import { v4 as uuidv4 } from "uuid"
+import styles from "./styles.module.css"
+import { PlusOutlined } from "@ant-design/icons"
+
 interface PageBlockProps {
   graphId: string
   nodeId: string
@@ -56,24 +59,26 @@ const PageBlock: React.FC<PageBlockProps> = ({
     // Fire off the debounced update with optimistic update
     debouncedUpdateBlock(blockId, newTitle, previousBlocks)
   }
+
   const createNewBlockOptimistically = async (index: number) => {
     const previousBlocks = [...blocks]
     try {
       const id = uuidv4()
 
       // Optimistic UI update
-      // const newBlock: Block = {
-      //   id: id,
-      //   type: BlockType.Text,
-      //   content: [],
-      //   properties: {},
-      //   parent: nodeId,
-      // }
+      const newBlock: Block = {
+        id: id,
+        type: BlockType.Text,
+        content: [],
+        properties: {},
+        parent: nodeId,
+      }
 
-      // const updatedBlocks = [...blocks]
-      // updatedBlocks.splice(index + 1, 0, newBlock)
-      // setBlocks(updatedBlocks)
+      const updatedBlocks = [...blocks]
+      updatedBlocks.splice(index + 1, 0, newBlock)
+      setBlocks(updatedBlocks)
 
+      // Create a promise for each operation
       const createBlockPromise = createBlock(
         graphId,
         nodeId,
@@ -93,15 +98,7 @@ const PageBlock: React.FC<PageBlockProps> = ({
       // Execute both operations concurrently
       await Promise.all([createBlockPromise, updateParentBlockPromise])
 
-      // const updatedBlocks = [...blocks]
-      // updatedBlocks.splice(index + 1, 0, newBlock)
-      // setBlocks(updatedBlocks)
-
       // Focus on the new input field after state update
-
-      // Perform Firestore updates
-
-      // Update the parent block's content array
       setTimeout(() => {
         inputRefs.current[index + 1]?.focus()
       }, 0)
@@ -139,7 +136,6 @@ const PageBlock: React.FC<PageBlockProps> = ({
     index: number
   ) => {
     if (event.key === "Enter") {
-      console.log("enter")
       event.preventDefault()
       await createNewBlockOptimistically(index)
     } else if (event.key === "Backspace" && event.currentTarget.value === "") {
@@ -155,6 +151,42 @@ const PageBlock: React.FC<PageBlockProps> = ({
     }
   }
 
+  // const handleBlockTypeChange = (value: BlockType) => {
+  //   setSelectedBlockType(value)
+  // }
+
+  const items: MenuProps["items"] = [
+    {
+      key: "1",
+      label: "Text ",
+    },
+    {
+      key: "2",
+      label: "Todo",
+    },
+    {
+      key: "3",
+      label: "Heading 1",
+    },
+    {
+      key: "4",
+      label: "Heading 2",
+    },
+    {
+      key: "5",
+      label: "Table",
+    },
+  ]
+
+  const handleMenuClick = (index: number) => {
+    createNewBlockOptimistically(index)
+  }
+
+  // const menuProps = {
+  //   items,
+  //   onClick: handleMenuClick,
+  // }
+
   return (
     <div>
       {blocks.length < 2 && (
@@ -166,24 +198,32 @@ const PageBlock: React.FC<PageBlockProps> = ({
         {blocks
           .filter((block) => block.id !== nodeId)
           .map((block, index) => (
-            <TextareaAutosize
-              key={block.id}
-              ref={(el) => (inputRefs.current[index] = el)}
-              value={block.properties.title || ""}
-              onChange={(e) => handleChange(block.id, e.target.value)}
-              onKeyDown={(e) => handleKeyDown(e, block.id, index)}
-              style={{
-                width: "100%",
-                outline: "none",
-                border: "none",
-                backgroundColor: "transparent",
-                color: "inherit",
-                fontSize: "1rem",
-                fontFamily: "inherit",
-                resize: "none",
-              }}
-              // Add other necessary props
-            />
+            <div key={block.id} className={styles.block}>
+              <Col span={1}>
+                <div className={styles.block__icon}>
+                  <Dropdown menu={{ items }} trigger={["click"]}>
+                    <PlusOutlined onClick={() => handleMenuClick(index)} />
+                  </Dropdown>
+                </div>
+              </Col>
+              <TextareaAutosize
+                ref={(el) => (inputRefs.current[index] = el)}
+                value={block.properties.title || ""}
+                onChange={(e) => handleChange(block.id, e.target.value)}
+                onKeyDown={(e) => handleKeyDown(e, block.id, index)}
+                style={{
+                  width: "100%",
+                  outline: "none",
+                  border: "none",
+                  backgroundColor: "transparent",
+                  color: "inherit",
+                  fontSize: "1rem",
+                  fontFamily: "inherit",
+                  resize: "none",
+                }}
+                // Add other necessary props
+              />
+            </div>
           ))}
       </Typography>
     </div>
